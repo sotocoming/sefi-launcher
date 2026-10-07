@@ -7,6 +7,9 @@ import { useStore } from '../store/store';
 export const SettingsPage: React.FC = () => {
   const { settings, updateSettings, setUpdateInfo } = useStore();
 
+  const [importing, setImporting] = useState(false);
+  const [importMessage, setImportMessage] = useState('');
+  const [importError, setImportError] = useState(false);
   const [ram, setRam] = useState(settings?.ramMax ? Math.round(settings.ramMax / 1024) : 6);
   const [fullscreen, setFullscreen] = useState(settings?.fullscreen ?? false);
   const [closeAfterLaunch, setCloseAfterLaunch] = useState(settings?.closeOnLaunch ?? false);
@@ -84,6 +87,17 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
+  const handleImport = async () => {
+    setImporting(true); setImportMessage(''); setImportError(false);
+    try {
+      const result = await window.electronAPI.importModpackArchive();
+      if (!result.cancelled) setImportMessage('Архив проверен и сохранён. Нажмите «Играть»: недостающие моды скачаются отдельно.');
+    } catch (error) {
+      setImportError(true);
+      setImportMessage((error instanceof Error ? error.message : 'Не удалось импортировать архив.').replace(/^Error invoking remote method '[^']+': (?:Error: )?/, ''));
+    } finally { setImporting(false); }
+  };
+
   return (
     <motion.div
       key="settings"
@@ -100,6 +114,20 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       <div className="mt-6 space-y-4 max-w-[800px]">
+        <GlassCard className="p-5">
+          <div className="text-sm font-semibold text-white">Сборка и загрузка</div>
+          <p className="mt-2 text-xs leading-relaxed text-white/60">
+            Моды загружаются с Modrinth, затем с CurseForge и доступного зеркала SEFI.
+            Если архив уже скачан, выберите официальный ZIP Homestead 1.3.7: проверим версию и состав.
+            ZIP CurseForge содержит настройки и часть модов; остальные загрузятся при запуске.
+          </p>
+          <button disabled={importing} onClick={handleImport}
+            className="mt-4 rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-4 py-2 text-sm text-fuchsia-200 disabled:opacity-50">
+            {importing ? 'Проверяем архив…' : 'Импортировать ZIP сборки'}
+          </button>
+          {importMessage && <p role={importError ? 'alert' : 'status'} className={`mt-3 text-xs leading-relaxed select-text ${importError ? 'text-rose-300' : 'text-emerald-300'}`}>{importMessage}</p>}
+        </GlassCard>
+
         {/* Memory & Performance */}
         <GlassCard className="p-5">
           <div className="flex items-center gap-2.5">

@@ -1,3 +1,5 @@
+import { canonicalPack } from './minecraft/pack-sources';
+import packCatalog from './minecraft/modpack-catalog.json';
 import { app, BrowserWindow, ipcMain, session, dialog, shell } from 'electron';
 import path from 'path';
 import fs from 'fs';
@@ -161,6 +163,22 @@ function setupIpc() {
   }
   ipcMain.handle('get-news-reactions', event => newsRequest(event));
   ipcMain.handle('react-news', (event, id: string, reaction: string) => newsRequest(event, {id, reaction}));
+
+  ipcMain.handle('import-modpack-archive', async event => {
+    if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== mainWindow.webContents.mainFrame) {
+      throw new Error('Недоступное окно.');
+    }
+    const config = await getLauncherConfig();
+    if (config.modpack.curseforgeProjectId !== packCatalog.projectId || config.modpack.curseforgeFileId !== packCatalog.fileId) {
+      throw new Error('Импорт для текущей сборки ещё не поддерживается. Обновите лаунчер.');
+    }
+    const choice = await dialog.showOpenDialog(mainWindow, { title: 'Импорт Homestead 1.3.7', properties: ['openFile'],
+      filters: [{ name: 'Официальный архив CurseForge', extensions: ['zip'] }] });
+    if (choice.canceled || !choice.filePaths[0]) return { cancelled: true };
+    const settings = await getSettings();
+    const imported = await canonicalPack(settings.gameDirectory, choice.filePaths[0]);
+    return { cancelled: false, name: imported?.name };
+  });
 
   ipcMain.handle('get-modpack-status', async () => {
     const settings = await getSettings();

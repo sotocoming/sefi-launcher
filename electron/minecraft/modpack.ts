@@ -1,3 +1,4 @@
+import { canonicalPack, communityDownloadToken, obtainFile } from './pack-sources';
 import bundledCatalog from './modpack-catalog.json';
 import fs from 'fs/promises';
 import path from 'path';
@@ -89,9 +90,13 @@ async function performInstall(gameDir: string, onProgress: (p: DownloadProgress)
   try {
     const catalog = bundledCatalog.projectId === projectId && bundledCatalog.fileId === fileId ? bundledCatalog : null;
     const catalogFiles = catalog?.files as Record<string, { url: string; sha256?: string }> | undefined;
+    const mirrorToken = await communityDownloadToken();
     progress('Загрузка и проверка архива Homestead Cozy');
-    const archive = await downloadArchive(catalog?.archive.url || `https://www.curseforge.com/api/v1/mods/${projectId}/files/${fileId}/download`, stage, '.zip',
-      (done, total) => progress('Загрузка архива сборки', done, total), config.modpack.sha256 || catalog?.archive.sha256 || undefined);
+    const archive = catalog ? (await canonicalPack(gameDir) || await obtainFile('archive', catalog.archive, stage, '.zip', mirrorToken,
+      (done, total) => progress('Загрузка архива сборки', done, total))) : await downloadArchive(
+        `https://www.curseforge.com/api/v1/mods/${projectId}/files/${fileId}/download`, stage, '.zip', undefined, config.modpack.sha256 || undefined);
+    if (config.modpack.sha256 && archive.sha256 !== config.modpack.sha256.toLowerCase()) throw new Error('Сборка не совпадает с контрольной суммой сервера.');
+    if (catalog && archive.file.startsWith(stage + path.sep)) await canonicalPack(gameDir, archive.file);
     if (catalog && archive.sha256 !== catalog.archive.sha256) throw new Error('Сборка не совпадает с проверенным каталогом загрузок.');
     const zip = checkedZip(archive.file);
     const manifest = JSON.parse(zip.readAsText('manifest.json'));
@@ -137,7 +142,7 @@ async function performInstall(gameDir: string, onProgress: (p: DownloadProgress)
           try {
             const source = catalogFiles?.[`${file.projectID}:${file.fileID}`];
             if (catalog && !source) throw new Error('Файл отсутствует в проверенном каталоге сборки.');
-            const downloaded = await downloadArchive(source?.url || `https://www.curseforge.com/api/v1/mods/${file.projectID}/files/${file.fileID}/download`, entryDir, '.mod', undefined, source?.sha256);
+            const downloaded = source?.sha256 ? await obtainFile(id, source as {url: string; sha256: string}, entryDir, '.mod', mirrorToken) : await downloadArchive( `https://www.curseforge.com/api/v1/mods/${file.projectID}/files/${file.fileID}/download`, entryDir, '.mod', undefined, source?.sha256);
             let directory: 'mods' | 'resourcepacks' | 'shaderpacks' = 'mods';
             if (downloaded.name.toLowerCase().endsWith('.zip')) {
               const content = checkedZip(downloaded.file);

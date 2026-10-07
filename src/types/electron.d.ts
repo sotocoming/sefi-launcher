@@ -32,6 +32,7 @@ export interface IElectronAPI {
 
   // Modpack
   getModpackStatus(): Promise<ModpackStatus>;
+  importModpackArchive(): Promise<{ cancelled: boolean; name?: string }>;
 
   // Server config
   getLauncherConfig(): Promise<LauncherConfig>;

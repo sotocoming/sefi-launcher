@@ -21,8 +21,9 @@ function trustedUrl(value: string): URL {
   const url = new URL(value);
   const host = url.hostname.toLowerCase();
   if (url.protocol !== 'https:' || url.username || url.password || (url.port && url.port !== '443')
-    || !(host === 'www.curseforge.com' || host === 'forgecdn.net' || host.endsWith('.forgecdn.net'))) {
-    throw new Error('Загрузка разрешена только с CurseForge и его CDN по HTTPS.');
+    || !(host === 'www.curseforge.com' || host === 'forgecdn.net' || host.endsWith('.forgecdn.net') || host === 'cdn.modrinth.com'
+      || (host === 'mc.sotocoming.ru' && /^\/api\/public\/community\/download-mirror\/[a-f0-9]{64}\/[^/]+$/.test(url.pathname)))) {
+    throw new Error('Недопустимый источник загрузки. Разрешены официальные CDN и зеркало SEFI по HTTPS.');
   }
   return url;
 }
@@ -55,14 +56,10 @@ export function checkedZip(file: string): any {
 
 export async function downloadArchive(url: string, directory: string, extension: '.jar' | '.zip' | '.mod',
   onProgress?: (downloaded: number, total: number) => void,
-  expectedSha256?: string): Promise<{ name: string; file: string; sha256: string; size: number }> {
-  const original = trustedUrl(url);
-  const hosts = expectedSha256 && ['edge.forgecdn.net', 'mediafilez.forgecdn.net', 'media.forgecdn.net'].includes(original.hostname)
-    ? [...new Set([original.hostname, 'mediafilez.forgecdn.net', 'media.forgecdn.net'])] : [original.hostname];
+  expectedSha256?: string, communityToken?: string): Promise<{ name: string; file: string; sha256: string; size: number }> {
+  trustedUrl(url);
   for (let attempt = 0; ; attempt++) {
-    const source = new URL(original.href);
-    source.hostname = hosts[Math.min(attempt, hosts.length - 1)];
-    try { return await downloadAttempt(source.href, directory, extension, onProgress, expectedSha256); }
+    try { return await downloadAttempt(url, directory, extension, onProgress, expectedSha256, communityToken); }
     catch (error: any) {
       const transient = error?.message === 'fetch failed' || error?.name === 'TimeoutError' || error?.downloadTransient === true
         || /HTTP (429|5[0-9]{2})/.test(error?.message || '')
@@ -79,7 +76,7 @@ export async function downloadArchive(url: string, directory: string, extension:
 
 async function downloadAttempt(url: string, directory: string, extension: '.jar' | '.zip' | '.mod',
   onProgress?: (downloaded: number, total: number) => void,
-  expectedSha256?: string): Promise<{ name: string; file: string; sha256: string; size: number }> {
+  expectedSha256?: string, communityToken?: string): Promise<{ name: string; file: string; sha256: string; size: number }> {
   let current = trustedUrl(url);
   let response: Response | undefined;
   const controller = new AbortController();
@@ -90,7 +87,10 @@ async function downloadAttempt(url: string, directory: string, extension: '.jar'
   const activity = () => { clearTimeout(idleTimer); idleTimer = setTimeout(timedOut, 90000); };
   try {
     for (let redirects = 0; redirects <= 5; redirects++) {
-      response = await requestDownload(current.href, signal);
+      if (communityToken && (current.origin !== 'https://mc.sotocoming.ru' || !current.pathname.startsWith('/api/public/community/download-mirror/'))) {
+        throw new Error('Зеркало вернуло недопустимое перенаправление.');
+      }
+      response = await requestDownload(current.href, signal, communityToken ? { 'X-Community-Token': communityToken } : undefined);
       activity();
       if ([301,302,303,307,308].includes(response.status)) {
         const location = response.headers.get('location');

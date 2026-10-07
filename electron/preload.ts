@@ -21,6 +21,7 @@ const api: IElectronAPI = {
   setActiveAccount: (id: string) => ipcRenderer.invoke('set-active-account', id),
   
   getModpackStatus: () => ipcRenderer.invoke('get-modpack-status'),
+  importModpackArchive: () => ipcRenderer.invoke('import-modpack-archive'),
   
   getLauncherConfig: () => ipcRenderer.invoke('get-launcher-config'),
   getServerStatus: () => ipcRenderer.invoke('get-server-status'),

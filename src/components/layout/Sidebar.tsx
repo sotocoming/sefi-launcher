@@ -3,6 +3,7 @@ import { Home, Map, Newspaper, Users, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useStore } from '../../store/store';
 import sefiLogo from '../../assets/branding/sefi-logo.png';
+import { version as launcherVersion } from '../../../package.json';
 
 interface SidebarProps {
   currentPage: 'home' | 'map' | 'news' | 'accounts' | 'settings';
@@ -158,6 +159,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
             </span>
           </div>
         </div>
+        <p className="mt-3 px-1 text-[11px] leading-none text-white/40 select-text" title="Версия лаунчера">
+          SEFI Launcher v{launcherVersion}
+        </p>
       </div>
     </aside>
   );

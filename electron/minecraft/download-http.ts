@@ -3,7 +3,7 @@ import { Readable } from 'stream';
 
 // Chromium uses the system proxy settings; Node fetch does not.
 // Return redirects to the caller so it can validate every destination.
-export function requestDownload(url: string, signal: AbortSignal): Promise<Response> {
+export function requestDownload(url: string, signal: AbortSignal, headers?: Record<string, string>): Promise<Response> {
   return new Promise((resolve, reject) => {
     const request = net.request({ url, method: 'GET', redirect: 'manual', credentials: 'omit', useSessionCookies: false });
     let settled = false;
@@ -15,6 +15,7 @@ export function requestDownload(url: string, signal: AbortSignal): Promise<Respo
       if (!settled) { settled = true; cleanup(); reject(signal.reason || new Error('Загрузка отменена.')); }
     };
     request.setHeader('User-Agent', 'SEFI-Launcher/1.0');
+    for (const [name, value] of Object.entries(headers || {})) request.setHeader(name, value);
     request.on('redirect', (status, _method, location) => {
       if (settled) return;
       settled = true; cleanup();

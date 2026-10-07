@@ -1,0 +1,33 @@
+appId: com.sefi.launcher
+productName: SEFI Launcher
+artifactName: SEFI-Launcher-Setup.${ext}
+afterPack: scripts/windows-resources.cjs
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
+extraResources:
+  - from: resources
+    to: resources
+  - from: build/icon.ico
+    to: brand/icon.ico
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: build/icon.ico
+  # Resource editing is performed by afterPack; signing requires publisher credentials.
+  signAndEditExecutable: false
+nsis:
+  oneClick: true
+  perMachine: false
+  allowElevation: true
+  deleteAppDataOnUninstall: false
+publish:
+  provider: github
+  owner: sotocoming
+  repo: sefi-launcher

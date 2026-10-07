@@ -1,0 +1,17 @@
+{
+  "project": "SEFI Launcher",
+  "note": "Renamed approved/generated assets. No image content was modified.",
+  "files": [
+    "backgrounds/sefi-home-background.png",
+    "branding/homestead-cozy-logo.png",
+    "branding/sefi-logo.png",
+    "characters/sefi-mascot.png",
+    "decor/sefi-decor-icons-01.png",
+    "decor/sefi-decor-icons-02.png",
+    "icons/homestead-modpack-icon.png",
+    "news/homestead-news-autumn-festival.png",
+    "news/homestead-news-greenhouse.png",
+    "news/homestead-news-winter.png",
+    "server/homestead-server-banner.png"
+  ]
+}

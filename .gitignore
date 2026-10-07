@@ -1,0 +1,16 @@
+node_modules
+dist
+design
+dist-electron
+release
+/build/*
+!/build/icon.ico
+!/build/icon.png
+.env
+.env.local
+.DS_Store
+*.log
+
+/mod_build/.gradle/
+/mod_build/build/
+.env.*

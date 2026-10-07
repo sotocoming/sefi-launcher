@@ -1,0 +1,42 @@
+{
+  "name": "sefi-launcher",
+  "version": "1.0.4",
+  "description": "SEFI Minecraft Launcher",
+  "main": "dist-electron/electron/main.js",
+  "author": "SEFI Team",
+  "license": "MIT",
+  "scripts": {
+    "dev": "concurrently -k \"vite\" \"npm run dev:electron\"",
+    "dev:electron": "tsc -p tsconfig.node.json && electron .",
+    "build": "vite build && tsc -p tsconfig.node.json",
+    "package": "npm run build && electron-builder build --win",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "adm-zip": "0.6.1",
+    "electron-updater": "^6.3.9",
+    "framer-motion": "^11.15.0",
+    "lucide-react": "^1.52.0",
+    "minecraft-launcher-core": "^3.18.1",
+    "msmc": "^5.0.5",
+    "prismarine-nbt": "^2.8.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.1.2",
+    "electron": "^33.3.1",
+    "electron-builder": "^25.1.8",
+    "postcss": "^8.4.49",
+    "resedit": "1.7.2",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  }
+}

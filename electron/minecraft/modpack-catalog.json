@@ -1,0 +1,1741 @@
+{
+  "schema": 1,
+  "projectId": 882046,
+  "fileId": 8110152,
+  "archive": {
+    "url": "https://edge.forgecdn.net/files/8110/152/Homestead-1.3.7.zip",
+    "sha256": "c70a94dbcef617b67faa226788d07b17368dac52edd75226bb05b1202f564ccc"
+  },
+  "files": {
+    "1005914:7568944": {
+      "url": "https://edge.forgecdn.net/files/7568/944/fzzy_config-0.7.6%2b1.20.1.jar",
+      "sha256": "faa76d1ad670041d88cebd4eeda8e804bcd99289e755336fc1df4a066cfdbc8c",
+      "size": 2372585
+    },
+    "1010566:5299563": {
+      "url": "https://edge.forgecdn.net/files/5299/563/flower-tweaks-1.jar",
+      "sha256": "c1d73b858039dd55a33a3887e466348923e57260cc83c6f0e1c4208e9fdb1ab4",
+      "size": 13471
+    },
+    "1023913:8008316": {
+      "url": "https://edge.forgecdn.net/files/8008/316/SubtleEffects-fabric-1.20.1-1.14.3.jar",
+      "sha256": "53aa7bcf73dc766bf7b543d3555d04e107f05d93802a19138607b69fbaf60c58",
+      "size": 3340781
+    },
+    "1026508:7427569": {
+      "url": "https://edge.forgecdn.net/files/7427/569/via_romana-2.2.2%2b1.20.1-fabric.jar",
+      "sha256": "69adbcf8f09d0bb433b318aa547e58aa6379268929ca6f4e25a66bae2db8cd8b",
+      "size": 1243811
+    },
+    "1030285:5986039": {
+      "url": "https://edge.forgecdn.net/files/5986/39/fastboot-1.20.x-1.2fabric.jar",
+      "sha256": "883e531ab6bba35d80ca5168995305f2d1a7da71f0e673c83bcd9b294b6f1d28",
+      "size": 30721
+    },
+    "1034453:7108486": {
+      "url": "https://edge.forgecdn.net/files/7108/486/peaceful_hunger-fabric-1.20.1-2.2.0.jar",
+      "sha256": "b2a434eba62f1ac87e9ab1ad7c1659303f6323435c25b68f3b0680daab12d7a5",
+      "size": 31171
+    },
+    "1035665:8021907": {
+      "url": "https://edge.forgecdn.net/files/8021/907/constructionwand-2.1.2%2b1.20.1.jar",
+      "sha256": "ce4505ef6cb3fa4408a11fc599ac7f7b6d8303527d0b6b20911342a8d6e47b7e",
+      "size": 309417
+    },
+    "1038103:7088023": {
+      "url": "https://edge.forgecdn.net/files/7088/23/letsdo-farm_and_charm-fabric-1.0.14.jar",
+      "sha256": "65df5358138969a37e3e3993128d2f0d0d78edef3a35059f1fd9659c490c17f0",
+      "size": 3331230
+    },
+    "1038106:6847828": {
+      "url": "https://edge.forgecdn.net/files/6847/828/letsdo-brewery-fabric-2.0.6.jar",
+      "sha256": "47ac54794103c46c7f25c9172d7d1765237b10794a279c13faf1e0c432e68386",
+      "size": 2030105
+    },
+    "1038117:6850363": {
+      "url": "https://edge.forgecdn.net/files/6850/363/letsdo-candlelight-fabric-2.0.5.jar",
+      "sha256": "7b8f96e46dfba4b86a91a2b76c594a8189d3718cc19067a948b481224c368bd9",
+      "size": 2494711
+    },
+    "1044992:6962787": {
+      "url": "https://edge.forgecdn.net/files/6962/787/naturespirit-2.2.5-1.20.1.jar",
+      "sha256": "93ce1637124377e9b41a8ddb5c065b0e3c2e55dd55b463acd130a771cb9ce3a3",
+      "size": 20517897
+    },
+    "1051342:7519088": {
+      "url": "https://edge.forgecdn.net/files/7519/88/Camerapture-1.10.12%2bmc1.20.1-fabric.jar",
+      "sha256": "7f7894302a51ce9d6bef370d5e9bd4e5dfbeb6c0d275ac43d712927429545593",
+      "size": 1974800
+    },
+    "1059879:7152625": {
+      "url": "https://edge.forgecdn.net/files/7152/625/createcontraptionterminals-fabric-1.20-1.2.0.jar",
+      "sha256": "2676ade72f64af286702e279047462f3f5784924306f013b277ceab5f8d26ecc",
+      "size": 88760
+    },
+    "1070751:7759423": {
+      "url": "https://edge.forgecdn.net/files/7759/423/Oh-The-Biomes-Weve-Gone-Fabric-1.7.5.jar",
+      "sha256": "0c966f3ca835ff9900cfc13154ca3d1d440be10b8e4be4068191d40703d69808",
+      "size": 18653246
+    },
+    "1071657:6854818": {
+      "url": "https://edge.forgecdn.net/files/6854/818/letsdo-wildernature-fabric-1.0.6.jar",
+      "sha256": "122ed406337b1cd870eb42ef7128895897af5955af22df38900437edeb904025",
+      "size": 3081155
+    },
+    "1076285:7560419": {
+      "url": "https://edge.forgecdn.net/files/7560/419/enchanter_fix-1.8%2bmc1.20-1.21.11.jar",
+      "sha256": "fbf5eed72b801c2f859c918c76cd62be4650b22e3ee11d5e6e7f9829f2938cff",
+      "size": 28514
+    },
+    "1082132:7117528": {
+      "url": "https://edge.forgecdn.net/files/7117/528/naturesdelight-1.12-1.20.1.jar",
+      "sha256": "0ce282f0fa3178c7d6145252e3c73d7381c431358e5a351e8b14dd581ce6a898",
+      "size": 257950
+    },
+    "1087831:6125414": {
+      "url": "https://edge.forgecdn.net/files/6125/414/structure_layout_optimizer-fabric-1.0.10.jar",
+      "sha256": "1b46be2fa5f60a8275384e82c352b50709e5afcd1a637e1c99bea3333fa98efd",
+      "size": 61013
+    },
+    "1092048:5915857": {
+      "url": "https://edge.forgecdn.net/files/5915/857/Configurable-2.2.3-fabric-yarn%2b1.20.1.jar",
+      "sha256": "2e04886a23ea3c0ca05f26a3bc56be61c379482b5f35cf89c134d1c67675d0a3",
+      "size": 643570
+    },
+    "1103431:6100811": {
+      "url": "https://edge.forgecdn.net/files/6100/811/sodiumoptionsapi-fabric-1.0.10-1.20.1.jar",
+      "sha256": "2e34c4ecac29d2ae363d433b5104aae986161e887252e145fa84a27d04761612",
+      "size": 657853
+    },
+    "1104882:6533721": {
+      "url": "https://edge.forgecdn.net/files/6533/721/txnilib-fabric-1.0.24-1.20.1.jar",
+      "sha256": "b1d2848cc92f94bd3c0786e68ce0e7d750c53d3b0a82bc61603d0db2753ff355",
+      "size": 1057614
+    },
+    "1115285:5803513": {
+      "url": "https://edge.forgecdn.net/files/5803/513/almanac-1.20.x-fabric-1.0.2.jar",
+      "sha256": "2c0ea8c3f9f7ca0b4a1d93328ecb26b1bfa00cf33d09d0089d197b707bf97a73",
+      "size": 16082
+    },
+    "1146393:6929973": {
+      "url": "https://edge.forgecdn.net/files/6929/973/sodiumoptionsmodcompat-fabric-1.0.0-1.20.1.jar",
+      "sha256": "11d29ae7caaad6bec7ea9999e9fc0783363c2d5be523df81bfbaaad1fd6760c2",
+      "size": 605673
+    },
+    "1151978:6862653": {
+      "url": "https://edge.forgecdn.net/files/6862/653/polymorphic-tom-1.0.4.jar",
+      "sha256": "f148ea119b918a91564c0c315bd10396b11132a9fcf4cc1b0e4a10b3b5d4c1d1",
+      "size": 17730
+    },
+    "1155302:6020868": {
+      "url": "https://edge.forgecdn.net/files/6020/868/omnilib-0.1.4%2b1.20.1.jar",
+      "sha256": "01050cf5fbc116c51f107d91e1765d8ef15156b6df8a610aa005cfc803707dd7",
+      "size": 253784
+    },
+    "1158094:6984568": {
+      "url": "https://edge.forgecdn.net/files/6984/568/deimos-1.20.1-fabric-2.4.jar",
+      "sha256": "953d1e533bbd3c744c6ac7c417f3c8130a84afabb5a9e574508cda68a9d66f1e",
+      "size": 47538
+    },
+    "1166503:6115805": {
+      "url": "https://edge.forgecdn.net/files/6115/805/more-enchantment-info-0.2.0.jar",
+      "sha256": "b39299f1592917eab89612c8db80767d3772faf6ac23cee3fcba69aa97618f9e",
+      "size": 90000
+    },
+    "1193211:6158675": {
+      "url": "https://edge.forgecdn.net/files/6158/675/welcomescreen-fabric-1.0.0-1.20.1.jar",
+      "sha256": "abf4960997a45a79fe90ebbb8d58cd42200328c25d9f0538e102d2752239f2e2",
+      "size": 15893
+    },
+    "1196599:7599506": {
+      "url": "https://edge.forgecdn.net/files/7599/506/coolrain-1.4.0-1.20.1.jar",
+      "sha256": "2becb88c266dc9e1d341b6f92667d002c02affca396e942ccf6c7996c2c891a9",
+      "size": 4133938
+    },
+    "1203668:7256553": {
+      "url": "https://edge.forgecdn.net/files/7256/553/Data_Anchor-fabric-1.20.1-1.0.0.20.jar",
+      "sha256": "275f0737e5770f79d5816a258f3de4b7cf7c6eaa025ab01c148e9fcaefc9b9a5",
+      "size": 116968
+    },
+    "1215789:6289992": {
+      "url": "https://edge.forgecdn.net/files/6289/992/carrasconlib-fabric-1.20.1-0.1.jar",
+      "sha256": "01d3eaf911b50bf8e7cd35eb2a9df5bc27f0cb06358aab98bff2e257a86a65dc",
+      "size": 88876
+    },
+    "1254143:8086319": {
+      "url": "https://edge.forgecdn.net/files/8086/319/colorwheel-fabric-1.2.6%2bmc1.20.1.jar",
+      "sha256": "327db05f9e1750df61cbab03b93a27e4594cc7ab687f722c71e81ac9bf5bf0e0",
+      "size": 387010
+    },
+    "1264714:6580471": {
+      "url": "https://edge.forgecdn.net/files/6580/471/respectmytrims-1.0.0%2bmc1.20.jar",
+      "sha256": "8334bc04be9ecfd79f1dae6561447f0efa2efa7f832ca5fdf4540dd9d56e0a5d",
+      "size": 24473
+    },
+    "1283531:7580362": {
+      "url": "https://edge.forgecdn.net/files/7580/362/immersive_furniture-fabric-0.1.3%2b1.20.1.jar",
+      "sha256": "4edae64e32ec163310294117d2a4989fcc1dbdc0a97f5001f536024190b619a5",
+      "size": 903534
+    },
+    "1285475:7924939": {
+      "url": "https://edge.forgecdn.net/files/7924/939/colorwheel_patcher-fabric-1.0.5%2bmc1.20.1.jar",
+      "sha256": "bf86c060026c6bec70a2b0b81e8e40d1a0a109b34cac017da4cbce9b2460d918",
+      "size": 210711
+    },
+    "1286189:6692757": {
+      "url": "https://edge.forgecdn.net/files/6692/757/phomesteadplushies-fabric-1.20.1-1.1.0.jar",
+      "sha256": "3111b4a28c94a0a75ef9224d207a8251f03577511de750660e7c2a2adfaa0fe6",
+      "size": 1263173
+    },
+    "1295518:6701799": {
+      "url": "https://edge.forgecdn.net/files/6701/799/invisibleframes-1.1.0%2b1.20.jar",
+      "sha256": "7b640c47073ea968fd4476bf6cc6a11a851acd25c88f363a6ef65a9867de6f0a",
+      "size": 39377
+    },
+    "1327508:7672582": {
+      "url": "https://edge.forgecdn.net/files/7672/582/tooltipoverhaul-fabric-1.20.1-1.4.3.jar",
+      "sha256": "186b754b1c1626e4a69be6de3e09f54d0504072f0a0b5759c3f8e2bba608ba66",
+      "size": 693342
+    },
+    "1332717:6916540": {
+      "url": "https://edge.forgecdn.net/files/6916/540/TameableMossbloom-1.0.jar",
+      "sha256": "d6447815d2fda99b90143f7339c56be3f4f2b2c6078d0bfb03a1ae72f90d134f",
+      "size": 12327
+    },
+    "1332726:6916590": {
+      "url": "https://edge.forgecdn.net/files/6916/590/tameableminisheep-1.0.jar",
+      "sha256": "43547ee19181752e2908b487f3a129ab499810c0b762c7c082ccd9777c6414dc",
+      "size": 16239
+    },
+    "1361021:7262718": {
+      "url": "https://edge.forgecdn.net/files/7262/718/froglightsreimagined-0.3-1.20.1.jar",
+      "sha256": "f02d1082e55773c0b1013a7cad2d540964a129ccefcd59a3ce616978e38475ff",
+      "size": 691015
+    },
+    "1366151:8085924": {
+      "url": "https://edge.forgecdn.net/files/8085/924/tokimistoolshed-fabric-1.3%2bmc1.20.1.jar",
+      "sha256": "0af431923df1f42cbf945335c037662f5edd2368e3df37a91919d9aa029c4bbe",
+      "size": 629767
+    },
+    "1371145:8044355": {
+      "url": "https://edge.forgecdn.net/files/8044/355/cozystudioscore-1.4-1.20.1.jar",
+      "sha256": "710c113ef0683b14d9fb14dce8fd42ad589073532cddad61477795e3ce3d75f9",
+      "size": 19423702
+    },
+    "1383770:7370997": {
+      "url": "https://edge.forgecdn.net/files/7370/997/squish-0.3-1.20.1.jar",
+      "sha256": "b26e80a33b6a061c7e81ba03a685197be5aec0e2483d2e1e5a323fcdd38f8c3a",
+      "size": 554822
+    },
+    "1386823:7283480": {
+      "url": "https://edge.forgecdn.net/files/7283/480/copperagebackport-fabric-1.20.1-0.1.4.jar",
+      "sha256": "7ca1a33cd6b715224ad827b2fd3b4cd3520c22cd8eb8102eb7ba7f321acf8df3",
+      "size": 2808741
+    },
+    "1388097:7363336": {
+      "url": "https://edge.forgecdn.net/files/7363/336/friendsforlife-1.2.0.jar",
+      "sha256": "00cfbfa76972c69370f040461963c0b08d2c08a22a2d76798c06960ce630e5cd",
+      "size": 265988
+    },
+    "1409618:7357109": {
+      "url": "https://edge.forgecdn.net/files/7357/109/stutterfix-mc1.20.1-0.2.0.jar",
+      "sha256": "9b2bad1d002f3b4f8aea88eea251ef0561731d633a50d69c9dcab89b6ebdd249",
+      "size": 26413
+    },
+    "1445937:7534085": {
+      "url": "https://edge.forgecdn.net/files/7534/85/screenshottoclipboard-1.0.0-1.18.2.1.20.4-release.jar",
+      "sha256": "2fa22a598308d1d530407d870d9b61f256e17e45deacaf8045eae33d1138d801",
+      "size": 37435
+    },
+    "1446593:7646746": {
+      "url": "https://edge.forgecdn.net/files/7646/746/serene_shrubbery-fabric-1.0.0%2bmc1.20.1.jar",
+      "sha256": "028971ad9951b958fe897860c91341f00f8d31c38548018547437bc8b8a1e909",
+      "size": 418972
+    },
+    "1468750:7933628": {
+      "url": "https://edge.forgecdn.net/files/7933/628/obsidianequipmentrework-fabric-0.4%2bmc1.20.1.jar",
+      "sha256": "f3ff857c15a0541412d9a9c5a949247796fbb7ef47b9a7965051a902144b8ead",
+      "size": 199282
+    },
+    "1510773:7909505": {
+      "url": "https://edge.forgecdn.net/files/7909/505/fairylights-1.1.4_fabric.jar",
+      "sha256": "3ee779f8ac17f7e5bdbffd89aabab1d57c309c010734c5f8784f9c746470f391",
+      "size": 762660
+    },
+    "225738:7963207": {
+      "url": "https://edge.forgecdn.net/files/7963/207/dummmmmmy-1.20-2.0.12-fabric.jar",
+      "sha256": "95706ca201a123d41330dc35f526bff4babf76c5b5b4c60fc0bd936ea12c1172",
+      "size": 832956
+    },
+    "228525:7612391": {
+      "url": "https://edge.forgecdn.net/files/7612/391/Bookshelf-Fabric-1.20.1-20.2.15.jar",
+      "sha256": "bfdcaea401be95943503cce660a68add5e8cdc08a2a8112b1d80dd63d7d63766",
+      "size": 315041
+    },
+    "232131:6972468": {
+      "url": "https://edge.forgecdn.net/files/6972/468/defaultoptions-fabric-1.20.1-18.0.4.jar",
+      "sha256": "9bcd3ae70a1007eb63344dca097088a697e37ecde9bb9648439e71396602ba31",
+      "size": 92486
+    },
+    "235577:8019425": {
+      "url": "https://edge.forgecdn.net/files/8019/425/trashslot-fabric-1.20.1-15.1.5.jar",
+      "sha256": "bbcefa6baf13ae117c4a136d7ff66b625c7540b9dcc0d4077b4f237085ee4408",
+      "size": 118660
+    },
+    "237749:5110802": {
+      "url": "https://edge.forgecdn.net/files/5110/802/coroutil-fabric-1.20.1-1.3.7.jar",
+      "sha256": "a97d58b44cf1ce8cf4fa8fded9c3c574ef1dd95e7fbb073f854e7fbce9c588b3",
+      "size": 2392617
+    },
+    "238086:8020594": {
+      "url": "https://edge.forgecdn.net/files/8020/594/kubejs-fabric-2001.6.5-build.26.jar",
+      "sha256": "e1a3f3fe1190635b8fe6469e28c21969f17183a0fafb3e69c21709c564894923",
+      "size": 1608326
+    },
+    "238222:7920913": {
+      "url": "https://edge.forgecdn.net/files/7920/913/jei-1.20.1-fabric-15.20.0.130.jar",
+      "sha256": "eeea05073673d6a6d281e00f2010b55f0eae00e7b21c1d3b8367d59ca2d5659c",
+      "size": 1422556
+    },
+    "239197:7772872": {
+      "url": "https://edge.forgecdn.net/files/7772/872/CraftTweaker-fabric-1.20.1-14.0.60.jar",
+      "sha256": "cb82a5df01c236bea863c4b1c59b60692fc04461d65482bf796d44662cea8900",
+      "size": 3994103
+    },
+    "248787:7517366": {
+      "url": "https://edge.forgecdn.net/files/7517/366/appleskin-fabric-mc1.20.1-2.5.2.jar",
+      "sha256": "821241285f534fd04aa15a91f3d1a6059135bce2d4b6e409fa1ae8825b4c9702",
+      "size": 1097240
+    },
+    "250419:7612609": {
+      "url": "https://edge.forgecdn.net/files/7612/609/EnchantmentDescriptions-Fabric-1.20.1-17.1.21.jar",
+      "sha256": "282d01a7688e803e429ccb24bf175f7fc5a8a0ae9a307be4d38c6e8bc9b8e5ee",
+      "size": 60972
+    },
+    "252848:7892950": {
+      "url": "https://edge.forgecdn.net/files/7892/950/NaturesCompass-1.20.1-2.6.0-fabric.jar",
+      "sha256": "9df61c2be27df9e1e4df1466db802a7e5a7d68150e2b1db667a6e7f119610d66",
+      "size": 238575
+    },
+    "254284:8043002": {
+      "url": "https://edge.forgecdn.net/files/8043/2/AmbientSounds_FABRIC_v6.3.8_mc1.20.1.jar",
+      "sha256": "afd5969be057999fb96833763c3313965ac7a1770f83a921130989547f0af7ed",
+      "size": 53432488
+    },
+    "257814:7976431": {
+      "url": "https://edge.forgecdn.net/files/7976/431/CreativeCore_FABRIC_v2.12.36_mc1.20.1.jar",
+      "sha256": "298430abe7b895363df6121d9a9e9ba35f38946747f0fbbc078a80b73a4c686f",
+      "size": 1197162
+    },
+    "263420:8042297": {
+      "url": "https://edge.forgecdn.net/files/8042/297/xaerominimap-fabric-1.20.1-25.3.12.jar",
+      "sha256": "e76276745007a2648dbe7616dc685802cc8c0126fc03eff3ae79d86534b1fe7a",
+      "size": 2171370
+    },
+    "264738:3213798": {
+      "url": "https://edge.forgecdn.net/files/3213/798/betterthanmending-1.3.0.jar",
+      "sha256": "63353c727739ea254c780168e92d1096dbb8cc83be230f4302f554f9bfb25128",
+      "size": 4152
+    },
+    "274259:4882498": {
+      "url": "https://edge.forgecdn.net/files/4882/498/carryon-fabric-1.20.1-2.1.2.7.jar",
+      "sha256": "8d25fb164fc4cc15cd9123a915c880c55527efe3fec26b2c7febf09e65c6ebdd",
+      "size": 443033
+    },
+    "276951:5503514": {
+      "url": "https://edge.forgecdn.net/files/5503/514/comforts-fabric-6.4.0%2b1.20.1.jar",
+      "sha256": "f9852a749b5154cbb0e97651cd0a1718382fcdfebdea86813bb118b16ee1096b",
+      "size": 693624
+    },
+    "284324:4672307": {
+      "url": "https://edge.forgecdn.net/files/4672/307/Emojiful-Fabric-1.20.1-4.2.0.jar",
+      "sha256": "25eeb44a7ec2618b8eda6122d8d57d35c66ebe1c1fa8a1421a49f9764f77ca57",
+      "size": 297767
+    },
+    "296996:7134454": {
+      "url": "https://edge.forgecdn.net/files/7134/454/rebind_narrator-1.20.1-fabric-2025.10.21.jar",
+      "sha256": "d2961dedec9de4d81c6d5565a5588d6d876b05afd0aed037481af43dbd3d243b",
+      "size": 186429
+    },
+    "302548:6185190": {
+      "url": "https://edge.forgecdn.net/files/6185/190/shulkerdropstwo-1.20.1-3.5.jar",
+      "sha256": "1c456b636501856e18253106db14014c3713ac41a1b2c2f6b19897dcc8270978",
+      "size": 31927
+    },
+    "303119:4780782": {
+      "url": "https://edge.forgecdn.net/files/4780/782/malilib-fabric-1.20.1-0.16.3.jar",
+      "sha256": "5ae189f27fbd49aa48e83e00251fe1d75c3e42c74f55575ae4e0a232ad0c3589",
+      "size": 545403
+    },
+    "306612:7929919": {
+      "url": "https://edge.forgecdn.net/files/7929/919/fabric-api-0.92.8%2b1.20.1.jar",
+      "sha256": "fbeee7c412009d232097218c1e33bbcbc670d49dd74aa7a0cf28ccdb04ac8268",
+      "size": 2110694
+    },
+    "308702:5162837": {
+      "url": "https://edge.forgecdn.net/files/5162/837/modmenu-7.2.2.jar",
+      "sha256": "a041b0f0305ffa5eb90120aa23768e1cfbb27583904b1751e3783c0f69382f1a",
+      "size": 721366
+    },
+    "308769:7976268": {
+      "url": "https://edge.forgecdn.net/files/7976/268/fabric-language-kotlin-1.13.11%2bkotlin.2.3.21.jar",
+      "sha256": "c35713ee1da70fde6bf0e9ed26f8e2baf0814e60eb993cd12acb940e57f4fd2f",
+      "size": 7813444
+    },
+    "308976:4605332": {
+      "url": "https://edge.forgecdn.net/files/4605/332/CraftingPad-fabric-1.20.1-1.0.12.jar",
+      "sha256": "dc9a31b6838141fa9b60f9080e22283aaef94d0f406a61d3235863374a9e205f",
+      "size": 13133
+    },
+    "317514:7451285": {
+      "url": "https://edge.forgecdn.net/files/7451/285/mouse-wheelie-1.15.1%2bmc1.20.1.jar",
+      "sha256": "7c37f69e490b45a4f47d2ec5cd053a59aaf443faeb514c64ee0073b3ed27576a",
+      "size": 1086131
+    },
+    "317716:5778732": {
+      "url": "https://edge.forgecdn.net/files/5778/732/elytraslot-fabric-6.4.4%2b1.20.1.jar",
+      "sha256": "ba49a677be30a9b003c2889c5f1bec1db95f875802adb8ae659bd64d7cc3b24d",
+      "size": 85106
+    },
+    "317780:8042196": {
+      "url": "https://edge.forgecdn.net/files/8042/196/xaeroworldmap-fabric-1.20.1-1.40.16.jar",
+      "sha256": "1272928dca90c2bfa209f7a3e80aedd742e2438ab0b6a769b29ac8010bedffd9",
+      "size": 1410559
+    },
+    "319596:5393114": {
+      "url": "https://edge.forgecdn.net/files/5393/114/Pehkui-3.8.2%2b1.14.4-1.20.6.jar",
+      "sha256": "5df4e35389fdf84f402ffe0c0499962f5b31d0269963ad5adb8f6af671ad1ef0",
+      "size": 537524
+    },
+    "324717:6291330": {
+      "url": "https://edge.forgecdn.net/files/6291/330/Jade-1.20-Fabric-11.13.1.jar",
+      "sha256": "02da30d17d3a1d892ff5657e2add8e012854575aed34e4f95dc9b3b8ba207b8c",
+      "size": 572882
+    },
+    "326302:6247535": {
+      "url": "https://edge.forgecdn.net/files/6247/535/Nostalgia_v5.1.zip",
+      "sha256": "7d7211af2fac6d9b3c7fcbaad7a47f1a612450376d14383088908831c18b6cc8",
+      "size": 1842205
+    },
+    "328163:5378501": {
+      "url": "https://edge.forgecdn.net/files/5378/501/sit-1.20.1-27.jar",
+      "sha256": "2f1b21fa489aa53082575d8e92cc99e1c6f7f62022c5016db5c378eea9721dc8",
+      "size": 64238
+    },
+    "334259:5956100": {
+      "url": "https://edge.forgecdn.net/files/5956/100/PresenceFootsteps-1.10.1%2b1.20.1.jar",
+      "sha256": "70f354e5ecd8993908601fcdfcb4e98f7b81f42192287282a5b86712e9a6be95",
+      "size": 5664952
+    },
+    "341284:5173501": {
+      "url": "https://edge.forgecdn.net/files/5173/501/trinkets-3.7.2.jar",
+      "sha256": "a6f11a4206c1285cd260a60d9bfe9cefa9914d2190d08b3c52050f42044b53b3",
+      "size": 238532
+    },
+    "342584:8021348": {
+      "url": "https://edge.forgecdn.net/files/8021/348/collective-1.20.1-8.22.jar",
+      "sha256": "f5266d805601c540baa1a908387b71b674fe967337226cf1b9d3e0aceba36cee",
+      "size": 662615
+    },
+    "345981:6185928": {
+      "url": "https://edge.forgecdn.net/files/6185/928/grassseeds-1.20.1-3.4.jar",
+      "sha256": "e6e9e9167582a4fdef6fcd5843c0adad29c3bf8cc8c191fe75df97e551a7a5a4",
+      "size": 28350
+    },
+    "348521:5729104": {
+      "url": "https://edge.forgecdn.net/files/5729/104/cloth-config-11.1.136-fabric.jar",
+      "sha256": "844f49c339c8f3144e167ab21b7d0059f0d571054e26285a0749348da25c49fa",
+      "size": 1172214
+    },
+    "348831:7143840": {
+      "url": "https://edge.forgecdn.net/files/7143/840/doubledoors-1.20.1-7.2.jar",
+      "sha256": "1847baf0f97a3ebc07735743b0e226c45dd7c289cd03214bcfc7f49ed44ccb1e",
+      "size": 54300
+    },
+    "349071:6185645": {
+      "url": "https://edge.forgecdn.net/files/6185/645/inventorytotem-1.20.1-3.4.jar",
+      "sha256": "bde671c0c6a5a71fdf0d56319461dcc30c3f58261cb547963b6b1581eaed9d0a",
+      "size": 18442
+    },
+    "353426:4954413": {
+      "url": "https://edge.forgecdn.net/files/4954/413/Mo-Glass-1.7-MC1.20.1.jar",
+      "sha256": "5145b9cbd96f216e2d492694b8ca2b1a9eeb69dcbe143a86dde22c2411694bbf",
+      "size": 536659
+    },
+    "353554:4624707": {
+      "url": "https://edge.forgecdn.net/files/4624/707/Stay_True_1.20.zip",
+      "sha256": "508bc459fe7125378e595681c3f571724648ff9f0be6dd21e31a83f7eeb1f8e0",
+      "size": 2139266
+    },
+    "353890:6598272": {
+      "url": "https://edge.forgecdn.net/files/6598/272/notenoughcrashes-4.4.9%2b1.20.1-fabric.jar",
+      "sha256": "3d6184d1a008997810de492ff506cb4696a541fffcdc8028558936b68234f1df",
+      "size": 138548
+    },
+    "354339:7613220": {
+      "url": "https://edge.forgecdn.net/files/7613/220/OpenLoader-Fabric-1.20.1-19.0.5.jar",
+      "sha256": "e87f1bef7a4ade22e0095e7fc7a0f11f9eccab3e38e8196d52c95e30cfe80230",
+      "size": 21443
+    },
+    "357540:5639959": {
+      "url": "https://edge.forgecdn.net/files/5639/959/inventoryhud.fabric.1.20.1-3.4.26.jar",
+      "sha256": "82a89cb2e004f9bf2c271ecb4a9e942bb79ddf71ca912184da438eb0538ff522",
+      "size": 237573
+    },
+    "360438:7268114": {
+      "url": "https://edge.forgecdn.net/files/7268/114/lithium-fabric-mc1.20.1-0.11.4.jar",
+      "sha256": "76133efe92aea907cf75562d9e26517deb170e2580e1ecd4979da2c8902de782",
+      "size": 691483
+    },
+    "361579:4738953": {
+      "url": "https://edge.forgecdn.net/files/4738/953/spark-1.10.53-fabric.jar",
+      "sha256": "00c034e684fa4471b41539dc29a8d39cc6f22eb29b2fa423895efc978a391d2d",
+      "size": 3082974
+    },
+    "367706:7256727": {
+      "url": "https://edge.forgecdn.net/files/7256/727/fancymenu_fabric_3.8.1_MC_1.20.1.jar",
+      "sha256": "1da7e2b114e683ebafc012cc3ec41520571c84c4e598b55fde00702ac037bec9",
+      "size": 4472279
+    },
+    "373591:4769064": {
+      "url": "https://edge.forgecdn.net/files/4769/64/YungsBetterMineshafts-1.20-Fabric-4.0.4.jar",
+      "sha256": "0a4657689217339a1f6079a2d9dda03f6d01beacac59c14e093ded3357db2b86",
+      "size": 621495
+    },
+    "374274:4581910": {
+      "url": "https://edge.forgecdn.net/files/4581/910/yosbr-0.1.2.jar",
+      "sha256": "db4c744fd71f5617639cb0fdff72378b08d2852004f4045c62090de1bf53afcb",
+      "size": 17373
+    },
+    "377109:7613278": {
+      "url": "https://edge.forgecdn.net/files/7613/278/ToolStats-Fabric-1.20.1-16.0.10.jar",
+      "sha256": "654b72835244ea85ac586d85a30b576f83ffb82149904492b4c8f1603c7d8db9",
+      "size": 16303
+    },
+    "377281:7612431": {
+      "url": "https://edge.forgecdn.net/files/7612/431/DarkPaintings-Fabric-1.20.1-17.0.6.jar",
+      "sha256": "b97c9139948eab25aef9d99041e9128f38fc978e2db7de5fdfd16230b9c8025c",
+      "size": 45465
+    },
+    "379680:5956095": {
+      "url": "https://edge.forgecdn.net/files/5956/95/grind-enchantments-3.1.4%2b1.20.1.jar",
+      "sha256": "403ebd449f09615ca7645dc6c14e7fb806e738af945174b0b4cd8e9f4f606859",
+      "size": 150818
+    },
+    "388172:7025126": {
+      "url": "https://edge.forgecdn.net/files/7025/126/geckolib-fabric-1.20.1-4.8.2.jar",
+      "sha256": "464b8f89b7d7c94dd5e0bd8d5a42c59fc55f3b8888f5da0b27772541a1815f77",
+      "size": 1069282
+    },
+    "388800:6450979": {
+      "url": "https://edge.forgecdn.net/files/6450/979/polymorph-fabric-0.49.10%2b1.20.1.jar",
+      "sha256": "05b611960c486c745db6a32b92951dfcb80b26ba2e7b96e12a6f43517830cffb",
+      "size": 680833
+    },
+    "390717:8020899": {
+      "url": "https://edge.forgecdn.net/files/8020/899/starterkit-1.20.1-8.0.jar",
+      "sha256": "cae7cc58d2ba5a277834f5194e090186db01804bccfe947ab4340bd260659b61",
+      "size": 186044
+    },
+    "391366:7971673": {
+      "url": "https://edge.forgecdn.net/files/7971/673/repurposed_structures-7.1.23%2b1.20.1-fabric.jar",
+      "sha256": "241f5d09060f98ccfe5cdfc9840733aa780e3086b21366bfcca7ea0859ab4ca8",
+      "size": 8174011
+    },
+    "393236:7731016": {
+      "url": "https://edge.forgecdn.net/files/7731/16/Patchouli-1.20.1-85-FABRIC.jar",
+      "sha256": "485e23ab9727c7e9f585f435020d733706a80c7f0a1dc20e85c7398e1d76b919",
+      "size": 857123
+    },
+    "394468:6260639": {
+      "url": "https://edge.forgecdn.net/files/6260/639/sodium-fabric-0.5.13%2bmc1.20.1.jar",
+      "sha256": "688c26029ce69f0b1f7cf936866656ca6723228ac46c4aef5b5f793b1e6abd22",
+      "size": 971552
+    },
+    "394535:4606911": {
+      "url": "https://edge.forgecdn.net/files/4606/911/trashcans-1.0.18-fabric-mc1.20.jar",
+      "sha256": "09852ec3febefcc70f4d58541385c520024dbcbd7a92f77242cb3cba32933841",
+      "size": 184006
+    },
+    "396826:6418134": {
+      "url": "https://edge.forgecdn.net/files/6418/134/toms_storage_fabric-1.20-1.7.1.jar",
+      "sha256": "3487d7b56b9ec734a9b06e356839f2177bc32f569682a552ecf9ccc619d5913c",
+      "size": 1537265
+    },
+    "403815:4613752": {
+      "url": "https://edge.forgecdn.net/files/4613/752/advancementinfo-1.20-fabric0.83.0-1.4.jar",
+      "sha256": "cb394550be72cfa2ac1e96031253d8cf3a11a81d5463af2c8ace3bcc5cb5d8d9",
+      "size": 43895
+    },
+    "407206:7875200": {
+      "url": "https://edge.forgecdn.net/files/7875/200/chat_heads-0.15.1-fabric-1.20.jar",
+      "sha256": "7b05c44105caf3246c8cb9ad6c8fdc1b4edc068ac77754da02451abfd2f865cc",
+      "size": 84192
+    },
+    "408209:4761944": {
+      "url": "https://edge.forgecdn.net/files/4761/944/fabricskyboxes-0.7.3%2bmc1.20.1.jar",
+      "sha256": "277393ed2df9c0418ab0af23e7c4213bb08b71d139c022d38ca3ead93235ec35",
+      "size": 207272
+    },
+    "409660:5175782": {
+      "url": "https://edge.forgecdn.net/files/5175/782/wirelessredstone-fabric-1.20.1-1.1.2.jar",
+      "sha256": "2b0f31cb89e0980803f6412fc008d34ba29ab4912703a50f908d57df19d67f8f",
+      "size": 138832
+    },
+    "410743:6390675": {
+      "url": "https://edge.forgecdn.net/files/6390/675/realisticbees-1.20.1-4.2.jar",
+      "sha256": "1f230abe0caf2a6af10d5f78425eebd0b4d8f6049ba0300f2add2e81370e5058",
+      "size": 45529
+    },
+    "410811:6555286": {
+      "url": "https://edge.forgecdn.net/files/6555/286/ftb-essentials-fabric-2001.2.3.jar",
+      "sha256": "016098ae7a6702f1ab53ac838b210f10885e72df25de08c018c3b31a9f7be8e9",
+      "size": 155533
+    },
+    "411813:6713333": {
+      "url": "https://edge.forgecdn.net/files/6713/333/stackrefill-1.20.1-4.9.jar",
+      "sha256": "be3a46145e95014f14d8ede203ab2e579ff59daa4d834cce04463df8ebf2a016",
+      "size": 35073
+    },
+    "412082:7884612": {
+      "url": "https://edge.forgecdn.net/files/7884/612/supplementaries-1.20-3.1.43-fabric.jar",
+      "sha256": "93b865c213f64ce7fdc74888b79048ff3002434db5adb0af3b6d5bcad58f7b5d",
+      "size": 13493444
+    },
+    "415681:7148381": {
+      "url": "https://edge.forgecdn.net/files/7148/381/connectiblechains-2.5.5%2b1.20.1.jar",
+      "sha256": "eff9a1c91a9855f26d9b75a42f39c6994ec806fd8ce91d1f74763a2a2f9fb595",
+      "size": 498760
+    },
+    "416089:8037665": {
+      "url": "https://edge.forgecdn.net/files/8037/665/voicechat-fabric-1.20.1-2.6.17.jar",
+      "sha256": "71fe0dca6a677e05769248fb1a274c9aade56481ca5d8b00cea6601cd0d57969",
+      "size": 5262944
+    },
+    "416294:6186969": {
+      "url": "https://edge.forgecdn.net/files/6186/969/rhino-fabric-2001.2.3-build.10.jar",
+      "sha256": "e205fac40f7f27abfa284b00f62d9c1cbd6da494a64cb984ebadd9d76ff5f3ee",
+      "size": 1743587
+    },
+    "416797:5142502": {
+      "url": "https://edge.forgecdn.net/files/5142/502/konkrete_fabric_1.8.1_MC_1.20.1.jar",
+      "sha256": "f87fc3ab29a8df63a5214fdfa58d2f9fa645255af64d38ba598a9f56fafccdb6",
+      "size": 892067
+    },
+    "417430:8086096": {
+      "url": "https://edge.forgecdn.net/files/8086/96/VanillaBackport-fabric-1.20.1-1.1.7.4.jar",
+      "sha256": "94732fc24b7dcf4bab5a04550b5eafd43914f5d06661d0894bb598dc8659c2ac",
+      "size": 55362530
+    },
+    "419699:5137936": {
+      "url": "https://edge.forgecdn.net/files/5137/936/architectury-9.2.14-fabric.jar",
+      "sha256": "bd7a7032bedb2ff96c6991a846a44c857336a51442a105f5859017e8ba9d1321",
+      "size": 585207
+    },
+    "421649:5769972": {
+      "url": "https://edge.forgecdn.net/files/5769/972/YungsApi-1.20-Fabric-4.0.6.jar",
+      "sha256": "26b6dc81f876aabf3d53ead59e5908a8b0f5434d46c150cfd376c027ac54053e",
+      "size": 1396331
+    },
+    "421897:8055420": {
+      "url": "https://edge.forgecdn.net/files/8055/420/particlerain-4.0.0-beta.10%2b1.20.1-fabric.jar",
+      "sha256": "8c027a37a828fd0cf6e11ce5419c213d3716796807d75ff2244ac79be523ca91",
+      "size": 608338
+    },
+    "423421:4915384": {
+      "url": "https://edge.forgecdn.net/files/4915/384/jumpoverfences-fabric-1.20.1-1.3.1.jar",
+      "sha256": "02463bd3622c533419169c227dcf5854862f227d07fc67a1befda5ccd16d8a20",
+      "size": 29556
+    },
+    "431135:4991432": {
+      "url": "https://edge.forgecdn.net/files/4991/432/go-fish-1.6.3%2b1.20.1.jar",
+      "sha256": "f4fbe5b10944cf36e0bd0d7399d1f0b2be0909c782e3233caf8515c9f89daced",
+      "size": 323058
+    },
+    "431203:7520157": {
+      "url": "https://edge.forgecdn.net/files/7520/157/MakeUp-UltraFast-9.4b.zip",
+      "sha256": "6087e97d65d1ea2b725298e602971f1d2a4fb96bb94ad825cdfe02c3368beee9",
+      "size": 402605
+    },
+    "431611:5481490": {
+      "url": "https://edge.forgecdn.net/files/5481/490/veinmining-fabric-1.5.0%2b1.20.1.jar",
+      "sha256": "493186ee89f4da0be67e5d5b2c6479050b4f5186c3262437694062f2c94de285",
+      "size": 460079
+    },
+    "433175:5320021": {
+      "url": "https://edge.forgecdn.net/files/5320/21/Chunky-1.3.146.jar",
+      "sha256": "ae7fb9d35a3a9d9d4f2104aeae7b31a901c5e5842891e2edd9ddcc42c2646a38",
+      "size": 344004
+    },
+    "433447:3831043": {
+      "url": "https://edge.forgecdn.net/files/3831/43/mixintrace-1.1.1%2b1.17.jar",
+      "sha256": "26ca21a27706cfa4561868f31c4fd07c542e8cc759419f5884ddff1f3a126a99",
+      "size": 36039
+    },
+    "433518:3821870": {
+      "url": "https://edge.forgecdn.net/files/3821/870/lazydfu-0.1.3.jar",
+      "sha256": "4f3b77273b57d019a8db58371e63e4426557c1bb7c9cc10536a03972122778c8",
+      "size": 14531
+    },
+    "433760:7650353": {
+      "url": "https://edge.forgecdn.net/files/7650/353/notenoughanimations-fabric-1.11.3-mc1.20.1.jar",
+      "sha256": "e9b2fccc300734cdb33f35d81e73f4d7f619316692f929232001851e50ec2136",
+      "size": 1921654
+    },
+    "438116:7844984": {
+      "url": "https://edge.forgecdn.net/files/7844/984/mcw-paintings-1.1.0-mc1.20.1fabric.jar",
+      "sha256": "2272bf384a45607a8d065685bfff2774646834d5089b7a2dfd5c1c132a68e57a",
+      "size": 155072
+    },
+    "438495:6164052": {
+      "url": "https://edge.forgecdn.net/files/6164/52/ftb-library-fabric-2001.2.9.jar",
+      "sha256": "08e80107ae3f73c6608bece1f5a8e487031b5baf37a8f5d266928bd5cc1652ce",
+      "size": 781160
+    },
+    "438496:6431736": {
+      "url": "https://edge.forgecdn.net/files/6431/736/ftb-quests-fabric-2001.4.13.jar",
+      "sha256": "720a51b186e815d0f2c54981dfd2af02b9d7e93eb6b57a90bc156a3c823b43f6",
+      "size": 1223024
+    },
+    "438497:6130783": {
+      "url": "https://edge.forgecdn.net/files/6130/783/ftb-teams-fabric-2001.3.1.jar",
+      "sha256": "37d213480a558453d196a7837b6a44fb3006e61cd4bf3a6d86c2d25243ebb1c8",
+      "size": 244872
+    },
+    "442842:5157021": {
+      "url": "https://edge.forgecdn.net/files/5157/21/BlockRunner-v8.0.4-1.20.1-Fabric.jar",
+      "sha256": "f29102144a7099f7747f81dbaf1498bcec4893060b023d38c645cb40baeb833a",
+      "size": 69675
+    },
+    "445838:5305053": {
+      "url": "https://edge.forgecdn.net/files/5305/53/animal_feeding_trough-1.1.0%2b1.20.1.jar",
+      "sha256": "4c39afc711918fae23ea46cb5c71c08d08ccabcba88b4ce7aba9d614c4ed5146",
+      "size": 237378
+    },
+    "447673:6298804": {
+      "url": "https://edge.forgecdn.net/files/6298/804/sodium-extra-0.5.9%2bmc1.20.1.jar",
+      "sha256": "5cae656838b595e27d5133264374e5d90f5f35a39e343bfc5a76b908fec97c9f",
+      "size": 370701
+    },
+    "448233:8053756": {
+      "url": "https://edge.forgecdn.net/files/8053/756/entityculling-fabric-1.10.2-mc1.20.1.jar",
+      "sha256": "fe64e5dc8869056ca133c16dee66fb3d6f4590954a822cca81572b365a39b145",
+      "size": 1589955
+    },
+    "452046:4610052": {
+      "url": "https://edge.forgecdn.net/files/4610/52/enhancedblockentities-0.9%2b1.20.jar",
+      "sha256": "1c4ce2c00d8cc6d2269de3cadaba551607c62692a8e5ad1d7c618462ed7ed05b",
+      "size": 490690
+    },
+    "452834:7508763": {
+      "url": "https://edge.forgecdn.net/files/7508/763/rightclickharvest-fabric-4.6.1%2b1.20.1.jar",
+      "sha256": "d4496d4df98083e64af435d8d0f8d5bf03bf94d5c2a2112029282a6c795f6d6e",
+      "size": 287561
+    },
+    "454372:6076732": {
+      "url": "https://edge.forgecdn.net/files/6076/732/supermartijn642corelib-1.1.18a-fabric-mc1.20.1.jar",
+      "sha256": "65db7c4bea17905b4ed4d8c92da52b3e6a8fea79b9075c7aac88ac1f3a480f28",
+      "size": 562776
+    },
+    "455508:6258195": {
+      "url": "https://edge.forgecdn.net/files/6258/195/iris-1.7.6%2bmc1.20.1.jar",
+      "sha256": "9eb15e563e0c9ae6eff15b7863f8432dd290cf9f724c7373e9b15b14aa829ed5",
+      "size": 2726899
+    },
+    "456151:4921204": {
+      "url": "https://edge.forgecdn.net/files/4921/204/things-0.3.3%2b1.20.jar",
+      "sha256": "62ed1a15b7515fb2c1323f4b44d221975a1d0293e24e9235a5e04dc0afa37206",
+      "size": 930355
+    },
+    "456239:4658749": {
+      "url": "https://edge.forgecdn.net/files/4658/749/EasyMagic-v8.0.1-1.20.1-Fabric.jar",
+      "sha256": "c36c2cd0e53647d76581c85db967a18a88b53ffd42f8a2e1b6da5482b58cde1b",
+      "size": 104693
+    },
+    "456956:5813139": {
+      "url": "https://edge.forgecdn.net/files/5813/139/chipped-fabric-1.20.1-3.0.7.jar",
+      "sha256": "b1af1f1a653a65b200c5fd547c59a97e176f6d5b2e41519596f7a30394d4f330",
+      "size": 15057458
+    },
+    "457570:5180902": {
+      "url": "https://edge.forgecdn.net/files/5180/902/configured-fabric-1.20.1-2.2.3.jar",
+      "sha256": "e48fa65de9e361facc8abf0c13b5dc3dcc4922d832c1e02cab39dc8b99285057",
+      "size": 591886
+    },
+    "459496:6237037": {
+      "url": "https://edge.forgecdn.net/files/6237/37/indium-1.0.36%2bmc1.20.1.jar",
+      "sha256": "8434d0abc8826e2540c26741fea45a1ab9d48f650746de282b36850fa1d01999",
+      "size": 105382
+    },
+    "459857:4810977": {
+      "url": "https://edge.forgecdn.net/files/4810/977/ferritecore-6.0.1-fabric.jar",
+      "sha256": "c7ba1118a05b2da900d1c369fbe1017a3e3ec3cafe5e51398b851279b9becf24",
+      "size": 125197
+    },
+    "467280:4584380": {
+      "url": "https://edge.forgecdn.net/files/4584/380/PotatoShaders_v1.0d.zip",
+      "sha256": "55aa21562dbc2860fd466719908437a8bc22ad358a673fb3c119e4bcdf1616af",
+      "size": 393109
+    },
+    "475358:4574355": {
+      "url": "https://edge.forgecdn.net/files/4574/355/bettermounthud-1.2.2.jar",
+      "sha256": "5de386555011840070dbbe7942422a8247b0b30a9d6d06d21c3c188ae53dde2f",
+      "size": 21587
+    },
+    "480684:4769084": {
+      "url": "https://edge.forgecdn.net/files/4769/84/YungsBetterStrongholds-1.20-Fabric-4.0.3.jar",
+      "sha256": "122b74d59629bf755663263a4ce43e58a5d13b74e67bea332d44a9bedb51b74a",
+      "size": 611598
+    },
+    "482160:4590983": {
+      "url": "https://edge.forgecdn.net/files/4590/983/Boat-Item-View-Fabric-1.20.1-0.0.5.jar",
+      "sha256": "e38fb50cc1a26704ba0662e86518d1c436109cd6788e7cc035509b1f5ec12cba",
+      "size": 1031662
+    },
+    "482834:4939709": {
+      "url": "https://edge.forgecdn.net/files/4939/709/farmers-delight-fabric-1.4.3.jar",
+      "sha256": "ea9d91b0a9d5d03abe8388d6e6af429baefe1da2ecc95753b045cea5bd6ed98a",
+      "size": 2718948
+    },
+    "485245:6292692": {
+      "url": "https://edge.forgecdn.net/files/6292/692/modernworldcreation_fabric_2.0.1_MC_1.20.1.jar",
+      "sha256": "7c8f9444642242f61b0bd99cbdd8a7d114fd23210e8851050264fec0d75f9194",
+      "size": 679401
+    },
+    "488090:8028804": {
+      "url": "https://edge.forgecdn.net/files/8028/804/midnightlib-fabric-1.9.3%2b1.20.1.jar",
+      "sha256": "0076f2fbd47c1a13df7ed83a7a4058a488d1cab0dd2c44373cfdb3a5c6c35629",
+      "size": 59401
+    },
+    "491290:6331319": {
+      "url": "https://edge.forgecdn.net/files/6331/319/smarterfarmers-1.20-2.1.2-fabric.jar",
+      "sha256": "b799905dbf9ce207c2b71da25312f7d741753f4d97b1841f9dfb617cf5a7eb95",
+      "size": 218266
+    },
+    "491794:7892929": {
+      "url": "https://edge.forgecdn.net/files/7892/929/ExplorersCompass-1.20.1-2.6.0-fabric.jar",
+      "sha256": "1d983c60262329c062acd2a191c3b5d4fcd5405c032a87609d18ab0d22851f07",
+      "size": 179781
+    },
+    "495476:6918566": {
+      "url": "https://edge.forgecdn.net/files/6918/566/PuzzlesLib-v8.1.33-1.20.1-Fabric.jar",
+      "sha256": "855034e7a858f2f9ee76c1181aa1f4d5b9e605d63d8a81f7bba155faba2da7c5",
+      "size": 1084397
+    },
+    "496913:4603805": {
+      "url": "https://edge.forgecdn.net/files/4603/805/twigs-3.1.0-fabric.jar",
+      "sha256": "25ab7e6eff163c799d30dfa27f9c54c3d0828dff8f5af099e69966c48783f33a",
+      "size": 2958651
+    },
+    "497175:5706124": {
+      "url": "https://edge.forgecdn.net/files/5706/124/graves-3.0.3%2b1.20.1.jar",
+      "sha256": "d606625c99a4e9becf743bf9d889aa1b9d65cce92ceedd158cb33169c695c46f",
+      "size": 1872216
+    },
+    "498794:4638050": {
+      "url": "https://edge.forgecdn.net/files/4638/50/ironchests-5.0.2-fabric.jar",
+      "sha256": "6a07065a3a68280e26a0fc8a3fc0d8dde10b0999432492ef6726cd583be96de6",
+      "size": 485230
+    },
+    "498797:5242620": {
+      "url": "https://edge.forgecdn.net/files/5242/620/mavm-1.2.6-mc1.20.1.jar",
+      "sha256": "5cc230ed7f1a12576703363585cf78d769ae57eea8e760a75d31260ddd9accc4",
+      "size": 792700
+    },
+    "499980:8076689": {
+      "url": "https://edge.forgecdn.net/files/8076/689/moonlight-1.20-2.16.32-fabric.jar",
+      "sha256": "6e469342247b0fb4839a77a9a8ed0163cb3e62efae1a2bb336c884d8e92ea507",
+      "size": 1364815
+    },
+    "500525:7420614": {
+      "url": "https://edge.forgecdn.net/files/7420/614/balm-fabric-1.20.1-7.3.38.jar",
+      "sha256": "0f4c8aefb655d6e042176b842eed38dbde5e352d732a5e8ad98f9e965360c66f",
+      "size": 609150
+    },
+    "506898:4584467": {
+      "url": "https://edge.forgecdn.net/files/4584/467/DetailArmorBar-2.6.3%2b1.20.1-fabric.jar",
+      "sha256": "1cdd8c6b58d390e71b167233f47835b6e267fd8065312a5b74764005ccf09a54",
+      "size": 57045
+    },
+    "509339:7148803": {
+      "url": "https://edge.forgecdn.net/files/7148/803/Fancy_Beds-v4.1.zip",
+      "sha256": "ceb50953d84fa1efb89ef88f2b695159e54cb84e0b4c4802101f742c580ff3ae",
+      "size": 202209
+    },
+    "511319:5075462": {
+      "url": "https://edge.forgecdn.net/files/5075/462/reeses_sodium_options-1.7.2%2bmc1.20.1-build.101.jar",
+      "sha256": "627b6b90e30d18de49dd8960afd5c8b530cf2c6f21b248d14a848d1023ff0bec",
+      "size": 77304
+    },
+    "511770:7248423": {
+      "url": "https://edge.forgecdn.net/files/7248/423/drippyloadingscreen_fabric_3.1.0_MC_1.20.1.jar",
+      "sha256": "c62fe14d7881126bfd2186611a74e82f24339ae4981e18b6a260a89df843ff10",
+      "size": 280441
+    },
+    "514882:5762252": {
+      "url": "https://edge.forgecdn.net/files/5762/252/AdvancementPlaques-1.20.1-fabric-1.6.7.jar",
+      "sha256": "a162aa8d872f5327405ba1ce1d601a825eb36f530e61d5fcae6c8d83d7107d94",
+      "size": 194905
+    },
+    "518319:5065345": {
+      "url": "https://edge.forgecdn.net/files/5065/345/morechathistory-1.3.0.jar",
+      "sha256": "87dd00a8b62b10bed3bb201d5aaf220fd72a6d77ef284c1fc65ddb5e262d4c8c",
+      "size": 3546
+    },
+    "521126:4760021": {
+      "url": "https://edge.forgecdn.net/files/4760/21/visuality-0.7.1%2b1.20.jar",
+      "sha256": "f95afc78d944a06f807c683f5959878d8214d775cd81ecbbbc076fc43763202a",
+      "size": 67302
+    },
+    "521427:5821272": {
+      "url": "https://edge.forgecdn.net/files/5821/272/citresewn-1.2.2%2b1.20.1.jar",
+      "sha256": "1c5bb912a58b30ffabe554927903d8bf81f21fc922df6ba873fa37cb5881e903",
+      "size": 395586
+    },
+    "521480:7857554": {
+      "url": "https://edge.forgecdn.net/files/7857/554/skinlayers3d-fabric-1.11.1-mc1.20.1.jar",
+      "sha256": "a3b7d719eabfda8255904143662586a2a6dbcf6c226f75405e0f7fea7a40532b",
+      "size": 1973785
+    },
+    "525586:5271361": {
+      "url": "https://edge.forgecdn.net/files/5271/361/YungsBetterDungeons-1.20-Fabric-4.0.4.jar",
+      "sha256": "6c69fd0316c448cf9c70b72dbea424a85be881f9adc3e7a56e8f0b08e3611fff",
+      "size": 944170
+    },
+    "527023:5212742": {
+      "url": "https://edge.forgecdn.net/files/5212/742/eating-animation-1.20%2b1.9.61.jar",
+      "sha256": "ff8fe184b3104b94c9e10e751f5730d3b1fec19894179743a2447367cb752463",
+      "size": 1218710
+    },
+    "531351:5962874": {
+      "url": "https://edge.forgecdn.net/files/5962/874/continuity-3.0.0%2b1.20.1.jar",
+      "sha256": "fdb646bd51667c57e576d1412c740ac48e3bf6953294dde11a62101a09395fe3",
+      "size": 1016063
+    },
+    "532610:4749199": {
+      "url": "https://edge.forgecdn.net/files/4749/199/owo-lib-0.11.2%2b1.20.jar",
+      "sha256": "1c249c30d3e50bba5cb35e0c3acebf4bd5f969bd33402de2f3a6a619fd688d12",
+      "size": 905421
+    },
+    "532730:4601231": {
+      "url": "https://edge.forgecdn.net/files/4601/231/libraryferret-fabric-1.20.1-4.0.0.jar",
+      "sha256": "77f517ebd80de51f9f87ad9c4d922b34c40d7c5fb68aed6d974ceed0db61b86d",
+      "size": 172458
+    },
+    "533097:6181291": {
+      "url": "https://edge.forgecdn.net/files/6181/291/c2me-fabric-mc1.20.1-0.2.0%2balpha.11.16.jar",
+      "sha256": "a6c0f7fbc1b2a62cafe72a967165caeef0fb671b7e0d377bd60fbb1e7f724cde",
+      "size": 1426500
+    },
+    "533942:5796107": {
+      "url": "https://edge.forgecdn.net/files/5796/107/BridgingMod-2.5.1%2b1.20.1.fabric-release.jar",
+      "sha256": "72a5caa3c5289e759259d0fca66c6ec132f8b64365432df184e46e30bbcffdab",
+      "size": 3577394
+    },
+    "534748:6745820": {
+      "url": "https://edge.forgecdn.net/files/6745/820/superDuperVanilla.zip",
+      "sha256": "c1cd481ac7ec81b6cb82f162b235509568f6f1ab9e416ccfedaee15e79e1a795",
+      "size": 2851664
+    },
+    "535489:7032237": {
+      "url": "https://edge.forgecdn.net/files/7032/237/sound-physics-remastered-fabric-1.20.1-1.5.1.jar",
+      "sha256": "275467bef6e56aab50b0c66ed42b2984160d36c65edb1b986e3c7c81d37e9253",
+      "size": 205569
+    },
+    "537533:7979747": {
+      "url": "https://edge.forgecdn.net/files/7979/747/Ksyxis-1.4.3.jar",
+      "sha256": "23c8c5993004f0584eb27b19b4397b7aa8833f41b8f2d1ea201ee54a60f964b9",
+      "size": 26968
+    },
+    "538214:5118730": {
+      "url": "https://edge.forgecdn.net/files/5118/730/handcrafted-fabric-1.20.1-3.0.6.jar",
+      "sha256": "aa82c95a7394c5fd7278c8b89e3554bb24dae0c3e6e73282a7f19d8bb6bf4a71",
+      "size": 7106384
+    },
+    "539382:5838145": {
+      "url": "https://edge.forgecdn.net/files/5838/145/Iceberg-1.20.1-fabric-1.1.25.jar",
+      "sha256": "f142f15b72e36225b9828e5f44e8453e54a26a57048b12fe49ab8fb6476793f8",
+      "size": 119018
+    },
+    "547434:7260491": {
+      "url": "https://edge.forgecdn.net/files/7260/491/ForgeConfigAPIPort-v8.0.3-1.20.1-Fabric.jar",
+      "sha256": "337a8f6c5ba48ef3b3da828f4f6a75d0552ba33f48ce97d3195befdb570e427a",
+      "size": 396628
+    },
+    "547881:5401036": {
+      "url": "https://edge.forgecdn.net/files/5401/36/advancednetherite-fabric-2.1.3-1.20.1.jar",
+      "sha256": "bd4ae36027e7b21b97d18999b328631661e39acebb1ca164435940d1d1093a5f",
+      "size": 502658
+    },
+    "549404:7514252": {
+      "url": "https://edge.forgecdn.net/files/7514/252/Kiwi-1.20.1-Fabric-11.10.2.jar",
+      "sha256": "674a55952c2746b321cadf790c3a64b4ab728214420392513c422317012a32f6",
+      "size": 1548893
+    },
+    "551364:6354623": {
+      "url": "https://edge.forgecdn.net/files/6354/623/friendsandfoes-fabric-mc1.20.1-3.0.9.jar",
+      "sha256": "bc3f162d6a614fa0eb3e422ee97eba04ce76734ee1d504beec1183d8e9407238",
+      "size": 3615166
+    },
+    "558905:6041696": {
+      "url": "https://edge.forgecdn.net/files/6041/696/sodiumextras-fabric-1.0.7-1.20.1.jar",
+      "sha256": "c3b24e230beb1e69d6c11fe3d5c9f9683ffb141d696d60b8bf6c229b0aed5495",
+      "size": 630468
+    },
+    "563977:7253376": {
+      "url": "https://edge.forgecdn.net/files/7253/376/puzzle-fabric-2.2.0%2b1.20.1.jar",
+      "sha256": "b053ef8347a531c023abe32bd83eb7117911a28251a109d55cdedcef7601690f",
+      "size": 138689
+    },
+    "564941:4631405": {
+      "url": "https://edge.forgecdn.net/files/4631/405/ShowMeWhatYouGot-1.20-1.1.1.jar",
+      "sha256": "e2149f73148e4fff866800225db121088178252c468894f65cc5c628e2e68ac8",
+      "size": 27596
+    },
+    "566140:7469698": {
+      "url": "https://edge.forgecdn.net/files/7469/698/ExtremeSoundMuffler-3.51-fabric-1.20.1.jar",
+      "sha256": "1148388b8c78795233028ad59c86630dba60846a67369f2bcdd501aef2f9141e",
+      "size": 473671
+    },
+    "570073:5659872": {
+      "url": "https://edge.forgecdn.net/files/5659/872/resourcefullib-fabric-1.20.1-2.1.29.jar",
+      "sha256": "2543d76f4f440d4401dccf7675f836381260919f0ac884e2696ae67e600adeeb",
+      "size": 431646
+    },
+    "570431:6497872": {
+      "url": "https://edge.forgecdn.net/files/6497/872/trade-cycling-fabric-1.20.1-1.0.18.jar",
+      "sha256": "d249a9217f7d478f60dfcf3340e4dd83c090992cf4984b744513057f3616570a",
+      "size": 430650
+    },
+    "571336:5876592": {
+      "url": "https://edge.forgecdn.net/files/5876/592/SimpleCopperPipes-mc1.20.1-2.0.3.jar",
+      "sha256": "c5fe0277e5fd9957cc9fe8ac3920cde5ab53c55393e6bd4362780f8261d20a5f",
+      "size": 1685617
+    },
+    "573127:6294278": {
+      "url": "https://edge.forgecdn.net/files/6294/278/securecrops-2.0.0%2b1.20.x.jar",
+      "sha256": "27cf6e57367f5815a9b1c5ed18d32fd985420321937b44ca937e445ff06cfb8d",
+      "size": 141159
+    },
+    "574741:7463100": {
+      "url": "https://edge.forgecdn.net/files/7463/100/zoomify-2.15.1%2b1.20.1.jar",
+      "sha256": "05908102a0609be8809358c4a1aed825d443c6363129d6c5374f2e634f5e1f19",
+      "size": 872547
+    },
+    "575305:4607750": {
+      "url": "https://edge.forgecdn.net/files/4607/750/FauxCustomEntityData-fabric-1.20.1-6.0.1.jar",
+      "sha256": "e46350f4769d53647fc1371f65a2a39ad7bc3c552423c4e42a06804eb6f40049",
+      "size": 16177
+    },
+    "580136:5698979": {
+      "url": "https://edge.forgecdn.net/files/5698/979/questsadditions-fabric-1.20.1-1.4.6.jar",
+      "sha256": "67ca16130266e1d53973c4ae32e7354de4d2da7814aede0e1b373590d82ce349",
+      "size": 129275
+    },
+    "580294:4632294": {
+      "url": "https://edge.forgecdn.net/files/4632/294/crops_love_rain-1.4.0.jar",
+      "sha256": "91078f183a88e1ff7a5a7b57bfd8ba1fdef54e3a0465b47f8949c86de79d6afa",
+      "size": 590365
+    },
+    "585548:7205249": {
+      "url": "https://edge.forgecdn.net/files/7205/249/BHMenu-Fabric-1.20.1-2.4.2.jar",
+      "sha256": "f28a021a0b433eb5ab97ac98deba35468f02ef61cec87618341f2fc3a57ec60f",
+      "size": 200712
+    },
+    "586157:5772682": {
+      "url": "https://edge.forgecdn.net/files/5772/682/Necronomicon-Fabric-1.6.0%2b1.20.1.jar",
+      "sha256": "8239b393bfc5a7fd3209713745c88e6da13859cf3e64a36d175c7dc5a8519e60",
+      "size": 37533
+    },
+    "590988:4769520": {
+      "url": "https://edge.forgecdn.net/files/4769/520/YungsBridges-1.20-Fabric-4.0.3.jar",
+      "sha256": "9a4548727fd22fd06efa5a70b4bda0231249be107aa5b91acc615981d558ebb0",
+      "size": 266481
+    },
+    "590990:5065826": {
+      "url": "https://edge.forgecdn.net/files/5065/826/TravelersTitles-1.20-Fabric-4.0.2.jar",
+      "sha256": "9b77eb5dc1a6f4be31ca91f84e4dcdac746c2909fb00fe328390a1b4f044e567",
+      "size": 345764
+    },
+    "590993:4769515": {
+      "url": "https://edge.forgecdn.net/files/4769/515/YungsExtras-1.20-Fabric-4.0.3.jar",
+      "sha256": "1765d0885e8ebe530ae81f2b2ae3d6d93c842bb04e03bdbde00f2b45c918c97a",
+      "size": 342639
+    },
+    "591388:5351562": {
+      "url": "https://edge.forgecdn.net/files/5351/562/Incendium_1.20.x_v5.3.5.jar",
+      "sha256": "96068e4d66ea503efebb1e31d28c2d6ce85db749049463cab9f799c8c0ae1e75",
+      "size": 4638945
+    },
+    "594013:4699172": {
+      "url": "https://edge.forgecdn.net/files/4699/172/UniversalBoneMeal-v8.0.1-1.20.1-Fabric.jar",
+      "sha256": "e2b62667c58fba965d4056a2bd500ca59b24fb702dcd970922ba83a432526852",
+      "size": 80819
+    },
+    "596224:4632961": {
+      "url": "https://edge.forgecdn.net/files/4632/961/Debugify-1.20.1%2b2.0.jar",
+      "sha256": "c61b78a7609c989578e98837047bc026d32654a0ad55f9118bb35f295536949d",
+      "size": 337545
+    },
+    "597248:5256598": {
+      "url": "https://edge.forgecdn.net/files/5256/598/duckling-fabric-1.20.4-4.0.0.jar",
+      "sha256": "1371516bf4171bb350e1294648ea328c5e3c0b693c93ec9a0eded411990d16f3",
+      "size": 519418
+    },
+    "60089:5230279": {
+      "url": "https://edge.forgecdn.net/files/5230/279/MouseTweaks-fabric-mc1.20-2.26.jar",
+      "sha256": "1eb9f0c7878598a3a7dfb52cd0e8159ebf8b33b04e6df232534fed2fbb6616e4",
+      "size": 77943
+    },
+    "602199:5385602": {
+      "url": "https://edge.forgecdn.net/files/5385/602/radiantgear-fabric-2.1.6%2b1.20.1.jar",
+      "sha256": "73ed42878d009d9127bcbbf322de57c19f798bae0212d860d8bd301352d7f350",
+      "size": 33078
+    },
+    "615106:7266482": {
+      "url": "https://edge.forgecdn.net/files/7266/482/lootr-fabric-1.20-0.7.35.86.jar",
+      "sha256": "153d74d44bc0fb13dc2fd38b011df7218f29f611c609826a1abc916e5d2d2f9d",
+      "size": 575601
+    },
+    "622010:5276058": {
+      "url": "https://edge.forgecdn.net/files/5276/58/show-me-your-skin-1.9.0%2b1.20.jar",
+      "sha256": "7145f140d00c7d58bf73fb2d1cd161d22df450aa1cc87a136df51fdc1192b100",
+      "size": 262295
+    },
+    "622967:7354935": {
+      "url": "https://edge.forgecdn.net/files/7354/935/Ribbits-1.20.1-Fabric-3.0.5.jar",
+      "sha256": "cc5863afb0b164669df77726cb6b6dc108523801f1fa4ce859471afc7f3ab0ab",
+      "size": 2331082
+    },
+    "623560:4582965": {
+      "url": "https://edge.forgecdn.net/files/4582/965/Log-Begone-Fabric-1.20.1-1.0.8.jar",
+      "sha256": "3c19307940567406c816cc4e531032c49eca57a8a3c8af3469778cdc5f34c4c9",
+      "size": 126944
+    },
+    "623764:7766757": {
+      "url": "https://edge.forgecdn.net/files/7766/757/jamlib-fabric-1.3.6%2b1.20.1.jar",
+      "sha256": "e50f5f66160eba9aa18c26143e97690c2d28eefe3e3b5070a0693b134904a553",
+      "size": 239867
+    },
+    "624165:7286603": {
+      "url": "https://edge.forgecdn.net/files/7286/603/create-fabric-6.0.8.1%2bbuild.1744-mc1.20.1.jar",
+      "sha256": "a613603fb08d967c5a4138d1adb7374c4a347b91e489fe21579a4cff4f40105a",
+      "size": 32189889
+    },
+    "626761:4923828": {
+      "url": "https://edge.forgecdn.net/files/4923/828/Towns-and-Towers-1.12-Fabric%2bForge.jar",
+      "sha256": "9c8115af7109579da990249fdd67b38323a45be70f8a3a962b61da69c7021984",
+      "size": 2864275
+    },
+    "627242:6610716": {
+      "url": "https://edge.forgecdn.net/files/6610/716/no-resource-pack-warnings-1.3.1.jar",
+      "sha256": "c3542072d9f3b52579a8d5b971daee5a489d326018b5af2081479d8e606f68ea",
+      "size": 5002
+    },
+    "628744:5820957": {
+      "url": "https://edge.forgecdn.net/files/5820/957/YouShallNotSpawn-fabric-1.20.x-2.0.2.jar",
+      "sha256": "48c3fd6a8d2a4bcc09783af85bc349064904dd5958214a6ccccd34d906392586",
+      "size": 218617
+    },
+    "628972:5281259": {
+      "url": "https://edge.forgecdn.net/files/5281/259/farmersknives-3.2.jar",
+      "sha256": "807b1bea8921fd9350832150d5ae06b84c7bec9d7eaa5bc0401e0d39d1e506a9",
+      "size": 103203
+    },
+    "629153:7029498": {
+      "url": "https://edge.forgecdn.net/files/7029/498/mcw-mcwpaths-1.1.1-mc1.20.1fabric.jar",
+      "sha256": "5a462e3aa88a0fa21bf1be3ffece57928316128a8e29ccbb8db3d7c5276deb07",
+      "size": 769476
+    },
+    "630104:7552138": {
+      "url": "https://edge.forgecdn.net/files/7552/138/moreculling-1.20.1-0.24.5.jar",
+      "sha256": "23b2e5f25f0f250e3c359c3f1478289430ab99347e04176e8ea51a247cda3210",
+      "size": 274506
+    },
+    "631990:7598406": {
+      "url": "https://edge.forgecdn.net/files/7598/406/simplehats-fabric-1.20.1-0.4.0a.jar",
+      "sha256": "97ef5fcce8076f1c5f998e9b178dfa414c64756afbb19fdf359e40df6050d276",
+      "size": 1400092
+    },
+    "634005:7671378": {
+      "url": "https://edge.forgecdn.net/files/7671/378/sootychimneys-fabric-1.20.1-1.3.4.jar",
+      "sha256": "1fbbedcdc4f9cbcb1e9d422c854d3c86fe0e0e1c0e0e5664512b4031f4b3ed33",
+      "size": 177131
+    },
+    "634062:4610472": {
+      "url": "https://edge.forgecdn.net/files/4610/472/NoChatReports-FABRIC-1.20.1-v2.2.2.jar",
+      "sha256": "8ff70525b0fbc5fa7592424872aa8092db1f7646d53817590bd9f9b88c75babc",
+      "size": 619812
+    },
+    "636608:7987206": {
+      "url": "https://edge.forgecdn.net/files/7987/206/open-parties-and-claims-fabric-1.20.1-0.26.2.jar",
+      "sha256": "32626bba1295cefb4dc8ef36b203e71c1eb93cb130bc6343005821180ed807e7",
+      "size": 1648013
+    },
+    "643052:3942300": {
+      "url": "https://edge.forgecdn.net/files/3942/300/MixinConflictHelper-1.2.0.jar",
+      "sha256": "4d6337d2220d6c26581352f25a2b4eebc0717bd3731fbcd1865e2277dee604ba",
+      "size": 171690
+    },
+    "655619:4589736": {
+      "url": "https://edge.forgecdn.net/files/4589/736/better_climbing-fabric-3.jar",
+      "sha256": "5a5edf3769d375bb04782cd42364bf86beff74fc253676bdb86065420cf27379",
+      "size": 12179
+    },
+    "656346:4662635": {
+      "url": "https://edge.forgecdn.net/files/4662/635/lmft-1.0.2%2b1.20-fabric.jar",
+      "sha256": "1a145a0ce7654de710082c73b0eb172a44a098288403582103961a54430a52a3",
+      "size": 179899
+    },
+    "656398:5504402": {
+      "url": "https://edge.forgecdn.net/files/5504/402/Celestial%20Configuration-fabric-1.20.1-1.1.1.jar",
+      "sha256": "e94d4e20f386b111d606e6fac4f88c20b10b5ac614b3508a10428c5045011c74",
+      "size": 137613
+    },
+    "656665:7269284": {
+      "url": "https://edge.forgecdn.net/files/7269/284/JadeAddons-1.20.1-Fabric-5.5.1.jar",
+      "sha256": "6b607c4bf13a1b03a228e4b64a3a300301f600d2c793efff63bc9c4d3ac2ae7e",
+      "size": 93694
+    },
+    "659011:7796915": {
+      "url": "https://edge.forgecdn.net/files/7796/915/deeperdarker-fabric-1.20-1.3.3-plus-b.jar",
+      "sha256": "a031f24d430c3485487499e8ab79e580dfff03aa39e93a33c742f7b5a256a335",
+      "size": 17962329
+    },
+    "659110:5558172": {
+      "url": "https://edge.forgecdn.net/files/5558/172/RegionsUnexploredFabric-0.5.6%2b1.20.1.jar",
+      "sha256": "d24dc3a6a08432d51d042750fe50a6c5051f9d0c725cfc434cf9ce6eb8b7e332",
+      "size": 5689530
+    },
+    "659674:7783826": {
+      "url": "https://edge.forgecdn.net/files/7783/826/sliceanddice-fabric-3.5.2.jar",
+      "sha256": "635a9f9595866dce034fda201bf8b4633660b8a259d67426e336d8b9e96691a0",
+      "size": 395717
+    },
+    "662675:5891365": {
+      "url": "https://edge.forgecdn.net/files/5891/365/ends_delight-refabricated-1.20.1-2.5.jar",
+      "sha256": "33269eebbfd99daa3df1c75ccb736e4fa114cd6f81869be7939f34475dc743fb",
+      "size": 272974
+    },
+    "662763:4777256": {
+      "url": "https://edge.forgecdn.net/files/4777/256/convenientnametags-1.1.0.jar",
+      "sha256": "76e652d5625d033565479807ac688ae7e880c4e52dfabf6a6b80646c34a5dc04",
+      "size": 96289
+    },
+    "663477:6311225": {
+      "url": "https://edge.forgecdn.net/files/6311/225/letmedespawn-1.20.x-fabric-1.5.0.jar",
+      "sha256": "6fa924944e2adf5f6fabc7b29980c1ec6bbe02cb58646f32e544d066e91e8593",
+      "size": 14607
+    },
+    "663567:5700925": {
+      "url": "https://edge.forgecdn.net/files/5700/925/mythicupgrades-4.2.0%2bmc1.20.1.jar",
+      "sha256": "7a2c95129d7375f67ee9f0f3c848d6a7d055df17a7acc32f2bba86c1ad049599",
+      "size": 1380130
+    },
+    "665526:4650327": {
+      "url": "https://edge.forgecdn.net/files/4650/327/Prism-1.20.1-fabric-1.0.5.jar",
+      "sha256": "dbe3ec8d19c75a1b04ebfdc93dc37f084d1b283568673ce3e4cc2ab9cff7c348",
+      "size": 57257
+    },
+    "667299:6336639": {
+      "url": "https://edge.forgecdn.net/files/6336/639/yet_another_config_lib_v3-3.6.6%2b1.20.1-fabric.jar",
+      "sha256": "7a2389ca436ea8f7abee787d6373f9526deece5d06785f3623b7fe89bd9b31ac",
+      "size": 1294234
+    },
+    "667884:3995206": {
+      "url": "https://edge.forgecdn.net/files/3995/206/logcleaner-1.0.0.jar",
+      "sha256": "ddd524aa21ed0053f149f45b8cc6212c1be718c65aef96db88a4f0354c61e798",
+      "size": 5008
+    },
+    "678856:7560835": {
+      "url": "https://edge.forgecdn.net/files/7560/835/fetzisasiandeco-fabric-1.7.3-1.20.1.jar",
+      "sha256": "572f2f42fe2fc53b6d009fed982cb79d87ddc4118079c0b2bc3b2fe06ec53f3d",
+      "size": 17585314
+    },
+    "681606:6358768": {
+      "url": "https://edge.forgecdn.net/files/6358/768/justhammers-fabric-20.1.5%2bmc1.20.1.jar",
+      "sha256": "7c566bdc6d18af12ba9160a7469526ac815be2c3f5e75accb673261b79fcbc65",
+      "size": 90255
+    },
+    "682213:8030639": {
+      "url": "https://edge.forgecdn.net/files/8030/639/mcpitanlib-3.6.8-1.20.1-fabric.jar",
+      "sha256": "f01660a2fabeb9ede59346779a9cbf81f75498f0ce4b587534b9df29ae0e985b",
+      "size": 2700309
+    },
+    "682566:5242481": {
+      "url": "https://edge.forgecdn.net/files/5242/481/ArmorStatues-v8.0.6-1.20.1-Fabric.jar",
+      "sha256": "43c8dfdd518947ecd677f95e65a4da932c691885eeaa8b924606fc1c39a37924",
+      "size": 574046
+    },
+    "686836:7197833": {
+      "url": "https://edge.forgecdn.net/files/7197/833/tectonic-3.0.17-fabric-1.20.1.jar",
+      "sha256": "ff333d025314842ef5b9a7528be9f21b418a8f11d90a3bc50000544432c2830c",
+      "size": 319868
+    },
+    "686911:7537757": {
+      "url": "https://edge.forgecdn.net/files/7537/757/ImmediatelyFast-Fabric-1.5.4%2b1.20.4.jar",
+      "sha256": "cbb4ca2f6fda0c0b7e4bec16f34bbff7661d989a443029f40bbf5393a76e53b4",
+      "size": 354883
+    },
+    "688223:6201652": {
+      "url": "https://edge.forgecdn.net/files/6201/652/labels-1.20-2.0.0-fabric.jar",
+      "sha256": "8ef56bc24c7e0fd69b5debe852688867b70a4da385274e6b6daa4435e2f4255c",
+      "size": 261950
+    },
+    "688231:7758638": {
+      "url": "https://edge.forgecdn.net/files/7758/638/Steam_Rails-1.7.2%2bfabric-mc1.20.1.jar",
+      "sha256": "a1204d76be4771778411c5def98ff3bcbe9869f12698ed9ce6795e93e6b49afe",
+      "size": 16863902
+    },
+    "688480:4032019": {
+      "url": "https://edge.forgecdn.net/files/4032/19/extra_thicc_packets-1.0.jar",
+      "sha256": "80ec0a7056b77fb1e0001a015a7d31374eee670ef4478aad26954d81b83b55f5",
+      "size": 7188
+    },
+    "689467:7872374": {
+      "url": "https://edge.forgecdn.net/files/7872/374/packetfixer-3.3.2-1.18-1.20.4-merged.jar",
+      "sha256": "12f96ecb8e61e0b3d3f0ca5701f479904904501dd251aa7bb60205afdf6bc2ce",
+      "size": 188661
+    },
+    "693313:6616780": {
+      "url": "https://edge.forgecdn.net/files/6616/780/Corgilib-Fabric-1.20.1-4.0.3.4.jar",
+      "sha256": "bdee50c14dd42b5b085fec7012ad7272ffd4e051161c0a6739275f2e77f54f3b",
+      "size": 741175
+    },
+    "693961:5324551": {
+      "url": "https://edge.forgecdn.net/files/5324/551/screenshot_viewer-1.3.1-fabric-mc1.20.jar",
+      "sha256": "f495283b5613796cbe85d7a348380014648f5cf21a7f903d5ca43a5d79a34c71",
+      "size": 270052
+    },
+    "697845:4797428": {
+      "url": "https://edge.forgecdn.net/files/4797/428/fsb-interop-1.3.6%2bmc1.20.1-build.50.jar",
+      "sha256": "17bec23a0a6d67bcaa4d056cd7b8938ba1c00f40b095cfa39c570a3f3b0d8b46",
+      "size": 49495
+    },
+    "699872:4863305": {
+      "url": "https://edge.forgecdn.net/files/4863/305/accelerated-decay-fabric-3.0.1%2bmc1.20.1.jar",
+      "sha256": "094f49fd6b4878c8324499ef152d66a2cace4ab4cdefb6ed0a8847ff4ffe072d",
+      "size": 9969
+    },
+    "704465:6965753": {
+      "url": "https://edge.forgecdn.net/files/6965/753/letsdo-vinery-fabric-1.4.41.jar",
+      "sha256": "d9a64ee64b2c618e6b4ca15963c1998d2ee20769b74784ea1081741be58275af",
+      "size": 3043160
+    },
+    "708967:4739523": {
+      "url": "https://edge.forgecdn.net/files/4739/523/fastquit-3.0.0%2b1.20%2b.jar",
+      "sha256": "6c07d505a7c7435c9813edf68103c8320e37c20daf95418d508aac2681212a78",
+      "size": 79306
+    },
+    "709773:5876579": {
+      "url": "https://edge.forgecdn.net/files/5876/579/FrozenLib-1.9.3-mc1.20.1.jar",
+      "sha256": "2fb831d9da0f5ef0dcefc36412f3784081e2070a984aefc076010800c7b622b6",
+      "size": 1465505
+    },
+    "709964:5240476": {
+      "url": "https://edge.forgecdn.net/files/5240/476/mavapi-1.1.4-mc1.20.1.jar",
+      "sha256": "4b4948fe9af6c9d94f1d27f0957beea0d855ca92cfe370170664c2ebaef62311",
+      "size": 592470
+    },
+    "711216:8074028": {
+      "url": "https://edge.forgecdn.net/files/8074/28/Geophilic%20v3.5.mod.jar",
+      "sha256": "746f80243c54236983145c0c1efa96e8014b5b536b6dcc3e213352367e6bc4d0",
+      "size": 2616562
+    },
+    "714059:6223996": {
+      "url": "https://edge.forgecdn.net/files/6223/996/resourcefulconfig-fabric-1.20.1-2.1.3.jar",
+      "sha256": "f8fbad0b2ab07ccaffce53a9d835601b41ab013af8a501af4de56b3958d1182a",
+      "size": 135078
+    },
+    "736986:7335194": {
+      "url": "https://edge.forgecdn.net/files/7335/194/chefs-delight-1.0.4-fabric-1.20.1.jar",
+      "sha256": "ce806d8939d121a650975aa6b9dad9591ea927371e494fab9b54a1bd9f32f54f",
+      "size": 118215
+    },
+    "738663:5759900": {
+      "url": "https://edge.forgecdn.net/files/5759/900/Not%20Enough%20Recipe%20Book-FABRIC-0.4.1%2b1.20.1.jar",
+      "sha256": "d682d4f8e8c9ed3f98170ab857610baaa8ad45c5a0113fd35fc00a91e29f5bc7",
+      "size": 21366
+    },
+    "739872:7721695": {
+      "url": "https://edge.forgecdn.net/files/7721/695/createdeco-2.1.1-1.20.1-fabric.jar",
+      "sha256": "7a72ee9c8da0b478256263c1e75ad4541b902cffb3c314bdb91850ead6fcfd4a",
+      "size": 3492044
+    },
+    "790339:4580836": {
+      "url": "https://edge.forgecdn.net/files/4580/836/blahaj-fabric-1.20.0-0.3.2.jar",
+      "sha256": "96e7ad4bc85237bcd8a5850cb21bc1e02dc9e5467d6fdde6ba2188315b845ca3",
+      "size": 36285
+    },
+    "790530:6122070": {
+      "url": "https://edge.forgecdn.net/files/6122/70/spelunkery-1.20.1-0.3.16-fabric.jar",
+      "sha256": "72022d184198ecc45602a99f419e96273a6b2f7d7066dd5c4e4070ceb6976f10",
+      "size": 2726891
+    },
+    "790626:7306748": {
+      "url": "https://edge.forgecdn.net/files/7306/748/modernfix-fabric-5.25.2%2bmc1.20.1.jar",
+      "sha256": "5c1f852046e62a17056bb6b571164e61644076c5eb9029c92b31e337cc62c0d9",
+      "size": 545175
+    },
+    "809311:7554172": {
+      "url": "https://edge.forgecdn.net/files/7554/172/beautify-2.0.0%2b1.20.1.jar",
+      "sha256": "fdbc81a7d519fcd05616ef6acd24727a4d6d2e320be48d32015c68d956ef8454",
+      "size": 836227
+    },
+    "809542:4996993": {
+      "url": "https://edge.forgecdn.net/files/4996/993/VillagersPlus_3.1_(FABRIC)_for_1.20.1.jar",
+      "sha256": "f86abec4f7960b277492ae2d66d0a0eb164cfe3f46af4088380b7eab7b3b6122",
+      "size": 356336
+    },
+    "817423:7084469": {
+      "url": "https://edge.forgecdn.net/files/7084/469/azurelib-fabric-1.20.1-3.0.27.jar",
+      "sha256": "503f54351ebac2eabf31ab47364aad4a7ed1d4fc2bb5f93bc443735456f1e5b3",
+      "size": 1367955
+    },
+    "817666:5193464": {
+      "url": "https://edge.forgecdn.net/files/5193/464/YungsBetterNetherFortresses-1.20-Fabric-2.0.6.jar",
+      "sha256": "93e0e537fcf20b18c0ea340e6d4f2c20225a29c45252b9cf78e205107ab4f03a",
+      "size": 760974
+    },
+    "821483:6467345": {
+      "url": "https://edge.forgecdn.net/files/6467/345/letsdo-meadow-fabric-1.3.25.jar",
+      "sha256": "0475ef8cde12bf84779546fbcc7be5970ef3ec9df756eba42720a6cf4b8ab956",
+      "size": 2658744
+    },
+    "826060:7361352": {
+      "url": "https://edge.forgecdn.net/files/7361/352/clutter-1.20-0.6.2.jar",
+      "sha256": "677f96aca1ce52f479e052ae5bcdc005c28dbcbfd61ccf1c2d38cc99def47c54",
+      "size": 5315683
+    },
+    "826308:4756831": {
+      "url": "https://edge.forgecdn.net/files/4756/831/Cluttered-2.1.0-1.20.1%5bFabric%5d.jar",
+      "sha256": "452842ccd91866fb6b8051239673c9907d7c38a576c0506d0018e75b0ed5d888",
+      "size": 5363792
+    },
+    "828331:7349610": {
+      "url": "https://edge.forgecdn.net/files/7349/610/gliders-fabric-1.2.0.jar",
+      "sha256": "6ccd3cb3c102310e16ca6b4b88163c20ac81aef3f77afa8b23ac27ab7fc4d747",
+      "size": 839830
+    },
+    "833233:5423271": {
+      "url": "https://edge.forgecdn.net/files/5423/271/rrls-4.0.6.1%2bmc1.20.1-fabric.jar",
+      "sha256": "da477c897a8bc0e080aa1e00b813c1d4bba26af80be2dbda10afd12a0ca40115",
+      "size": 160946
+    },
+    "835861:5424643": {
+      "url": "https://edge.forgecdn.net/files/5424/643/Item_Obliterator-MC1.20.1-Fabric_Quilt-2.3.0.jar",
+      "sha256": "64bf81726963996f1c3e1404e9058c352daf6bcdf96f931f75da66a2869cb9c2",
+      "size": 28620
+    },
+    "838411:7440332": {
+      "url": "https://edge.forgecdn.net/files/7440/332/suppsquared-1.20-1.1.29.jar",
+      "sha256": "910e2468373c54eab7f3be5db4dcdf432d2b2e3309f020c66f6b0e1ade3cb70c",
+      "size": 761615
+    },
+    "840896:5511110": {
+      "url": "https://edge.forgecdn.net/files/5511/110/StackDeobfuscatorFabric-1.4.3%2b08e71cc.jar",
+      "sha256": "335627367b8212c17e58978866874ede8d0d9a159053fbb38e56123fff83d0f9",
+      "size": 321213
+    },
+    "841262:5230028": {
+      "url": "https://edge.forgecdn.net/files/5230/28/oceansdelight-fdrf-fabric-1.0.2-1.20.jar",
+      "sha256": "c87de6e5cd772c65d5f79e8b8fcbe04e6bad0e29b5caffde1141c59e9fde2754",
+      "size": 97109
+    },
+    "841890:5176880": {
+      "url": "https://edge.forgecdn.net/files/5176/880/athena-fabric-1.20.1-3.1.2.jar",
+      "sha256": "da18e81a3b72263a67c40e325537c587b48fff2fabb625c612ca4d7c2f386ecd",
+      "size": 74370
+    },
+    "843344:5892154": {
+      "url": "https://edge.forgecdn.net/files/5892/154/DustyDecoRefabricated-1.1-1.20.1%2b1.20.2.jar",
+      "sha256": "caf67b644971dd3d069b0508541781a3b0c2bde638f831bbfcaec273ed20987d",
+      "size": 450672
+    },
+    "847059:7007608": {
+      "url": "https://edge.forgecdn.net/files/7007/608/alcocraftplus-1.20-2.1.0-fabric.jar",
+      "sha256": "d551037847b838c36c77bb3c6fa08be71d25d13765376e82d36dd2fd646eb43b",
+      "size": 277122
+    },
+    "849364:5310270": {
+      "url": "https://edge.forgecdn.net/files/5310/270/hearth_and_home-fabric-1.20.1-2.0.3.jar",
+      "sha256": "772066b64640ec64fc360fc82200234869296f5bb4f77497370e581b3b834241",
+      "size": 1174045
+    },
+    "851046:8020270": {
+      "url": "https://edge.forgecdn.net/files/8020/270/neruina-3.3.1%2b1.20.1-fabric.jar",
+      "sha256": "004004154f8c266d9ef3cf37203c652f8406c3a950718e8f5b8efd3bbf058693",
+      "size": 855759
+    },
+    "856996:4861834": {
+      "url": "https://edge.forgecdn.net/files/4861/834/cristellib-1.1.5-fabric.jar",
+      "sha256": "6d4e73a95e7bee1e0f9b2a531d40fcc255490c064f4607f58d11f48c4c61101b",
+      "size": 431581
+    },
+    "858691:6849933": {
+      "url": "https://edge.forgecdn.net/files/6849/933/letsdo-beachparty-fabric-2.0.3.jar",
+      "sha256": "2997630dc7dc158486acc4906ccc3e19e781f23e5f4216e028683ff472ee9653",
+      "size": 7420462
+    },
+    "861310:4535395": {
+      "url": "https://edge.forgecdn.net/files/4535/395/fadeless-1.0.1.jar",
+      "sha256": "4a854afa0ca3fbc6e942ee1e4a2e94335d517c276bf7989684c07612f0e7ac77",
+      "size": 7876
+    },
+    "864599:5468180": {
+      "url": "https://edge.forgecdn.net/files/5468/180/letsdo-API-fabric-1.2.15-fabric.jar",
+      "sha256": "fdf4208313555faa7af4ec7bf3bfb9eaf790f2924e442d6d28801ae05883325e",
+      "size": 1702813
+    },
+    "867099:7949711": {
+      "url": "https://edge.forgecdn.net/files/7949/711/CraterLib-Fabric-1.20-3.1.1.jar",
+      "sha256": "a73092ce494fa3270ef5370684fe9a6a395d260f61be9523382ef4de82a2afbc",
+      "size": 1357593
+    },
+    "867232:6675234": {
+      "url": "https://edge.forgecdn.net/files/6675/234/perfectplushies-fabric-1.20.1-1.13.3.jar",
+      "sha256": "c9f35d3fc2fae0fa9bb4c6a5946c67a7bab899ac072c06a4c8b247089bbc9243",
+      "size": 1271342
+    },
+    "877553:6563192": {
+      "url": "https://edge.forgecdn.net/files/6563/192/Eldritch_End-FABRIC-MC1.20.1-0.3.4.jar",
+      "sha256": "ec2431606d5589da907c87b34eadcbbf5d37c0f4bf278f004cf2ab225064c75d",
+      "size": 5293865
+    },
+    "880630:6231029": {
+      "url": "https://edge.forgecdn.net/files/6231/29/fallingtrees-fabric-mc1.20-0.13.2-SNAPSHOT.jar",
+      "sha256": "1a476ff6090341ecbede1c3fffc34aa421848870c72b14aaffdd4c1807f8ea4a",
+      "size": 4023370
+    },
+    "889915:6402485": {
+      "url": "https://edge.forgecdn.net/files/6402/485/ftb-xmod-compat-fabric-2.1.3.jar",
+      "sha256": "73c7ffc6ffd38da1e62cf15015ead6cc50900daf6d5a61d84aacf3c670ddc9ee",
+      "size": 131086
+    },
+    "891328:5918169": {
+      "url": "https://edge.forgecdn.net/files/5918/169/DiagonalWindows-v8.1.5-1.20.1-Fabric.jar",
+      "sha256": "c64343bf1b7132d71ff4e5904ac6aebefd770256480adc0e8472fdc5e18f4376",
+      "size": 167797
+    },
+    "891880:5944710": {
+      "url": "https://edge.forgecdn.net/files/5944/710/tidal-towns-1.3.4.jar",
+      "sha256": "cb4f6b0c415b929121f50071941a14f4772665f4f4e37f9f8f17778d328ebab1",
+      "size": 110098
+    },
+    "896219:4693387": {
+      "url": "https://edge.forgecdn.net/files/4693/387/JustOutdoorStuffs-1.20.1-fabric-v1.0.2.jar",
+      "sha256": "9708b1eadbde03c26697b85826d6706b351cae7474bf8a7b91b59ceac81cae69",
+      "size": 512078
+    },
+    "896746:7470400": {
+      "url": "https://edge.forgecdn.net/files/7470/400/amendments-1.20-2.2.5-fabric.jar",
+      "sha256": "2324ed590eb33884eb9153a8f893030bfd9f194406579e18968391eb094e1341",
+      "size": 1266546
+    },
+    "899386:8017465": {
+      "url": "https://edge.forgecdn.net/files/8017/465/justenoughbreeding-fabric-1.20.1-3.0.0.jar",
+      "sha256": "b6a39e5df1bb1e4abc6d18d54565ae1cc0d195f7f7a23c91230acc3b50c5d456",
+      "size": 261540
+    },
+    "900093:7004134": {
+      "url": "https://edge.forgecdn.net/files/7004/134/niftycarts-20.1.5.jar",
+      "sha256": "265cbf9d0e75ddd5047a6c874006e7cc86550d2de789d6d4e60dec2d77ff21b1",
+      "size": 575758
+    },
+    "901350:5193816": {
+      "url": "https://edge.forgecdn.net/files/5193/816/YungsBetterEndIsland-1.20-Fabric-2.0.6.jar",
+      "sha256": "8e6183a380c17677d23d5d7790d04bf18589ed12867460ece32327e8765046fa",
+      "size": 517369
+    },
+    "908418:5041738": {
+      "url": "https://edge.forgecdn.net/files/5041/738/darksmelting-fabric-1.20.1-1.0.6.jar",
+      "sha256": "8a66832e2125254515923d7a709aaf4b6605593182699157ecf2cbd42b65a7ff",
+      "size": 4773
+    },
+    "911437:6453963": {
+      "url": "https://edge.forgecdn.net/files/6453/963/sparsestructures-fabric-1.20.1-3.0.jar",
+      "sha256": "faf5a806fe2ce4438b9c0e5cc9d32b31a7bb4f66f8d6f6235a2e3b908e69262b",
+      "size": 123939
+    },
+    "912121:5559269": {
+      "url": "https://edge.forgecdn.net/files/5559/269/fasterrandom-5.1.0.jar",
+      "sha256": "40b326e9c98610b54be67751e618193e671cc907240d94a57085259b10cedf08",
+      "size": 20697
+    },
+    "914586:4758379": {
+      "url": "https://edge.forgecdn.net/files/4758/379/modmenu-badges-lib-2023.6.1.jar",
+      "sha256": "12af314796682fb98e19105d91c58ae9798e3c19173410e0729b751477cc953d",
+      "size": 5221
+    },
+    "915531:5933315": {
+      "url": "https://edge.forgecdn.net/files/5933/315/villagesandpillages-fabric-mc1.20.1-1.0.2.jar",
+      "sha256": "a3c2b7d9430c1e0ed436a645a5a5bc4bde44f217474351a0d92975c581c6a6a8",
+      "size": 241108
+    },
+    "915902:7624105": {
+      "url": "https://edge.forgecdn.net/files/7624/105/EuphoriaPatcher-1.8.6-r5.7.1-fabric.jar",
+      "sha256": "9ebe1de226413858a08d9272511366e63f327bbf4d2b8f0c960234fc8bbca277",
+      "size": 2827550
+    },
+    "916747:6274626": {
+      "url": "https://edge.forgecdn.net/files/6274/626/OctoLib-FABRIC-0.5.0.1%2b1.20.1.jar",
+      "sha256": "cfa75c8b7ca08a175332ea66a427e95748389de019a6fcf7fc5852b104ffcc51",
+      "size": 424020
+    },
+    "930232:7304403": {
+      "url": "https://edge.forgecdn.net/files/7304/403/mcw-holidays-1.1.2-mc1.20.1fabric.jar",
+      "sha256": "6550644fb00215d70456be4ad6e6a2192b246f39c944ac921c6968baf8296097",
+      "size": 1006067
+    },
+    "935694:4861638": {
+      "url": "https://edge.forgecdn.net/files/4861/638/spawn-1.0.3-fabric.jar",
+      "sha256": "4105e9cc177ffee6ab3a0be74724d920e69bd8c1631346df5b7931024713dad1",
+      "size": 7070089
+    },
+    "936015:6742616": {
+      "url": "https://edge.forgecdn.net/files/6742/616/lithostitched-fabric-1.20.1-1.4.11.jar",
+      "sha256": "78c13369bd34be50faee673a0618871bb9314443fcd506d8bf5457c3f95d02c4",
+      "size": 487655
+    },
+    "938643:5139711": {
+      "url": "https://edge.forgecdn.net/files/5139/711/melody_fabric_1.0.4_MC_1.20.1-1.20.4.jar",
+      "sha256": "3f7f5bab77a01a26af4702a70af5a7fd0a6f04f4fde51a4180113790e0c9e1e7",
+      "size": 39696
+    },
+    "938917:7164886": {
+      "url": "https://edge.forgecdn.net/files/7164/886/accessories-fabric-1.0.0-beta.48%2b1.20.1.jar",
+      "sha256": "f3d51950f930de8571f3c5a96bf2e22f491efe261047ad8e5cb8925cb5e526c8",
+      "size": 769376
+    },
+    "943925:6466152": {
+      "url": "https://edge.forgecdn.net/files/6466/152/ftb-filter-system-fabric-20.0.1.jar",
+      "sha256": "51892e2e9462966cbc93644efd5e3be18d457ce021360fe35dca06ce42db5420",
+      "size": 194184
+    },
+    "945479:6315235": {
+      "url": "https://edge.forgecdn.net/files/6315/235/watut-fabric-1.20.1-1.2.3.jar",
+      "sha256": "1f3da9141ca583b1bcc706e9826aa79d788b2b0c59202508c596526dc1016e67",
+      "size": 789018
+    },
+    "951221:6458888": {
+      "url": "https://edge.forgecdn.net/files/6458/888/letsdo-herbalbrews-fabric-1.0.12.jar",
+      "sha256": "e3ed8151e25517a23af8863ed0bbdd36e0e027bcccaa1f4ac2d8cfba0549279a",
+      "size": 729071
+    },
+    "952356:5572189": {
+      "url": "https://edge.forgecdn.net/files/5572/189/noanimaltemptdelay-1.20.1-1.2.jar",
+      "sha256": "4532a4fe4d9afb481215731f940306b5995da49dbd13a4122dbf90035e60d3fe",
+      "size": 17020
+    },
+    "953729:5047386": {
+      "url": "https://edge.forgecdn.net/files/5047/386/create_oxidized-0.1.1%2b1.20.1.jar",
+      "sha256": "a8a79b1f9286df17003c686c0d1f00d8f1467d9f72d0067de03191cc588d9907",
+      "size": 282035
+    },
+    "957811:7024411": {
+      "url": "https://edge.forgecdn.net/files/7024/411/cratedelight-25.09.22-1.20-fabric.jar",
+      "sha256": "ae287b703aa6f97dc4906c1cd4a9fe6a21de5dc98072193a41ecffcafe1f2b3d",
+      "size": 176367
+    },
+    "959388:5015554": {
+      "url": "https://edge.forgecdn.net/files/5015/554/GeckoLibIrisCompat-Fabric-1.0.0.jar",
+      "sha256": "3bdd715799e82e4b1472de59995d91da3e5c19389bf2dc01d69a5708641c4ae9",
+      "size": 6202
+    },
+    "962544:7864093": {
+      "url": "https://edge.forgecdn.net/files/7864/93/Oh-The-Trees-Youll-Grow-fabric-1.20.1-1.6.0.jar",
+      "sha256": "660c9385bddd7a1049f5904f8e646d14bb4308bb636f38e662331b7409940d1f",
+      "size": 165847
+    },
+    "962878:8082329": {
+      "url": "https://edge.forgecdn.net/files/8082/329/hexalia-1.3.2-1.20.1%2bfabric.jar",
+      "sha256": "245161424b6a0bdc2693d3169d2aaade4f44a38a6ea0ba06cb0759a8694c2413",
+      "size": 1925402
+    },
+    "962916:5353373": {
+      "url": "https://edge.forgecdn.net/files/5353/373/lavender-0.1.9%2b1.20.jar",
+      "sha256": "3f0329a0f7133ed2d854a6a739de1ecbc93c1b563f00c911243689b912a96795",
+      "size": 523368
+    },
+    "964817:6948520": {
+      "url": "https://edge.forgecdn.net/files/6948/520/sawmill-1.20-1.4.10-fabric.jar",
+      "sha256": "7f806ed4d323e931604fc480a95f1586e6be192aaee2786d086708f540a19dcf",
+      "size": 640144
+    },
+    "967867:6533556": {
+      "url": "https://edge.forgecdn.net/files/6533/556/letsdo-addon-structures-1.7.2.jar",
+      "sha256": "58dacc74b4703fc8f9508376964f82d2cf0a654c4f00e954426e25175f2775f3",
+      "size": 330446
+    },
+    "968398:7634683": {
+      "url": "https://edge.forgecdn.net/files/7634/683/copycats-3.0.7%2bmc.1.20.1-fabric.jar",
+      "sha256": "9e7ef992fe54a41e864d4b78d0a41091f09e88dcc3b2772b611377b0938c6e42",
+      "size": 1996934
+    },
+    "969422:5918172": {
+      "url": "https://edge.forgecdn.net/files/5918/172/DiagonalWalls-v8.0.4-1.20.1-Fabric.jar",
+      "sha256": "de2a0a807d0c38043511c5e0ec7c8fda16eed6200c9d6ac49829588ebe876cd8",
+      "size": 158486
+    },
+    "973463:6680595": {
+      "url": "https://edge.forgecdn.net/files/6680/595/deltaboxlib-fabric-2.2.0%2b1.20.1.jar",
+      "sha256": "a932e4e16fca53130b190cc1ec3cc4189eb14e6c555889f717cc54730ca90902",
+      "size": 852126
+    },
+    "974774:5108234": {
+      "url": "https://edge.forgecdn.net/files/5108/234/Icterine-fabric-1.20.0-1-1.3.0.jar",
+      "sha256": "2069791775c6e65b35f2d811b19f8c15dce2851069913f82512502c3d24aaafe",
+      "size": 39604
+    },
+    "975120:5855462": {
+      "url": "https://edge.forgecdn.net/files/5855/462/cwb-fabric-3.0.0%2bmc1.20.jar",
+      "sha256": "3a5974fc1fb82eed22e759aa788c3c387402a25042ccf8865678be06a1c4d6fb",
+      "size": 79729
+    },
+    "975460:6245107": {
+      "url": "https://edge.forgecdn.net/files/6245/107/pandalib-fabric-mc1.20-0.5.2-SNAPSHOT.jar",
+      "sha256": "6003fa45bc433e5e5dbbc3db35f0aad642cdc5dbea9e392f7f5835e1ec30357b",
+      "size": 859440
+    },
+    "979317:7092593": {
+      "url": "https://edge.forgecdn.net/files/7092/593/sophisticatedcore-1.20.1-1.2.7.14.163.jar",
+      "sha256": "66c00dd1118e60d718220dabb3d9408f4574928efe8e9361d76cc4f3690b7127",
+      "size": 2858810
+    },
+    "979322:7147929": {
+      "url": "https://edge.forgecdn.net/files/7147/929/sophisticatedbackpacks-1.20.1-3.23.4.5.110.jar",
+      "sha256": "15ec32d411a70384743a5770ae6a22b71a8418af7f8eebbffac7bfc8a1836c0f",
+      "size": 986101
+    },
+    "979326:8032765": {
+      "url": "https://edge.forgecdn.net/files/8032/765/sophisticatedstorage-1.20.1-1.3.5.11.142.jar",
+      "sha256": "5608d2206a6bd1326584b52b4c5a7b329be9c3f8b33aa3a24060078aed0bcf89",
+      "size": 1676141
+    },
+    "989574:7068951": {
+      "url": "https://edge.forgecdn.net/files/7068/951/cicada-lib-0.14.3%2b1.20.1.jar",
+      "sha256": "ab3bb261662b1c928b2aab29ec9e1eeb48eeb166726f65a35a4a83a8415fe4f4",
+      "size": 381708
+    },
+    "992333:7041984": {
+      "url": "https://edge.forgecdn.net/files/7041/984/letsdocompat-fabric-2.2.4.jar",
+      "sha256": "2afe15a6a87d1513e9dfbbff6c25efa78ab142fd80f121c2a77ebcf1364c97f5",
+      "size": 27547
+    },
+    "993166:7199661": {
+      "url": "https://edge.forgecdn.net/files/7199/661/FarmersDelight-1.20.1-2.4.1%2brefabricated.jar",
+      "sha256": "81d78e10b58e220bffbe4932de5486ac2127efc37908e89161237a34f0828fac",
+      "size": 8056758
+    },
+    "997634:8075940": {
+      "url": "https://edge.forgecdn.net/files/8075/940/Platform-fabric-1.20.1-1.3.3.jar",
+      "sha256": "78aee0fd12c4ddfc5eb407fc7bf70fa20b3f7df4e16155e1c93ab115c3d6d870",
+      "size": 939640
+    },
+    "998782:5336735": {
+      "url": "https://edge.forgecdn.net/files/5336/735/NethersDelight-Refabricated-1.20.1-4.1.1.jar",
+      "sha256": "882c8fd92d7964f2314da6d4696190d451f8ed87db7726df06b9bc913776c9cb",
+      "size": 342154
+    }
+  }
+}

@@ -1,0 +1,12 @@
+plugins { id 'fabric-loom' version '1.10.5' }
+group = 'ru.sotocoming'
+version = '2.0.0'
+base { archivesName = 'sefi-auth' }
+repositories { mavenCentral() }
+dependencies {
+    minecraft 'com.mojang:minecraft:1.20.1'
+    mappings 'net.fabricmc:yarn:1.20.1+build.10:v2'
+    modImplementation 'net.fabricmc:fabric-loader:0.18.4'
+    modImplementation 'net.fabricmc.fabric-api:fabric-api:0.92.8+1.20.1'
+}
+tasks.withType(JavaCompile).configureEach { options.release = 17 }

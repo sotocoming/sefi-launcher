@@ -40,6 +40,7 @@ export const AccountsPage: React.FC = () => {
         const updated = await window.electronAPI.getAccounts();
         setAccounts(updated);
         setActiveAccount(newAcc);
+        if (newAcc.communityLinkError) setErrorMsg(newAcc.communityLinkError);
       }
     } catch (err: any) {
       let raw = err?.message || String(err);
@@ -124,15 +125,11 @@ export const AccountsPage: React.FC = () => {
   // 2. Microsoft / Mojang side
   const msAccount = accounts.find((a) => a.type === 'microsoft');
   // Check if they are unified / linked together
+  const isLicenseBoundOnBackend = Boolean(commAccount?.mcVerifiedAt && commAccount.mcType === 'microsoft' && commAccount.mcUuid);
   const isLinked = Boolean(
-    msAccount && (
-      msAccount.twitchLogin ||
-      msAccount.communityToken ||
-      (commAccount?.mcUuid && msAccount.uuid.replace(/-/g, '').toLowerCase() === commAccount.mcUuid.replace(/-/g, '').toLowerCase())
-    )
+    msAccount && isLicenseBoundOnBackend
+      && msAccount.uuid.replace(/-/g, '').toLowerCase() === commAccount!.mcUuid!.replace(/-/g, '').toLowerCase()
   );
-
-  const isLicenseBoundOnBackend = commAccount?.mcType === 'microsoft';
 
   return (
     <motion.div
@@ -271,6 +268,7 @@ export const AccountsPage: React.FC = () => {
                       const updated = await window.electronAPI.getAccounts();
                       setAccounts(updated);
                       setActiveAccount(newAcc);
+        if (newAcc.communityLinkError) setErrorMsg(newAcc.communityLinkError);
                     }
                   } catch (err: any) {
                     setErrorMsg(err.message || 'Ошибка входа SEFI Community');
@@ -312,7 +310,7 @@ export const AccountsPage: React.FC = () => {
                 </svg>
               </div>
               <span className="mt-2 text-[10px] font-bold uppercase tracking-wider text-fuchsia-300 bg-fuchsia-500/15 px-2 py-0.5 rounded-full border border-fuchsia-400/25">
-                {linkingId ? 'Связка…' : 'Связать 🔗'}
+                {linkingId ? 'Связка…' : 'Привязать к Twitch'}
               </span>
             </button>
           ) : (
@@ -375,9 +373,14 @@ export const AccountsPage: React.FC = () => {
                 <div className="mt-4 flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 rounded-full border border-blue-400/30 bg-blue-500/15 px-2.5 py-0.5 text-[11px] font-medium text-blue-300">
                     <Check size={11} strokeWidth={3} />
-                    Лицензия подтверждена
+                    {isLinked ? 'Привязка подтверждена сервером' : 'Вход Microsoft выполнен'}
                   </span>
                 </div>
+                {!isLinked && (
+                  <p className="mt-3 text-xs leading-5 text-amber-200">
+                    {commAccount ? 'Привязка к сообществу не подтверждена. Нажмите «Привязать к Twitch» между карточками и подтвердите пару аккаунтов.' : 'Войдите в SEFI Community через сайт, затем нажмите «Привязать к Twitch» между карточками.'}
+                  </p>
+                )}
               </div>
             ) : isLicenseBoundOnBackend && commAccount ? (
               <div className="mt-5">

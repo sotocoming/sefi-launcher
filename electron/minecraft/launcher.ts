@@ -145,7 +145,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   const launcherConfig = await getLauncherConfig().catch(() => null);
   const serverHost = launcherConfig?.server?.ip || 'minecraft.sotocoming.ru';
   const serverPort = launcherConfig?.server?.port || 25565;
-  const serverName = launcherConfig?.server?.name || 'SEFI Homestead Cozy';
+  const serverName = launcherConfig?.server?.name || 'Sweet Home';
   const fullAddress = serverPort === 25565 ? serverHost : `${serverHost}:${serverPort}`;
 
   const customArgs: string[] = [];
@@ -200,6 +200,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   };
 
   try {
+    await ensureServerInServersDat(settings.gameDirectory, serverName, fullAddress);
     await applyFullscreenSetting(settings.gameDirectory, settings.fullscreen);
     const child = await launcher.launch(opts);
     child?.once('error', (error: Error) => {

@@ -125,28 +125,38 @@ export async function loginMicrosoft(): Promise<Account> {
       accounts.push(newAccount);
     }
 
-    // Auto-link with backend if communityToken is present
+    // A local Twitch session is not proof of a completed Minecraft binding.
+    newAccount.mcType = 'offline';
+    newAccount.mcUuid = undefined;
+    newAccount.mcVerifiedAt = 0;
     if (newAccount.communityToken) {
       try {
         const linkRes = await fetch(COMMUNITY_ORIGIN + '/api/public/community/launcher/minecraft/auto-link', {
-          method: 'POST',
+          method: 'POST', redirect: 'error', signal: AbortSignal.timeout(60000),
           headers: { 'Content-Type': 'application/json', 'X-Community-Token': newAccount.communityToken },
           body: JSON.stringify({ minecraft_access_token: newAccount.accessToken }),
         });
-        if (linkRes.ok) {
-          const resData = await linkRes.json() as any;
-          if (resData?.user) {
-            newAccount.whitelistStatus = resData.user.whitelist_status;
-            newAccount.username = resData.user.mc_nickname || newAccount.username;
-          }
+        const resData = await linkRes.json() as any;
+        if (!linkRes.ok) throw new Error(typeof resData?.error === 'string' ? resData.error : 'Сервер не подтвердил привязку.');
+        const user = resData?.user;
+        if (!user?.mc_verified_at || user.mc_type !== 'microsoft' || typeof user.mc_uuid !== 'string'
+          || user.mc_uuid.replace(/-/g, '').toLowerCase() !== newAccount.uuid.replace(/-/g, '').toLowerCase()) {
+          throw new Error('Сервер не подтвердил привязку этого Minecraft-профиля.');
         }
-      } catch {
-        // Silently continue - local token still attached
+        newAccount.mcType = 'microsoft';
+        newAccount.mcUuid = user.mc_uuid;
+        newAccount.mcVerifiedAt = user.mc_verified_at;
+        newAccount.whitelistStatus = user.whitelist_status;
+      } catch (error) {
+        newAccount.communityLinkError = 'Вход Microsoft выполнен, но привязка к Twitch не завершена. '
+          + (error instanceof Error ? error.message : 'Повторите привязку.');
       }
     }
 
-    // Clean duplicate offline community accounts
-    const cleaned = accounts.filter(a => a.id === newAccount.id || !(a.type === 'offline' && a.communityToken));
+    // Keep the standard profile until the backend confirms the new identity.
+    const cleaned = newAccount.mcVerifiedAt
+      ? accounts.filter(a => a.id === newAccount.id || !(a.type === 'offline' && a.communityToken === newAccount.communityToken))
+      : accounts;
     await saveAccounts(cleaned);
     return newAccount;
   } catch (err: any) {
@@ -192,6 +202,7 @@ export async function loginCommunity(fresh = false): Promise<Account> {
       twitchLogin: user.twitch_login, twitchAvatar: user.twitch_avatar,
       mcType: user.mc_verified_at && user.mc_uuid && user.mc_type === 'microsoft' ? 'microsoft' : 'offline',
       mcUuid: user.mc_verified_at ? user.mc_uuid : undefined,
+      mcVerifiedAt: user.mc_verified_at || 0,
     };
     accounts.forEach(account => { account.active = false; });
     const index = accounts.findIndex(account => account.id === newAccount.id);
@@ -221,6 +232,8 @@ export async function refreshCommunityProfile(token: string): Promise<Account | 
       if (transferSelection) accounts.forEach(a => { a.active = a.id === accounts[msIdx].id; });
       accounts[msIdx].mcType = 'microsoft';
       accounts[msIdx].mcUuid = user.mc_uuid;
+      accounts[msIdx].mcVerifiedAt = user.mc_verified_at;
+      delete accounts[msIdx].communityLinkError;
       accounts[msIdx].whitelistStatus = user.whitelist_status;
       accounts[msIdx].twitchLogin = user.twitch_login;
       accounts[msIdx].twitchAvatar = user.twitch_avatar;
@@ -230,6 +243,16 @@ export async function refreshCommunityProfile(token: string): Promise<Account | 
       await saveAccounts(cleaned);
       return accounts[msIdx];
     }
+
+    for (const account of accounts) {
+      if (account.type === 'microsoft' && account.communityToken === token) {
+        account.mcType = user.mc_verified_at && user.mc_uuid && user.mc_type === 'microsoft' ? 'microsoft' : 'offline';
+        account.mcUuid = user.mc_verified_at ? user.mc_uuid : undefined;
+        account.mcVerifiedAt = user.mc_verified_at || 0;
+        account.whitelistStatus = user.whitelist_status;
+      }
+    }
+    await saveAccounts(accounts);
 
     const idx = accounts.findIndex((a) => a.type === 'offline' && (a.communityToken === token || a.id === `comm_${user.id}`));
     if (idx !== -1) {
@@ -241,7 +264,8 @@ export async function refreshCommunityProfile(token: string): Promise<Account | 
       accounts[idx].whitelistStatus = user.whitelist_status;
       accounts[idx].twitchLogin = user.twitch_login;
       accounts[idx].twitchAvatar = user.twitch_avatar;
-      accounts[idx].mcType = user.mc_type;
+      accounts[idx].mcVerifiedAt = user.mc_verified_at || 0;
+      accounts[idx].mcType = user.mc_verified_at && user.mc_uuid && user.mc_type === 'microsoft' ? 'microsoft' : 'offline';
       accounts[idx].mcUuid = user.mc_uuid;
       await saveAccounts(accounts);
       return accounts[idx];
@@ -313,6 +337,13 @@ export async function linkMinecraftAccount(accountId: string): Promise<Account |
     accounts[index].twitchAvatar = community.twitchAvatar;
     accounts[index].whitelistStatus = freshCommunity?.whitelistStatus || community.whitelistStatus;
     accounts[index].communityToken = community.communityToken;
+    if (!freshCommunity?.mcVerifiedAt || freshCommunity.mcUuid?.replace(/-/g, '').toLowerCase() !== candidate.uuid.replace(/-/g, '').toLowerCase()) {
+      throw new Error('Подтверждение отправлено. Обновите профиль сообщества, чтобы проверить результат привязки.');
+    }
+    accounts[index].mcType = 'microsoft';
+    accounts[index].mcUuid = freshCommunity.mcUuid;
+    accounts[index].mcVerifiedAt = freshCommunity.mcVerifiedAt;
+    delete accounts[index].communityLinkError;
     accounts[index].username = candidate.name;
     accounts[index].active = true;
 

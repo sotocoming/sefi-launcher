@@ -39,6 +39,8 @@ export interface Account {
   twitchAvatar?: string;
   mcType?: 'offline' | 'microsoft';
   mcUuid?: string | null;
+  mcVerifiedAt?: number;
+  communityLinkError?: string;
 }
 
 export interface ModpackInfo {

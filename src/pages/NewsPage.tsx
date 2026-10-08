@@ -9,7 +9,7 @@ interface NewsPageProps {
 }
 
 export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
-  const { news, setNews, activeAccount } = useStore();
+  const { news, setNews, activeAccount, launcherConfig } = useStore();
   const [activeFilter, setActiveFilter] = useState<'all' | 'event' | 'update' | 'news'>('all');
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
 
@@ -115,7 +115,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
               Новости и события сервера
             </h1>
             <p className="text-xs text-white/45">
-              Анонсы обновлений, праздников и жизни Homestead
+              Анонсы обновлений, праздников и жизни {launcherConfig?.modpack?.name || 'сервера'}
             </p>
           </div>
         </div>

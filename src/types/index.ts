@@ -67,6 +67,7 @@ export interface LauncherConfig {
   modpack: ModpackInfo;
   server: {
     name?: string;
+    title?: string;
     ip: string;
     port: number;
   };

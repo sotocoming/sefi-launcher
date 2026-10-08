@@ -6,7 +6,7 @@ import { useStore } from '../store/store';
 
 export const MapPage: React.FC = () => {
   const { launcherConfig } = useStore();
-  const serverName = launcherConfig?.modpack?.name || 'сервера';
+  const serverName = launcherConfig?.server?.title || launcherConfig?.server?.name || 'Sweet Home';
   const [iframeKey, setIframeKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 

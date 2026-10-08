@@ -115,7 +115,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
               Новости и события сервера
             </h1>
             <p className="text-xs text-white/45">
-              Анонсы обновлений, праздников и жизни {launcherConfig?.modpack?.name || 'сервера'}
+              Анонсы обновлений, праздников и жизни {launcherConfig?.server?.title || launcherConfig?.server?.name || 'Sweet Home'}
             </p>
           </div>
         </div>

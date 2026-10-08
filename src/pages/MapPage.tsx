@@ -79,7 +79,7 @@ export const MapPage: React.FC = () => {
           <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#0d120e] gap-3">
             <div className="size-8 animate-spin rounded-full border-2 border-emerald-400/20 border-t-emerald-400" />
             <span className="text-xs font-mono text-emerald-300/80 tracking-wide">
-              Загрузка карты мира Homestead…
+              Загрузка карты мира {serverName}…
             </span>
           </div>
         )}
@@ -87,7 +87,7 @@ export const MapPage: React.FC = () => {
         <iframe
           key={iframeKey}
           src="https://mc.sotocoming.ru/maps"
-          title="Homestead Server Map"
+          title={`Карта сервера ${serverName}`}
           className="size-full border-0 bg-[#101711]"
           onLoad={() => setIsLoading(false)}
         />

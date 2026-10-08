@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Newspaper, ExternalLink, ThumbsUp, ThumbsDown, Calendar, ChevronDown } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
+import { NewsMarkdown } from '../components/ui/NewsMarkdown';
 import { useStore } from '../store/store';
 
 interface NewsPageProps {
@@ -37,7 +38,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
     .map((n) => ({
       id: n.id,
       title: n.title,
-      body: n.body,
+      body: n.body_markdown ?? n.body,
       date: n.date,
       time: n.time,
       tag: (n.tag || 'news') as 'event' | 'update' | 'news',
@@ -201,9 +202,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
                         {item.title}
                       </h2>
 
-                      <p className={`text-xs leading-relaxed text-white/60 whitespace-pre-line ${isExpanded ? '' : 'line-clamp-4'}`}>
-                        {item.body}
-                      </p>
+                      <NewsMarkdown source={item.body} collapsed={!isExpanded && isLong} />
 
                       {isLong && (
                         <button

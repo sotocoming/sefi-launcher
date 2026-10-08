@@ -85,6 +85,7 @@ export interface NewsItem {
   id: string;
   title: string;
   body: string;
+  body_markdown?: string;
   date: string;
   image?: string;
   image_launcher?: string;

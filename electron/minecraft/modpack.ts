@@ -188,7 +188,7 @@ async function performInstall(gameDir: string, onProgress: (p: DownloadProgress)
       } else overrideFiles.push({ relative, source: path.join(extracted, overrides, relative) });
     }
     await ensureSefiAuthMod(stage);
-    const authName = 'sefi-auth-2.0.0.jar';
+    const authName = 'sefi-auth-2.0.1.jar';
     const auth = path.join(stagedMods, authName);
     checkedZip(auth);
     if (names.has(authName.toLowerCase())) throw new Error('Сборка содержит собственную копию SEFI Auth.');
@@ -243,7 +243,7 @@ async function performInstall(gameDir: string, onProgress: (p: DownloadProgress)
 export async function ensureSefiAuthMod(gameDir: string): Promise<void> {
   const modsDir = await safeDestination(gameDir, 'mods');
   await fs.mkdir(modsDir, { recursive: true });
-  const name = 'sefi-auth-2.0.0.jar';
+  const name = 'sefi-auth-2.0.1.jar';
   const sources = [path.join(process.resourcesPath || '', 'resources', 'mods', name), path.join(app.getAppPath(), 'resources', 'mods', name)];
   let source: string | undefined;
   for (const candidate of sources) if (await fs.access(candidate).then(() => true, () => false)) { source = candidate; break; }

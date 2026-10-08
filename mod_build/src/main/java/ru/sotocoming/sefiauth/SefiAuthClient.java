@@ -5,6 +5,10 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.*;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.network.PacketByteBuf;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.Identifier;
+import net.minecraft.text.Text;
 import java.net.URI;
 import java.net.http.*;
 import java.nio.charset.StandardCharsets;
@@ -21,10 +25,13 @@ public final class SefiAuthClient implements ClientModInitializer {
     private volatile Object connection;
     private final AtomicBoolean attempted = new AtomicBoolean();
     private boolean helloSent;
+    private final VoiceChatReconnect voiceReconnect = new VoiceChatReconnect();
+    private final LauncherLoginFeedback loginFeedback = new LauncherLoginFeedback();
+    private Text deferredLoginWarning;
     @Override public void onInitializeClient() {
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> { key = null; connection = null; attempted.set(false); helloSent = false; });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> { key = null; connection = null; attempted.set(false); helloSent = false; voiceReconnect.reset(); loginFeedback.reset(); deferredLoginWarning = null; });
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            key = null; connection = null; attempted.set(false); helloSent = false;
+            key = null; connection = null; attempted.set(false); helloSent = false; voiceReconnect.reset(); loginFeedback.reset(); deferredLoginWarning = null;
             if (!System.getProperty("sefi.authPort", "").matches("[0-9]{4,5}")) return;
             var entry = client.getCurrentServerEntry();
             String expected = System.getProperty("sefi.serverAddress", "").toLowerCase(Locale.ROOT).replaceFirst(":25565$", "");
@@ -33,10 +40,31 @@ public final class SefiAuthClient implements ClientModInitializer {
             // Only send a public ephemeral key; never a credential on JOIN.
             try {
                 key = KeyPairGenerator.getInstance("Ed25519").generateKeyPair(); connection = handler;
+                loginFeedback.start();
+                if (client.player != null) client.player.sendMessage(Text.literal("§7[SEFI] Подтверждаем вход через лаунчер…"), false);
             } catch (Exception ignored) { key = null; }
+        });
+        ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
+            if (!overlay && connection != null && loginFeedback.suppress(message.getString())) {
+                deferredLoginWarning = message;
+                return false;
+            }
+            return true;
+        });
+        ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
+            if (!overlay && connection != null && message.getString().replaceAll("§[0-9A-FK-ORa-fk-or]", "")
+                    .equals("[SEFI] Вход подтверждён лаунчером.")) {
+                loginFeedback.confirmed(); deferredLoginWarning = null;
+                voiceReconnect.authenticated();
+            }
         });
         // Fabric's channel advertisement can arrive after JOIN; wait for it without sending credentials.
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (connection != null && connection == client.getNetworkHandler() && loginFeedback.tick()) {
+                if (deferredLoginWarning != null && client.player != null) client.player.sendMessage(deferredLoginWarning, false);
+                deferredLoginWarning = null;
+            }
+            voiceReconnect.tick(connection != null && connection == client.getNetworkHandler(), this::retryVoiceChat);
             if (key == null || helloSent || connection != client.getNetworkHandler()
                     || !ClientPlayNetworking.canSend(SefiAuthCommon.HELLO)) return;
             helloSent = true;
@@ -82,5 +110,24 @@ public final class SefiAuthClient implements ClientModInitializer {
                 } catch (Exception ignored) { /* Password fallback, never log credential-bearing exceptions. */ }
             }); } catch (RejectedExecutionException ignored) { }
         });
+    }
+    private void retryVoiceChat() {
+        if (!FabricLoader.getInstance().isModLoaded("voicechat")) return;
+        try {
+            // Preserve an existing connection or an in-flight UDP handshake.
+            Object voice = Class.forName("de.maxhenkel.voicechat.voice.client.ClientManager")
+                .getMethod("getClient").invoke(null);
+            if (voice == null || voice.getClass().getMethod("getInitializationData").invoke(voice) != null) return;
+            Identifier channel = new Identifier("voicechat", "request_secret");
+            if (!ClientPlayNetworking.canSend(channel)) return;
+            int version = Class.forName("de.maxhenkel.voicechat.Voicechat").getField("COMPATIBILITY_VERSION").getInt(null);
+            PacketByteBuf out = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
+            out.writeInt(version);
+            ClientPlayNetworking.send(channel, out);
+            org.slf4j.LoggerFactory.getLogger("sefi-auth").info("Retrying voice chat connection after launcher authentication");
+        } catch (ReflectiveOperationException | LinkageError ignored) {
+            // Voice chat is optional; incompatible versions must not affect login.
+            org.slf4j.LoggerFactory.getLogger("sefi-auth").warn("Could not retry optional voice chat connection");
+        }
     }
 }

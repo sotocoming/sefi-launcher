@@ -68,7 +68,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
               />
               <span className="flex-1 text-left">{item.label}</span>
               {item.count !== undefined && item.count > 0 && (
-                <span className="rounded-full bg-fuchsia-500/20 px-2 py-0.5 text-[10px] font-semibold text-fuchsia-300 border border-fuchsia-400/20">
+                <span title={`Новостей: ${item.count}`}
+                  className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-[10px] leading-none tabular-nums font-semibold text-fuchsia-300 border border-fuchsia-400/20">
                   {item.count}
                 </span>
               )}

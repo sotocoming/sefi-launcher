@@ -5,8 +5,25 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { useStore } from '../store/store';
 
 export const SettingsPage: React.FC = () => {
-  const { settings, updateSettings, setUpdateInfo } = useStore();
+  const { settings, updateSettings, setUpdateInfo, updateInfo, gameState, installLauncherUpdate } = useStore();
 
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const playing = !['idle', 'error'].includes(gameState.status);
+  const checkUpdates = async () => {
+    if (playing || checkingUpdate) return;
+    setCheckingUpdate(true);
+    try { setUpdateInfo(await window.electronAPI.checkForUpdates()); }
+    catch { setUpdateInfo({ status: 'error', error: 'Не удалось проверить обновления. Повторите позже.' }); }
+    finally { setCheckingUpdate(false); }
+  };
+  const updateText = playing ? 'Проверки приостановлены на время игры.'
+    : updateInfo?.status === 'checking' ? 'Проверяем обновления…'
+    : updateInfo?.status === 'downloading' ? 'Скачивание обновления: '+(updateInfo.percent || 0)+'%'
+    : updateInfo?.status === 'ready' ? 'Обновление скачано и готово к установке.'
+    : updateInfo?.status === 'available' ? 'Найдено обновление. Начинаем загрузку…'
+    : updateInfo?.status === 'error' ? 'Не удалось проверить или скачать обновление. Повторите позже.'
+    : updateInfo?.status === 'idle' ? 'Установлена актуальная версия.'
+    : 'Проверяйте вручную или дождитесь автоматической проверки.';
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
   const [importError, setImportError] = useState(false);
@@ -275,6 +292,16 @@ export const SettingsPage: React.FC = () => {
                 />
               </div>
             </button>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-5">
+          <div className="flex items-center gap-2.5"><RotateCcw size={18} className="text-fuchsia-300" /><h2 className="text-sm font-semibold text-white">Обновления лаунчера</h2></div>
+          <p className="mt-2 text-xs text-white/50">Автоматически раз в 2 часа. Во время игры проверки приостановлены.</p>
+          <p role="status" className="mt-3 text-xs text-white/70">{updateText}</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button type="button" onClick={checkUpdates} disabled={playing || checkingUpdate || ['checking','available','downloading'].includes(updateInfo?.status || '')} className="rounded-lg border border-fuchsia-400/30 bg-fuchsia-500/10 px-4 py-2 text-xs text-fuchsia-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-fuchsia-500/20">{checkingUpdate ? 'Проверяем…' : 'Проверить обновления'}</button>
+            {updateInfo?.status === 'ready' && <button type="button" onClick={installLauncherUpdate} disabled={playing} className="rounded-lg bg-emerald-500/20 px-4 py-2 text-xs text-emerald-200 disabled:opacity-40">Установить и перезапустить</button>}
           </div>
         </GlassCard>
 

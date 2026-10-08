@@ -24,7 +24,7 @@ const WindowButton: React.FC<WindowButtonProps> = ({ icon: Icon, onClick, danger
 };
 
 export const TitleBar: React.FC = () => {
-  const { updateInfo, installLauncherUpdate } = useStore();
+  const { updateInfo, installLauncherUpdate, gameState } = useStore();
 
   const handleMinimize = () => {
     if (window.electronAPI?.minimize) {
@@ -61,6 +61,8 @@ export const TitleBar: React.FC = () => {
         {updateInfo?.status === 'ready' && (
           <button
             onClick={installLauncherUpdate}
+            disabled={!['idle','error'].includes(gameState.status)}
+            title={!['idle','error'].includes(gameState.status) ? 'Установите обновление после выхода из игры' : 'Установить обновление'}
             className="flex items-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-500/20 px-3.5 py-1 text-xs font-semibold text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)] transition hover:bg-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
             <Sparkles size={13} className="text-emerald-300 animate-pulse" />

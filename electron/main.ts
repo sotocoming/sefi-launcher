@@ -1,9 +1,11 @@
 import { canonicalPack } from './minecraft/pack-sources';
 import packCatalog from './minecraft/modpack-catalog.json';
-import { app, BrowserWindow, ipcMain, session, dialog, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, session, dialog, shell, net } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import { autoUpdater } from 'electron-updater';
+import { UpdateChecks } from './update-checks';
+import type { UpdateInfo } from '../src/types';
 import { getSettings, saveSettings, getLauncherConfig } from './config';
 import { getServerStatus } from './server-status';
 import { getAccounts, addOfflineAccount, loginMicrosoft, loginCommunity, linkMinecraftAccount, refreshCommunityProfile, removeAccount, setActiveAccount } from './minecraft/accounts';
@@ -21,6 +23,8 @@ if (process.platform === 'win32') app.setAppUserModelId('com.sefi.launcher');
 
 let mainWindow: BrowserWindow | null = null;
 let hiddenForGame = false;
+let gameBusy = false;
+let updateChecks: UpdateChecks | null = null;
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -201,6 +205,9 @@ function setupIpc() {
 
   ipcMain.handle('launch-game', async () => {
     await launchGame((state) => {
+      gameBusy = !['idle', 'error'].includes(state.status);
+      autoUpdater.autoInstallOnAppQuit = !gameBusy;
+      if (!gameBusy) void updateChecks?.run();
       mainWindow?.webContents.send('game-state-change', state);
       if (state.status === 'downloading') {
         mainWindow?.webContents.send('download-progress', state.progress);
@@ -269,6 +276,13 @@ function setupIpc() {
 }
 
 function setupAutoUpdater() {
+  let updateState: UpdateInfo = { status: 'idle' };
+  const publish = (state: UpdateInfo) => { updateState = state; mainWindow?.webContents.send('update-status-change', state); };
+  updateChecks = new UpdateChecks({
+    state: () => updateState,
+    blocked: () => gameBusy || !net.isOnline(),
+    check: async () => { await autoUpdater.checkForUpdates(); },
+  });
   autoUpdater.logger = console;
   // Automatically download updates in the background when available
   autoUpdater.autoDownload = true;
@@ -276,13 +290,13 @@ function setupAutoUpdater() {
   autoUpdater.autoInstallOnAppQuit = true;
 
   autoUpdater.on('checking-for-update', () => {
-    mainWindow?.webContents.send('update-status-change', {
+    publish({
       status: 'checking'
     });
   });
 
   autoUpdater.on('update-available', (info) => {
-    mainWindow?.webContents.send('update-status-change', {
+    publish({
       status: 'available',
       version: info.version,
       releaseNotes: typeof info.releaseNotes === 'string' ? info.releaseNotes : undefined
@@ -290,14 +304,15 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.on('update-not-available', () => {
-    mainWindow?.webContents.send('update-status-change', {
+    publish({
       status: 'idle'
     });
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
-    mainWindow?.webContents.send('update-status-change', {
+    publish({
       status: 'downloading',
+      version: updateState.version,
       percent: Math.round(progressObj.percent),
       transferred: progressObj.transferred,
       total: progressObj.total
@@ -305,7 +320,7 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.on('update-downloaded', (info) => {
-    mainWindow?.webContents.send('update-status-change', {
+    publish({
       status: 'ready',
       version: info.version,
       releaseNotes: typeof info.releaseNotes === 'string' ? info.releaseNotes : undefined
@@ -314,35 +329,31 @@ function setupAutoUpdater() {
 
   autoUpdater.on('error', (err) => {
     console.error('AutoUpdater error:', err);
-    mainWindow?.webContents.send('update-status-change', {
+    publish({
       status: 'error',
       error: err?.message || 'Update check error'
     });
   });
 
   ipcMain.handle('check-for-updates', async () => {
-    try {
-      const result = await autoUpdater.checkForUpdates();
-      return {
-        status: result?.updateInfo?.version ? 'available' : 'idle',
-        version: result?.updateInfo?.version,
-        releaseNotes: result?.updateInfo?.releaseNotes?.toString()
-      };
-    } catch (e: any) {
-      return { status: 'error', error: e?.message };
-    }
+    if (isDev) return { status: 'error', error: 'Обновления доступны в установленном лаунчере.' };
+    return await updateChecks!.run(true);
   });
 
   ipcMain.handle('install-update', () => {
     // isSilent: true installs silently, isForceRunAfter: true launches new version immediately
-    autoUpdater.quitAndInstall(false, true);
+    if (!gameBusy) autoUpdater.quitAndInstall(false, true);
   });
 
   // Check for updates shortly after launcher launch in production
   if (!isDev) {
     setTimeout(() => {
-      autoUpdater.checkForUpdates().catch(() => {});
+      void updateChecks?.run();
     }, 4000);
+    const timer = setInterval(() => { void updateChecks?.run(); }, 5 * 60_000);
+    timer.unref();
+    mainWindow?.on('focus', () => { void updateChecks?.run(); });
+    app.once('before-quit', () => clearInterval(timer));
   }
 }
 

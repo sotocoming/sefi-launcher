@@ -2,8 +2,10 @@ import React, { useMemo } from 'react';
 import MarkdownIt from 'markdown-it';
 import './NewsMarkdown.css';
 
-const parser = new MarkdownIt('commonmark', Object.assign({ html: false, breaks: true }, { maxNesting: 20 }))
-  .disable(['image', 'heading', 'lheading', 'hr', 'reference', 'autolink']);
+const parser = new MarkdownIt('commonmark', Object.assign({ html: false, breaks: true, linkify: true }, { maxNesting: 20 }))
+  .disable(['image', 'heading', 'lheading', 'hr', 'reference'])
+  .enable('linkify');
+parser.linkify.set({ fuzzyLink: false, fuzzyEmail: false });
 parser.validateLink = (url: string) => {
   if (/[\x00-\x1f\\]/.test(url)) return false;
   if (url.startsWith('#') || (url.startsWith('/') && !url.startsWith('//'))) return true;

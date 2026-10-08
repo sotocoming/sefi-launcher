@@ -30,7 +30,7 @@ const api: IElectronAPI = {
   getLauncherConfig: () => ipcRenderer.invoke('get-launcher-config'),
   getServerStatus: () => ipcRenderer.invoke('get-server-status'),
   getNewsReactions: () => ipcRenderer.invoke('get-news-reactions'),
-  reactNews: (id: string, reaction: 'like' | 'dislike', prev: 'like' | 'dislike' | null) =>
+  reactNews: (id: string, reaction: 'like', prev: 'like' | null) =>
     ipcRenderer.invoke('react-news', id, reaction, prev),
 
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),

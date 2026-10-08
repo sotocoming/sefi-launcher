@@ -76,6 +76,7 @@ export interface LauncherConfig {
     background: string;
     minVersion: string;
   };
+  community_links?: { id: 'support' | 'discord' | 'twitch'; label: string; url: string }[];
   news: NewsItem[];
 }
 
@@ -94,7 +95,6 @@ export interface NewsItem {
   tag?: 'event' | 'update' | 'news';
   url?: string;
   likes?: number;
-  dislikes?: number;
   archived?: boolean;
 }
 

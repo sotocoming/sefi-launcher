@@ -1,6 +1,6 @@
 import { PlayerAvatar } from '../accounts/PlayerAvatar';
 import React from 'react';
-import { Home, Map, Newspaper, Users, Settings } from 'lucide-react';
+import { Home, Map, Newspaper, Users, Settings, Heart, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useStore } from '../../store/store';
 import sefiLogo from '../../assets/branding/sefi-logo.png';
@@ -12,7 +12,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => {
-  const { activeAccount, news } = useStore();
+  const { activeAccount, news, launcherConfig } = useStore();
 
   const publishedNewsCount = (news || []).filter(
     n => (n.status === 'published' || (!n.status && !n.archived)) && !n.archived && n.status !== 'scheduled'
@@ -26,6 +26,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
     { id: 'settings' as const, label: 'Настройки', icon: Settings },
   ];
 
+  const links = (launcherConfig?.community_links || []).filter(link => {
+    try { const url = new URL(link.url); return ['support','discord','twitch'].includes(link.id) && url.protocol === 'https:' && !url.username && !url.password; }
+    catch { return false; }
+  });
   return (
     <aside className="flex w-[224px] shrink-0 flex-col border-r border-white/[0.06] bg-[#0c0c12] z-30 select-none">
       {/* Brand Header with sefi-logo.png */}
@@ -76,6 +80,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
             </button>
           );
         })}
+        {links.length > 0 && <div className="mt-4 border-t border-white/[0.07] pt-3">
+          {links.map(link => <button key={link.id} type="button" title={link.label} onClick={() => void window.electronAPI.openExternal(link.url)} className="group flex h-10 w-full items-center gap-3 rounded-[10px] px-3 text-sm text-white/55 transition hover:bg-fuchsia-400/10 hover:text-fuchsia-200">
+            {link.id === 'support' ? <Heart size={18} className="shrink-0 text-fuchsia-300" /> : link.id === 'twitch' ? <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="shrink-0" aria-hidden="true"><path d="M11.571 4.714h1.715v5.143h-1.715zm4.715 0H18v5.143h-1.714zM6 0 1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg> : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="shrink-0" aria-hidden="true"><path d="M8 5 5 6c-2 3-3 7-3 11l5 2 1-2m8-12 3 1c2 3 3 7 3 11l-5 2-1-2M7 8c3-2 7-2 10 0M7 16c3 2 7 2 10 0"/><circle cx="8.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>}
+            <span className="min-w-0 flex-1 text-left text-xs leading-tight line-clamp-2">{link.label}</span><ExternalLink size={12} className="shrink-0 text-white/30" />
+          </button>)}
+        </div>}
       </nav>
 
       {/* Active Account Widget */}

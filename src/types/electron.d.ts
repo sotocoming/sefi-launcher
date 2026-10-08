@@ -42,8 +42,8 @@ export interface IElectronAPI {
   // Server config
   getLauncherConfig(): Promise<LauncherConfig>;
   getServerStatus(): Promise<ServerStatus>;
-  getNewsReactions(): Promise<{ok: boolean; votes: Record<string, 'like' | 'dislike'>}>;
-  reactNews(id: string, reaction: 'like' | 'dislike', prev: 'like' | 'dislike' | null): Promise<{ ok: boolean; likes: number; dislikes: number; user_vote: 'like' | 'dislike' | null }>;
+  getNewsReactions(): Promise<{ok: boolean; votes: Record<string, 'like'>}>;
+  reactNews(id: string, reaction: 'like', prev: 'like' | null): Promise<{ ok: boolean; likes: number; user_vote: 'like' | null }>;
 
   // Updates & Links
   checkForUpdates(): Promise<UpdateInfo>;

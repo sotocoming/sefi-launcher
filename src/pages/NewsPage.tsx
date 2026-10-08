@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Newspaper, ExternalLink, ThumbsUp, ThumbsDown, Calendar, ChevronDown } from 'lucide-react';
+import { Newspaper, ExternalLink, ThumbsUp, Calendar, ChevronDown } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { NewsMarkdown } from '../components/ui/NewsMarkdown';
 import { useStore } from '../store/store';
@@ -18,7 +18,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
     setExpandedIds(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const [userVotes, setUserVotes] = useState<Record<string, 'like' | 'dislike' | null>>({});
+  const [userVotes, setUserVotes] = useState<Record<string, 'like' | null>>({});
   const [authorized, setAuthorized] = useState(false);
   const [busy, setBusy] = useState(false);
   const [reactionError, setReactionError] = useState('');
@@ -43,7 +43,6 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
       time: n.time,
       tag: (n.tag || 'news') as 'event' | 'update' | 'news',
       likes: n.likes ?? 0,
-      dislikes: n.dislikes ?? 0,
       image: n.image_launcher || n.image || '',
     }));
 
@@ -60,14 +59,14 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
     }
   };
 
-  const handleReact = async (id: string, type: 'like' | 'dislike') => {
+  const handleReact = async (id: string, type: 'like') => {
     if (!authorized || busy) return;
     const accountId = activeAccount?.id;
     setBusy(true); setReactionError('');
     const prevVote = userVotes[id] || null;
 
     try {
-      let data: { ok: boolean; likes: number; dislikes: number; user_vote: 'like' | 'dislike' | null };
+      let data: { ok: boolean; likes: number; user_vote: 'like' | null };
 
       if (window.electronAPI?.reactNews) {
         data = await window.electronAPI.reactNews(id, type, prevVote);
@@ -80,7 +79,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
         // Синхронизируем счетчик в общем сторе
         const currentList = news || [];
         const updatedNews = currentList.map(item =>
-          item.id === id ? { ...item, likes: data.likes, dislikes: data.dislikes } : item
+          item.id === id ? { ...item, likes: data.likes } : item
         );
         setNews(updatedNews);
       }
@@ -230,20 +229,6 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
                         >
                           <ThumbsUp size={12} className={currentVote === 'like' ? 'fill-current' : ''} />
                           <span>{item.likes}</span>
-                        </button>
-
-                        <button
-                          disabled={!authorized || busy}
-                          onClick={() => handleReact(item.id, 'dislike')}
-                          title={currentVote === 'dislike' ? 'Снять дизлайк' : 'Поставить дизлайк'}
-                          className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
-                            currentVote === 'dislike'
-                              ? 'bg-rose-500/25 text-rose-300 border border-rose-400/40 shadow-[0_0_12px_rgba(244,63,94,0.25)]'
-                              : 'bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white border border-white/[0.06]'
-                          }`}
-                        >
-                          <ThumbsDown size={12} className={currentVote === 'dislike' ? 'fill-current' : ''} />
-                          <span>{item.dislikes}</span>
                         </button>
                       </div>
 

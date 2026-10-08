@@ -172,6 +172,13 @@ export const useStore = create<StoreState>((set, get) => ({
     } catch (e) {
       console.error('Launch error', e);
       set({ gameState: { status: 'error', message: launchErrorMessage(e) } });
+    } finally {
+      // Installation may finish even if a later game startup step fails.
+      const directory = get().settings?.gameDirectory;
+      try {
+        const status = await window.electronAPI.getModpackStatus();
+        if (get().settings?.gameDirectory === directory) set({ modpackStatus: status });
+      } catch (e) { console.error('Failed to refresh installed modpack status', e); }
     }
   },
 

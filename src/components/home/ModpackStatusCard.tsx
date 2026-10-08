@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, ArrowUpCircle } from 'lucide-react';
+import { Check, ArrowUpCircle, Download, Loader2 } from 'lucide-react';
 import { GlassCard } from '../ui/GlassCard';
 import { useStore } from '../../store/store';
 import modpackIcon from '../../assets/icons/homestead-modpack-icon.png';
@@ -8,7 +8,9 @@ export const ModpackStatusCard: React.FC = () => {
   const { modpackStatus, launcherConfig } = useStore();
 
   const name = launcherConfig?.modpack?.name || 'Homestead Cozy';
-  const version = launcherConfig?.modpack?.version || '1.0.0';
+  const version = modpackStatus?.currentVersion || launcherConfig?.modpack?.version;
+  const checking = !modpackStatus;
+  const hasInstalledVersion = !!modpackStatus?.currentVersion;
   const hasUpdate = modpackStatus?.updateAvailable ?? false;
 
   return (
@@ -19,20 +21,24 @@ export const ModpackStatusCard: React.FC = () => {
         </div>
 
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] text-white/40 uppercase tracking-wider font-medium">Установленная сборка</div>
+          <div className="text-[10px] text-white/40 uppercase tracking-wider font-medium">{hasInstalledVersion ? 'Установленная сборка' : 'Игровая сборка'}</div>
           <div className="text-xs font-bold text-white tracking-wide truncate">
-            {name} <span className="text-fuchsia-300 font-semibold">v{version}</span>
+            {name} {version && <span className="text-fuchsia-300 font-semibold">v{version}</span>}
           </div>
         </div>
       </div>
 
       <div className="flex items-center justify-between rounded-lg border border-emerald-400/15 bg-emerald-400/[0.06] px-3 py-2">
         <div className="flex items-center gap-2 min-w-0">
-          {hasUpdate ? (
+          {checking ? (
+            <><Loader2 size={14} className="text-white/40 shrink-0 animate-spin" /><span className="text-[11px] font-semibold text-white/50 truncate">Проверяем сборку</span></>
+          ) : !hasInstalledVersion ? (
+            <><Download size={14} className="text-amber-400 shrink-0" /><span className="text-[11px] font-semibold text-amber-300 truncate">Установится при запуске</span></>
+          ) : hasUpdate ? (
             <>
               <ArrowUpCircle size={14} className="text-amber-400 shrink-0" />
               <span className="text-[11px] font-semibold text-amber-300 truncate">
-                Обновление готово
+                Доступно обновление
               </span>
             </>
           ) : (

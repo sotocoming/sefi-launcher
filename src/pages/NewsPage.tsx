@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Newspaper, ExternalLink, ThumbsUp, ThumbsDown, Calendar } from 'lucide-react';
+import { Newspaper, ExternalLink, ThumbsUp, ThumbsDown, Calendar, ChevronDown } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { useStore } from '../store/store';
 
@@ -11,6 +11,11 @@ interface NewsPageProps {
 export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
   const { news, setNews, activeAccount } = useStore();
   const [activeFilter, setActiveFilter] = useState<'all' | 'event' | 'update' | 'news'>('all');
+  const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const [userVotes, setUserVotes] = useState<Record<string, 'like' | 'dislike' | null>>({});
   const [authorized, setAuthorized] = useState(false);
@@ -38,7 +43,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
       tag: (n.tag || 'news') as 'event' | 'update' | 'news',
       likes: n.likes ?? 0,
       dislikes: n.dislikes ?? 0,
-      image: n.image || '',
+      image: n.image_launcher || n.image || '',
     }));
 
   const filteredItems = activeFilter === 'all'
@@ -158,6 +163,9 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
             const tagInfo = tagLabels[item.tag] || tagLabels.news;
             const currentVote = userVotes[item.id];
 
+            const isExpanded = !!expandedIds[item.id];
+            const isLong = (item.body || '').length > 200 || (item.body || '').split('\n').length > 4;
+
             return (
               <GlassCard
                 key={item.id}
@@ -165,7 +173,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
               >
                 <div className="flex flex-col md:flex-row">
                   {item.image && (
-                    <div className="h-44 md:h-auto md:w-64 shrink-0 overflow-hidden bg-black/40">
+                    <div className="h-48 md:w-64 md:aspect-[3/4] md:max-h-[380px] md:self-start shrink-0 overflow-hidden bg-black/40">
                       <img
                         src={item.image}
                         alt={item.title}
@@ -193,9 +201,20 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
                         {item.title}
                       </h2>
 
-                      <p className="text-xs leading-relaxed text-white/60 whitespace-pre-line">
+                      <p className={`text-xs leading-relaxed text-white/60 whitespace-pre-line ${isExpanded ? '' : 'line-clamp-4'}`}>
                         {item.body}
                       </p>
+
+                      {isLong && (
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(item.id)}
+                          className="mt-2.5 inline-flex items-center gap-1 text-xs font-medium text-fuchsia-300/90 hover:text-fuchsia-200 transition cursor-pointer"
+                        >
+                          <span>{isExpanded ? 'Свернуть' : 'Читать полностью'}</span>
+                          <ChevronDown size={13} className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                        </button>
+                      )}
                     </div>
 
                     <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3">

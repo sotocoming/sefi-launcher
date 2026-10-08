@@ -51,9 +51,9 @@ export const NewsBanner: React.FC<NewsBannerProps> = ({ onOpenNews }) => {
       {/* Left: Thumbnail & Headline */}
       <div className="flex items-center gap-2.5 min-w-0">
         <div className="relative size-7 shrink-0 overflow-hidden rounded-lg border border-white/[0.08] bg-black/50">
-          {latest.image ? (
+          {(latest.image_launcher || latest.image) ? (
             <img
-              src={latest.image}
+              src={latest.image_launcher || latest.image}
               alt=""
               className="size-full object-cover transition-transform duration-300 group-hover:scale-110"
             />

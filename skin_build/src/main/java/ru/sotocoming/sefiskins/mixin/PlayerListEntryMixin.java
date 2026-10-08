@@ -1,4 +1,6 @@
-package ru.sotocoming.sefiskins;
+package ru.sotocoming.sefiskins.mixin;
+import ru.sotocoming.sefiskins.CommunitySkins;
+import ru.sotocoming.sefiskins.SkinIdentity;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import net.minecraft.client.network.PlayerListEntry;

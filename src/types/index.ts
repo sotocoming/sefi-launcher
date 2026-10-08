@@ -86,6 +86,9 @@ export interface NewsItem {
   body: string;
   date: string;
   image?: string;
+  image_launcher?: string;
+  image_discord?: string;
+  image_site?: string;
   tag?: 'event' | 'update' | 'news';
   url?: string;
   likes?: number;

@@ -44,7 +44,7 @@ export const NewsPanel: React.FC = () => {
           date: [n.date, n.time].filter(Boolean).join(' ') || n.date || '',
           tag: n.tag || 'news',
           likes: n.likes || 0,
-          image: n.image || defaultNews[i % defaultNews.length].image,
+          image: n.image_launcher || n.image || defaultNews[i % defaultNews.length].image,
         }))
     : defaultNews.map(n => ({ ...n, tag: 'news' as const, likes: 0 }));
 

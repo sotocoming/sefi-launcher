@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "sefi-skins",
+  "version": "1.0.0",
+  "name": "SEFI Skins",
+  "description": "Shared community skins with official textures taking priority",
+  "license": "MIT",
+  "environment": "client",
+  "mixins": [
+    "sefi-skins.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "1.20.1",
+    "java": ">=17"
+  }
+}

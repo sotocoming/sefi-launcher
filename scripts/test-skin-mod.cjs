@@ -1,0 +1,26 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),os=require('node:os');
+const AdmZip=require('adm-zip');
+const project=path.resolve(__dirname,'..');
+const temp=fs.mkdtempSync(path.join(project,'design','skin-install-'));
+const mods=path.join(temp,'mods');fs.mkdirSync(mods);
+fs.writeFileSync(path.join(mods,'sefi-skins-0.9.0.jar'),'old');fs.writeFileSync(path.join(mods,'other-mod.jar'),'user');
+const context={exports:{},process:{resourcesPath:path.join(temp,'missing')},require(id){if(id==='electron')return {app:{getAppPath:()=>project}};return require(id);}};
+vm.runInNewContext(fs.readFileSync(path.join(project,'dist-electron/electron/minecraft/skin-mod.js'),'utf8'),context);
+(async()=>{
+ await context.exports.ensureSefiSkinMod(temp);await context.exports.ensureSefiSkinMod(temp);
+ const bundled=fs.readFileSync(path.join(project,'resources/mods/sefi-skins-1.0.0.jar'));
+ assert.deepEqual(fs.readFileSync(path.join(mods,'sefi-skins-1.0.0.jar')),bundled);
+ assert.equal(fs.readFileSync(path.join(mods,'other-mod.jar'),'utf8'),'user');
+ assert.equal(fs.existsSync(path.join(mods,'sefi-skins-0.9.0.jar')),false);
+ const backups=fs.readdirSync(path.join(temp,'sefi-backups'));assert.equal(backups.length,1);
+ assert.equal(fs.readFileSync(path.join(temp,'sefi-backups',backups[0],'sefi-skins-0.9.0.jar'),'utf8'),'old');
+ const jar=new AdmZip(bundled);const meta=JSON.parse(jar.readAsText('fabric.mod.json'));
+ assert.equal(meta.environment,'client');assert.equal(meta.id,'sefi-skins');
+ const mixin=JSON.parse(jar.readAsText('sefi-skins.mixins.json'));assert.deepEqual(mixin.client,['PlayerListEntryMixin']);
+ const mappings=JSON.parse(jar.readAsText('sefi-skins.refmap.json')).mappings;
+ assert(Object.keys(mappings).some(n=>n.includes('PlayerListEntryMixin')));
+ assert(jar.getEntry('ru/sotocoming/sefiskins/SkinIdentity.class'));
+ const launcher=fs.readFileSync(path.join(project,'electron/minecraft/launcher.ts'),'utf8');
+ assert(launcher.indexOf('await ensureSefiSkinMod(settings.gameDirectory)')<launcher.indexOf("if (activeAccount.type === 'offline' && activeAccount.communityToken)"));
+ console.log('PASS: bundled remapped Fabric jar, official identity policy, universal installation, repeat install and backup; unrelated mods preserved.');
+})().catch(e=>{console.error(e);process.exitCode=1;});

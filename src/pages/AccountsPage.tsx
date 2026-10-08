@@ -1,35 +1,16 @@
+import { SkinEditor } from '../components/accounts/SkinEditor';
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CircleUserRound, Plus, Trash2, Check, ShieldCheck, Box, Sparkles, UserCheck, AlertCircle, X } from 'lucide-react';
-import { GlassCard } from '../components/ui/GlassCard';
+import { motion } from 'framer-motion';
+import { Trash2, Check, Box, AlertCircle } from 'lucide-react';
 import { useStore } from '../store/store';
-import { Account } from '../types';
-
-interface ConfirmModalState {
-  accountId: string;
-  accountName: string;
-}
 
 export const AccountsPage: React.FC = () => {
   const { accounts, activeAccount, setAccounts, setActiveAccount } = useStore();
-  const [offlineName, setOfflineName] = useState('');
   const [isLoggingInMs, setIsLoggingInMs] = useState(false);
   const [isLoggingInCommunity, setIsLoggingInCommunity] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [linkingId, setLinkingId] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState('');
-  const [confirmModal, setConfirmModal] = useState<ConfirmModalState | null>(null);
-
-  // If a licensed account exists with Twitch linked, or with matching UUID, hide redundant offline profile
-  const displayedAccounts = accounts.filter((acc) => {
-    if (acc.type === 'offline' && acc.communityToken) {
-      const hasLicensed = accounts.some(
-        (other) => other.type === 'microsoft' && (other.twitchLogin === acc.twitchLogin || other.uuid === acc.uuid)
-      );
-      if (hasLicensed) return false;
-    }
-    return true;
-  });
 
   const handleMicrosoftLogin = async () => {
     setIsLoggingInMs(true);
@@ -68,7 +49,6 @@ export const AccountsPage: React.FC = () => {
     setLinkingId(id);
     setErrorMsg('');
     setSuccessMsg('');
-    setConfirmModal(null);
     try {
       const linked = await window.electronAPI.linkMinecraftAccount(id);
       if (linked) {
@@ -81,19 +61,6 @@ export const AccountsPage: React.FC = () => {
       setAccounts(updated);
       setActiveAccount(updated.find(a => a.active) || null);
       setLinkingId(null);
-    }
-  };
-
-  const handleSelect = async (account: Account) => {
-    try {
-      if (window.electronAPI?.setActiveAccount) {
-        await window.electronAPI.setActiveAccount(account.id);
-        const updated = await window.electronAPI.getAccounts();
-        setAccounts(updated);
-      }
-      setActiveAccount(account);
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -464,6 +431,7 @@ export const AccountsPage: React.FC = () => {
           </div>
         </div>
       </div>
+      <SkinEditor key={activeAccount?.id || 'none'} account={activeAccount} />
     </motion.div>
   );
 };

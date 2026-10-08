@@ -8,6 +8,7 @@ import { getSettings, saveSettings, getLauncherConfig } from './config';
 import { getServerStatus } from './server-status';
 import { getAccounts, addOfflineAccount, loginMicrosoft, loginCommunity, linkMinecraftAccount, refreshCommunityProfile, removeAccount, setActiveAccount } from './minecraft/accounts';
 import { getModpackStatus } from './minecraft/modpack';
+import { chooseSkin, getCommunitySkin, saveCommunitySkin, resetCommunitySkin } from './minecraft/skins';
 import { launchGame } from './minecraft/launcher';
 
 const isDev = !app.isPackaged;
@@ -105,6 +106,19 @@ function setupIpc() {
 
   ipcMain.handle('get-settings', getSettings);
   ipcMain.handle('save-settings', async (_, settings) => await saveSettings(settings));
+
+  function skinWindow(event: Electron.IpcMainInvokeEvent): BrowserWindow {
+    if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== mainWindow.webContents.mainFrame) {
+      throw new Error('Скины доступны только из основного окна лаунчера.');
+    }
+    return mainWindow;
+  }
+  ipcMain.handle('choose-skin', event => chooseSkin(skinWindow(event)));
+  ipcMain.handle('get-community-skin', (event, id: string) => { skinWindow(event); return getCommunitySkin(id); });
+  ipcMain.handle('save-community-skin', (event, id: string, png: string, model: 'classic' | 'slim') => {
+    skinWindow(event); return saveCommunitySkin(id, png, model);
+  });
+  ipcMain.handle('reset-community-skin', (event, id: string) => { skinWindow(event); return resetCommunitySkin(id); });
 
   ipcMain.handle('get-accounts', getAccounts);
   ipcMain.handle('add-offline-account', async (_, username) => await addOfflineAccount(username));

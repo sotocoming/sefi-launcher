@@ -5,6 +5,8 @@ import type { GameState, DownloadProgress } from '../../src/types';
 import { getSettings, getLauncherConfig } from '../config';
 import { getAccounts } from './accounts';
 import { getJavaPath } from './java';
+import { ensureSefiSkinMod } from './skin-mod';
+import { skinApiOrigin } from './skins';
 import { startTicketBroker, redactLaunchLog } from './ticket-broker';
 import { getModpackStatus, installModpack, ensureSefiAuthMod } from './modpack';
 import { ensureServerInServersDat } from './servers-dat';
@@ -148,7 +150,8 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   const serverName = launcherConfig?.server?.name || 'Sweet Home';
   const fullAddress = serverPort === 25565 ? serverHost : `${serverHost}:${serverPort}`;
 
-  const customArgs: string[] = [];
+  await ensureSefiSkinMod(settings.gameDirectory);
+  const customArgs: string[] = [`-Dsefi.skinApi=${skinApiOrigin()}`];
   // Remove legacy credential artifacts. The new protocol uses memory-only, connection-bound proofs.
   await fs.unlink(path.join(settings.gameDirectory, 'sefi_ticket.txt')).catch(() => {});
   if (activeAccount.type === 'offline' && activeAccount.communityToken) {

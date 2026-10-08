@@ -3,6 +3,7 @@ import { launchErrorMessage } from '../utils/errors';
 import {
   Settings,
   Account,
+  CommunitySkin,
   ModpackStatus,
   ServerStatus,
   LauncherConfig,
@@ -19,6 +20,9 @@ interface StoreState {
   settings: Settings | null;
   accounts: Account[];
   activeAccount: Account | null;
+  communitySkins: Record<string, CommunitySkin | null>;
+  loadCommunitySkin: (id: string) => Promise<CommunitySkin | null>;
+  setCommunitySkin: (id: string, skin: CommunitySkin | null) => void;
   modpackStatus: ModpackStatus | null;
   serverStatus: ServerStatus | null;
   launcherConfig: LauncherConfig | null;
@@ -46,6 +50,8 @@ interface StoreState {
   installLauncherUpdate: () => Promise<void>;
 }
 
+const skinRequests = new Map<string, Promise<CommunitySkin | null>>();
+
 let settingsSaveQueue: Promise<void> = Promise.resolve();
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -55,6 +61,19 @@ export const useStore = create<StoreState>((set, get) => ({
   settings: null,
   accounts: [],
   activeAccount: null,
+  communitySkins: {},
+  setCommunitySkin: (id, skin) => set(state => ({ communitySkins: { ...state.communitySkins, [id]: skin } })),
+  loadCommunitySkin: (id) => {
+    const cached = get().communitySkins;
+    if (Object.prototype.hasOwnProperty.call(cached, id)) return Promise.resolve(cached[id]);
+    const pending = skinRequests.get(id);
+    if (pending) return pending;
+    const request = window.electronAPI.getCommunitySkin(id).then(skin => {
+      get().setCommunitySkin(id, skin); return skin;
+    }).finally(() => { skinRequests.delete(id); });
+    skinRequests.set(id, request);
+    return request;
+  },
   modpackStatus: null,
   serverStatus: null,
   launcherConfig: null,

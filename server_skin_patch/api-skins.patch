@@ -1,0 +1,22 @@
+--- a/web/api.py
++++ b/web/api.py
+@@ -218,6 +218,19 @@
+             return {"ok": True, "user": security.public_user(user)}, 200
+ 
+         # Публичные эндпоинты профиля игрока на сайте
++        if path == '/api/public/community/skin' or path.startswith('/api/public/community/skins/'):
++            from web import community, community_skins
++            try:
++                if path == '/api/public/community/skin':
++                    if method not in ('GET', 'POST'): raise ApiError('Метод не поддерживается.', 405)
++                    user = community.get_user_by_session((ctx.get('headers') or {}).get('X-Community-Token'))
++                    return community_skins.own(user, body if method == 'POST' else None), 200
++                if method != 'GET': raise ApiError('Метод не поддерживается.', 405)
++                name = query.get('name', [''])[0]
++                return community_skins.public(path.rsplit('/', 1)[-1], name), 200
++            except community_skins.SkinError as exc:
++                raise ApiError(str(exc), exc.status) from None
++
+         if path == "/api/public/community/me" and method == "GET":
+             from web import community
+             req_headers = ctx.get("headers") or {}

@@ -7,7 +7,7 @@ import { useStore } from '../../store/store';
 export const PlayButton: React.FC = () => {
   const { gameState, launch, activeAccount } = useStore();
   const [copyResult, setCopyResult] = useState<{ message: string; ok: boolean } | null>(null);
-  const errorMessage = launchErrorMessage(gameState.message);
+  const errorMessage = launchErrorMessage(gameState.status === 'error' ? gameState.message : '');
   const copyError = async () => {
     try { await navigator.clipboard.writeText(errorMessage); setCopyResult({ message: errorMessage, ok: true }); }
     catch { setCopyResult({ message: errorMessage, ok: false }); }

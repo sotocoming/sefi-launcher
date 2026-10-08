@@ -131,3 +131,6 @@ export interface UpdateInfo {
   total?: number;
   error?: string;
 }
+
+export interface SkinDraft { png: string; filename: string; }
+export interface CommunitySkin { png: string; model: 'classic' | 'slim'; sha256: string; }

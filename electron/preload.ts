@@ -11,6 +11,10 @@ const api: IElectronAPI = {
   selectGameDirectory: () => ipcRenderer.invoke('select-game-directory'),
   openDirectory: (dirPath: string) => ipcRenderer.invoke('open-directory', dirPath),
   
+  getCommunitySkin: id => ipcRenderer.invoke('get-community-skin', id),
+  chooseSkin: () => ipcRenderer.invoke('choose-skin'),
+  saveCommunitySkin: (id, png, model) => ipcRenderer.invoke('save-community-skin', id, png, model),
+  resetCommunitySkin: id => ipcRenderer.invoke('reset-community-skin', id),
   getAccounts: () => ipcRenderer.invoke('get-accounts'),
   addOfflineAccount: (username: string) => ipcRenderer.invoke('add-offline-account', username),
   loginMicrosoft: () => ipcRenderer.invoke('login-microsoft'),

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Map, ExternalLink, RotateCw, Compass } from 'lucide-react';
+import { ExternalLink, RotateCw, Compass } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 
 export const MapPage: React.FC = () => {

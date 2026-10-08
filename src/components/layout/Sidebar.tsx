@@ -1,3 +1,4 @@
+import { PlayerAvatar } from '../accounts/PlayerAvatar';
 import React from 'react';
 import { Home, Map, Newspaper, Users, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -24,17 +25,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
     { id: 'accounts' as const, label: 'Аккаунты', icon: Users },
     { id: 'settings' as const, label: 'Настройки', icon: Settings },
   ];
-
-  const getAvatarUrl = () => {
-    if (activeAccount?.skinUrl && activeAccount.skinUrl.includes('mc-heads.net')) {
-      return activeAccount.skinUrl;
-    }
-    const identifier = activeAccount?.uuid || activeAccount?.username;
-    if (identifier) {
-      return `https://mc-heads.net/avatar/${encodeURIComponent(identifier)}/64`;
-    }
-    return `https://mc-heads.net/avatar/Alex/64`;
-  };
 
   return (
     <aside className="flex w-[224px] shrink-0 flex-col border-r border-white/[0.06] bg-[#0c0c12] z-30 select-none">
@@ -94,14 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
           className="group cursor-pointer rounded-[14px] border border-white/[0.07] bg-white/[0.035] p-3 transition hover:border-fuchsia-400/30 hover:bg-white/[0.06]"
         >
           <div className="flex items-center gap-3">
-            <img
-              src={getAvatarUrl()}
-              alt="Avatar"
-              className="size-10 rounded-[9px] bg-white/5 object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://mc-heads.net/avatar/Alex/48';
-              }}
-            />
+            <PlayerAvatar account={activeAccount} />
 
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-semibold text-white">

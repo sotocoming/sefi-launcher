@@ -1,5 +1,5 @@
 import React from 'react';
-import { Minus, Square, X, DownloadCloud, RefreshCw, Sparkles } from 'lucide-react';
+import { Minus, Square, X, DownloadCloud, Sparkles } from 'lucide-react';
 import { useStore } from '../../store/store';
 
 interface WindowButtonProps {

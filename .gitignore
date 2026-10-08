@@ -14,3 +14,12 @@ release
 /mod_build/.gradle/
 /mod_build/build/
 .env.*
+
+/skin_build/.gradle/
+/skin_build/build/
+/.tools/
+/release-skins-preview/
+hub.js
+public-sites.json
+test_mc_verifier.py
+

@@ -30,6 +30,11 @@ export interface IElectronAPI {
   removeAccount(id: string): Promise<void>;
   setActiveAccount(id: string): Promise<void>;
 
+  getCommunitySkin(id: string): Promise<import('./index').CommunitySkin | null>;
+  chooseSkin(): Promise<import('./index').SkinDraft | null>;
+  saveCommunitySkin(id: string, png: string, model: 'classic' | 'slim'): Promise<import('./index').CommunitySkin | null>;
+  resetCommunitySkin(id: string): Promise<null>;
+
   // Modpack
   getModpackStatus(): Promise<ModpackStatus>;
   importModpackArchive(): Promise<{ cancelled: boolean; name?: string }>;

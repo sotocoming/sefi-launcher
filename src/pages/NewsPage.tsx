@@ -173,7 +173,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
               >
                 <div className="flex flex-col md:flex-row">
                   {item.image && (
-                    <div className="h-48 md:w-64 md:aspect-[3/4] md:max-h-[380px] md:self-start shrink-0 overflow-hidden bg-black/40">
+                    <div className="h-48 md:w-64 md:h-48 shrink-0 overflow-hidden bg-black/40">
                       <img
                         src={item.image}
                         alt={item.title}

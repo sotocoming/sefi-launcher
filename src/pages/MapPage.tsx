@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, RotateCw, Compass } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
+import { useStore } from '../store/store';
 
 export const MapPage: React.FC = () => {
+  const { launcherConfig } = useStore();
+  const serverName = launcherConfig?.modpack?.name || 'сервера';
   const [iframeKey, setIframeKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -38,7 +41,7 @@ export const MapPage: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold tracking-tight text-white">
-                Карта сервера Homestead
+                Карта сервера {serverName}
               </h1>
               <span className="rounded-full bg-emerald-500/15 border border-emerald-400/25 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
                 Онлайн мир

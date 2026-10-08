@@ -19,7 +19,10 @@ if (profileDirectory) {
   fs.mkdirSync(path.resolve(profileDirectory), { recursive: true });
   app.setPath('userData', path.resolve(profileDirectory));
 }
-if (process.platform === 'win32') app.setAppUserModelId('com.sefi.launcher');
+if (process.platform === 'win32') {
+  const appId = isDev ? 'com.sefi.launcher.dev' : 'com.sefi.launcher';
+  app.setAppUserModelId(appId);
+}
 
 let mainWindow: BrowserWindow | null = null;
 let hiddenForGame = false;
@@ -56,7 +59,7 @@ function createWindow() {
     minWidth: 1100,
     minHeight: 680,
     frame: false,
-    icon: app.isPackaged ? path.join(process.resourcesPath, 'brand/icon.ico') : path.join(app.getAppPath(), 'build/icon.ico'),
+    icon: app.isPackaged ? path.join(process.resourcesPath, 'brand/icon.ico') : path.join(app.getAppPath(), 'build/icon.png'),
     backgroundColor: '#09090D',
     webPreferences: {
       nodeIntegration: false,
@@ -64,6 +67,12 @@ function createWindow() {
       sandbox: true,
       preload: path.join(__dirname, 'preload.js')
     }
+  });
+
+  if (isDev && process.platform === 'win32') mainWindow.setAppDetails({
+    appId: 'com.sefi.launcher.dev',
+    appIconPath: path.join(app.getAppPath(), 'build/icon.ico'),
+    appIconIndex: 0,
   });
 
   // Allow in-app embedding of server map and news iframe strictly from trusted domain

@@ -16,6 +16,8 @@ export interface IElectronAPI {
   // Settings
   getSettings(): Promise<Settings>;
   saveSettings(settings: Settings): Promise<void>;
+  getJavaStatus(): Promise<import('./index').JavaStatus>;
+  prepareJava(): Promise<import('./index').JavaStatus>;
   selectJavaPath(): Promise<string | null>;
   selectGameDirectory(): Promise<string | null>;
   openDirectory(dirPath: string): Promise<void>;

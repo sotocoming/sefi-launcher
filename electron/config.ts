@@ -2,6 +2,7 @@ import { app } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
 import { randomUUID } from 'crypto';
+import { normalizeGameDirectory } from './minecraft/game-directory';
 import type { Settings, LauncherConfig } from '../src/types';
 
 let settingsWrites: Promise<void> = Promise.resolve();
@@ -25,7 +26,8 @@ export async function getSettings(): Promise<Settings> {
 
   try {
     const data = await fs.readFile(settingsFile, 'utf-8');
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
+    const settings = { ...DEFAULT_SETTINGS, ...JSON.parse(data) };
+    return { ...settings, gameDirectory: normalizeGameDirectory(settings.gameDirectory) };
   } catch (e) {
     return DEFAULT_SETTINGS;
   }
@@ -35,7 +37,7 @@ export async function saveSettings(settings: Settings): Promise<void> {
   if (!settings || typeof settings.fullscreen !== 'boolean' || typeof settings.closeOnLaunch !== 'boolean') {
     throw new Error('Некорректные настройки экрана и запуска.');
   }
-  const serialized = JSON.stringify(settings, null, 2);
+  const serialized = JSON.stringify({ ...settings, gameDirectory: normalizeGameDirectory(settings.gameDirectory) }, null, 2);
   const task = settingsWrites.then(async () => {
     const userDataPath = app.getPath('userData');
     await fs.mkdir(userDataPath, { recursive: true });

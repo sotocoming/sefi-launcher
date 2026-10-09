@@ -11,6 +11,8 @@ import { getServerStatus } from './server-status';
 import { getAccounts, addOfflineAccount, loginMicrosoft, loginCommunity, linkMinecraftAccount, refreshCommunityProfile, removeAccount, setActiveAccount } from './minecraft/accounts';
 import { getModpackStatus } from './minecraft/modpack';
 import { chooseSkin, getCommunitySkin, saveCommunitySkin, resetCommunitySkin } from './minecraft/skins';
+import { getJavaStatus, getJavaPath, inspectJava } from './minecraft/java';
+import { prepareGameDirectory } from './minecraft/game-directory';
 import { launchGame } from './minecraft/launcher';
 
 const isDev = !app.isPackaged;
@@ -233,6 +235,20 @@ function setupIpc() {
     });
   });
 
+  ipcMain.handle('get-java-status', async () => getJavaStatus((await getSettings()).javaPath));
+  ipcMain.handle('prepare-java', async () => {
+    if (gameBusy) throw new Error('Дождитесь завершения запуска или закройте игру.');
+    gameBusy = true;
+    try {
+      mainWindow?.webContents.send('game-state-change', { status: 'checking' });
+      await getJavaPath(progress => {
+        mainWindow?.webContents.send('download-progress', progress);
+        mainWindow?.webContents.send('game-state-change', { status: 'downloading', progress });
+      });
+      return await getJavaStatus('');
+    } finally { gameBusy = false; mainWindow?.webContents.send('game-state-change', { status: 'idle' }); }
+  });
+
   ipcMain.handle('select-java-path', async () => {
     if (!mainWindow) return null;
     const result = await dialog.showOpenDialog(mainWindow, {
@@ -244,6 +260,7 @@ function setupIpc() {
       ]
     });
     if (!result.canceled && result.filePaths.length > 0) {
+      await inspectJava(result.filePaths[0]);
       return result.filePaths[0];
     }
     return null;
@@ -256,7 +273,7 @@ function setupIpc() {
       properties: ['openDirectory', 'createDirectory']
     });
     if (!result.canceled && result.filePaths.length > 0) {
-      return result.filePaths[0];
+      return await prepareGameDirectory(result.filePaths[0]);
     }
     return null;
   });

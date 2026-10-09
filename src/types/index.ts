@@ -140,3 +140,12 @@ export interface UpdateInfo {
 
 export interface SkinDraft { png: string; filename: string; }
 export interface CommunitySkin { png: string; model: 'classic' | 'slim'; sha256: string; }
+
+export interface JavaStatus {
+  status: 'ready' | 'missing' | 'error';
+  source: 'managed' | 'custom';
+  version?: string;
+  architecture?: string;
+  path?: string;
+  message?: string;
+}

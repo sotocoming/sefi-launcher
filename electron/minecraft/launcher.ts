@@ -4,7 +4,8 @@ import path from 'path';
 import type { GameState, DownloadProgress } from '../../src/types';
 import { getSettings, getLauncherConfig } from '../config';
 import { getAccounts } from './accounts';
-import { getJavaPath } from './java';
+import { resolveJava } from './java';
+import { prepareGameDirectory } from './game-directory';
 import { ensureSefiSkinMod } from './skin-mod';
 import { skinApiOrigin } from './skins';
 import { startTicketBroker, redactLaunchLog } from './ticket-broker';
@@ -81,11 +82,10 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     }
   }
 
-  const javaPath = (settings.javaPath && settings.javaPath.trim())
-    ? settings.javaPath.trim()
-    : await getJavaPath((progress) => {
-        onStateChange({ status: 'downloading', progress });
-      });
+  settings.gameDirectory = await prepareGameDirectory(settings.gameDirectory);
+  const javaPath = await resolveJava(settings.javaPath || '', settings.ramMax, (progress) => {
+    onStateChange({ status: 'downloading', progress });
+  });
 
   const status = await getModpackStatus(settings.gameDirectory);
   if (!status.installed || status.updateAvailable) {
@@ -126,11 +126,18 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     });
   });
 
+  const startupLog: string[] = [];
+  const rememberStartup = (message: string) => {
+    startupLog.push(redactLaunchLog(String(message)).slice(-1500));
+    if (startupLog.length > 12) startupLog.shift();
+  };
   launcher.on('debug', (msg: string) => {
+    rememberStartup(msg);
     console.log('[Minecraft Debug]:', redactLaunchLog(msg));
   });
 
   launcher.on('data', (data: string) => {
+    rememberStartup(data);
     console.log('[Minecraft Log]:', data);
   });
 
@@ -213,7 +220,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       onStateChange({ status: 'error', message: error.message || 'Не удалось запустить Java.' });
     });
     if (!child || !child.pid) {
-      throw new Error('Процесс Minecraft не смог стартовать (проверьте логи Java)');
+      throw new Error('Процесс Minecraft не смог стартовать. Java: ' + javaPath + '\n' + startupLog.join('\n').slice(-4000));
     }
     gameRunning = true;
     onStateChange({ status: 'running', pid: child.pid });

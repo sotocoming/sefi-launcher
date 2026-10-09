@@ -7,6 +7,8 @@ const api: IElectronAPI = {
   
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings: Settings) => ipcRenderer.invoke('save-settings', settings),
+  getJavaStatus: () => ipcRenderer.invoke('get-java-status'),
+  prepareJava: () => ipcRenderer.invoke('prepare-java'),
   selectJavaPath: () => ipcRenderer.invoke('select-java-path'),
   selectGameDirectory: () => ipcRenderer.invoke('select-game-directory'),
   openDirectory: (dirPath: string) => ipcRenderer.invoke('open-directory', dirPath),

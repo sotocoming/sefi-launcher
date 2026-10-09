@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { MemoryStick, Coffee, Monitor, FolderOpen, Sparkles, DownloadCloud, RotateCcw } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { useStore } from '../store/store';
+import type { JavaStatus } from '../types';
 
 export const SettingsPage: React.FC = () => {
   const { settings, updateSettings, setUpdateInfo, updateInfo, gameState, installLauncherUpdate } = useStore();
@@ -30,7 +31,29 @@ export const SettingsPage: React.FC = () => {
   const [ram, setRam] = useState(settings?.ramMax ? Math.round(settings.ramMax / 1024) : 6);
   const [fullscreen, setFullscreen] = useState(settings?.fullscreen ?? false);
   const [closeAfterLaunch, setCloseAfterLaunch] = useState(settings?.closeOnLaunch ?? false);
-  const [javaPath, setJavaPath] = useState(settings?.javaPath || 'Автоопределение (Java 17/21)');
+  const [javaPath, setJavaPath] = useState(settings?.javaPath || 'Java SEFI · автоматическая установка');
+  const [javaStatus, setJavaStatus] = useState<JavaStatus | null>(null);
+  const [javaBusy, setJavaBusy] = useState(false);
+  const [javaError, setJavaError] = useState('');
+  const [javaTask, setJavaTask] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    setJavaStatus(null);
+    window.electronAPI.getJavaStatus().then(value => { if (!cancelled) setJavaStatus(value); })
+      .catch(() => { if (!cancelled) setJavaStatus({ status: 'error', source: settings?.javaPath ? 'custom' : 'managed', message: 'Не удалось проверить Java.' }); });
+    return () => { cancelled = true; };
+  }, [settings?.javaPath, gameState.status]);
+  useEffect(() => window.electronAPI.onDownloadProgress(progress => {
+    if (progress.stage === 'java') setJavaTask(progress.task + (progress.total > 100 ? ' · ' + Math.round(progress.percentage) + '%' : ''));
+  }), []);
+  const cleanJavaError = (error: unknown) => (error instanceof Error ? error.message : String(error)).replace(/^Error invoking remote method '[^']+': (?:Error: )?/, '');
+  const handlePrepareJava = async () => {
+    if (playing || javaBusy || !settings) return;
+    setJavaBusy(true); setJavaError(''); setJavaTask('Проверка Java SEFI…');
+    try { setJavaStatus(await window.electronAPI.prepareJava()); }
+    catch (error) { setJavaError(cleanJavaError(error)); }
+    finally { setJavaBusy(false); setJavaTask(''); }
+  };
   const [gameDir, setGameDir] = useState(settings?.gameDirectory || 'C:\\Users\\...\\.sefi-launcher');
 
   useEffect(() => {
@@ -38,7 +61,7 @@ export const SettingsPage: React.FC = () => {
       setRam(Math.round(settings.ramMax / 1024));
       setFullscreen(settings.fullscreen);
       setCloseAfterLaunch(settings.closeOnLaunch);
-      if (settings.javaPath) setJavaPath(settings.javaPath);
+      setJavaPath(settings.javaPath || 'Java SEFI · автоматическая установка');
       if (settings.gameDirectory) setGameDir(settings.gameDirectory);
     }
   }, [settings]);
@@ -71,21 +94,18 @@ export const SettingsPage: React.FC = () => {
   };
 
   const handleSelectJava = async () => {
-    if (window.electronAPI?.selectJavaPath) {
+    if (playing || javaBusy || !settings) return;
+    setJavaBusy(true); setJavaError('');
+    try {
       const selected = await window.electronAPI.selectJavaPath();
-      if (selected && settings) {
-        setJavaPath(selected);
-        updateSettings({ ...settings, javaPath: selected });
-      }
-    }
+      if (selected) await updateSettings({ ...useStore.getState().settings!, javaPath: selected });
+    } catch (error) { setJavaError(cleanJavaError(error)); }
+    finally { setJavaBusy(false); }
   };
-
-  const handleResetJava = () => {
-    if (settings) {
-      const def = 'Автоопределение (Java 17/21)';
-      setJavaPath(def);
-      updateSettings({ ...settings, javaPath: '' });
-    }
+  const handleResetJava = async () => {
+    if (playing || javaBusy || !settings) return;
+    setJavaError('');
+    await updateSettings({ ...settings, javaPath: '' });
   };
 
   const handleOpenGameDir = async () => {
@@ -94,14 +114,16 @@ export const SettingsPage: React.FC = () => {
     }
   };
 
+  const [directoryError, setDirectoryError] = useState('');
   const handleSelectGameDir = async () => {
-    if (window.electronAPI?.selectGameDirectory) {
+    setDirectoryError('');
+    try {
       const selected = await window.electronAPI.selectGameDirectory();
       if (selected && settings) {
         setGameDir(selected);
-        updateSettings({ ...settings, gameDirectory: selected });
+        await updateSettings({ ...useStore.getState().settings!, gameDirectory: selected });
       }
-    }
+    } catch (error) { setDirectoryError(cleanJavaError(error)); }
   };
 
   const handleImport = async () => {
@@ -194,8 +216,8 @@ export const SettingsPage: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-white/90">Среда выполнения Java</span>
-                  <span className="rounded-md bg-emerald-400/[0.1] px-2 py-0.5 text-[10px] font-medium text-emerald-300 border border-emerald-400/20">
-                    Java 17/21 обнаружена
+                  <span className={"rounded-md px-2 py-0.5 text-[10px] font-medium border " + (javaStatus?.status === 'ready' ? 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20' : javaStatus?.status === 'error' ? 'bg-rose-400/10 text-rose-300 border-rose-400/20' : 'bg-white/5 text-white/60 border-white/10')}>
+                    {javaBusy ? 'Подготовка…' : !javaStatus ? 'Проверяем…' : javaStatus.status === 'ready' ? 'Java ' + javaStatus.version + ' · 64 бит' : javaStatus.status === 'missing' ? 'Установится при запуске' : 'Нужна проверка'}
                   </span>
                 </div>
                 <div className="mt-1 text-xs text-white/35 font-mono truncate max-w-[400px]">
@@ -207,19 +229,32 @@ export const SettingsPage: React.FC = () => {
                 {settings?.javaPath && (
                   <button
                     onClick={handleResetJava}
-                    title="Сбросить на автоопределение"
+                    disabled={playing || javaBusy || !settings}
+                    title="Использовать отдельную Java SEFI"
                     className="h-8 rounded-[8px] border border-white/[0.08] bg-white/[0.04] px-2.5 text-xs text-white/50 transition hover:bg-white/[0.08] hover:text-white cursor-pointer"
                   >
-                    Авто
+                    Java SEFI
                   </button>
                 )}
                 <button
+                  disabled={playing || javaBusy || !settings}
                   onClick={handleSelectJava}
                   className="h-8 rounded-[8px] border border-white/[0.08] bg-white/[0.04] px-3 text-xs text-white/80 transition hover:bg-white/[0.08] hover:text-white cursor-pointer"
                 >
                   Обзор...
                 </button>
               </div>
+            </div>
+
+            <div className="pt-4 space-y-2">
+              <p className="text-xs text-white/60 leading-relaxed">{settings?.javaPath ? 'Выбрана своя Java. Проверяем версию, разрядность и запуск с выделенной памятью. Чтобы перейти на автоматическую установку, нажмите «Java SEFI».' : 'SEFI скачает отдельную Java 21 для этой сборки. Она хранится в папке лаунчера и проверяется перед запуском игры.'}</p>
+              {javaStatus?.path && <p className="text-[11px] font-mono text-white/40 break-all select-text">{javaStatus.path}</p>}
+              <p role="status" className="text-xs text-white/60">{javaTask || javaStatus?.message}</p>
+              {javaError && <p role="alert" className="text-xs text-rose-300 whitespace-pre-wrap select-text">{javaError}</p>}
+              {!settings?.javaPath && <button disabled={playing || javaBusy || !settings} onClick={handlePrepareJava}
+                className="rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-3 py-2 text-xs text-fuchsia-200 disabled:opacity-50">
+                {javaBusy ? 'Подготовка Java…' : javaStatus?.status === 'ready' ? 'Проверить Java SEFI' : 'Скачать Java SEFI'}
+              </button>}
             </div>
 
             <div className="pt-4 flex items-center justify-between">
@@ -232,6 +267,7 @@ export const SettingsPage: React.FC = () => {
 
               <div className="flex items-center gap-2">
                 <button
+                  disabled={playing || javaBusy || !settings}
                   onClick={handleSelectGameDir}
                   title="Выбрать другую папку для установки игры"
                   className="h-8 rounded-[8px] border border-white/[0.08] bg-white/[0.04] px-3 text-xs text-white/80 transition hover:bg-white/[0.08] hover:text-white cursor-pointer"
@@ -239,6 +275,7 @@ export const SettingsPage: React.FC = () => {
                   Изменить...
                 </button>
                 <button
+                  disabled={!settings}
                   onClick={handleOpenGameDir}
                   title="Открыть папку в проводнике Windows"
                   className="flex h-8 items-center gap-1.5 rounded-[8px] border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 text-xs text-fuchsia-200 transition hover:bg-fuchsia-500/20 hover:text-white cursor-pointer"
@@ -249,6 +286,8 @@ export const SettingsPage: React.FC = () => {
               </div>
             </div>
           </div>
+          <p className="mt-3 text-xs text-white/40">При выборе целого диска создадим на нём папку SEFI Minecraft.</p>
+          {directoryError && <p role="alert" className="mt-2 text-xs text-rose-300 whitespace-pre-wrap select-text">{directoryError}</p>}
         </GlassCard>
 
         {/* Display & Launch Options */}

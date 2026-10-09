@@ -1,6 +1,6 @@
 plugins { id 'fabric-loom' version '1.10.5' }
 group = 'ru.sotocoming'
-version = '2.0.1'
+version = '2.0.2'
 base { archivesName = 'sefi-auth' }
 repositories { mavenCentral() }
 dependencies {

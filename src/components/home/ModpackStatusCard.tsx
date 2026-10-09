@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, ArrowUpCircle, Download, Loader2 } from 'lucide-react';
+import { Check, ArrowUpCircle, Download, Loader2, Layers3 } from 'lucide-react';
 import { GlassCard } from '../ui/GlassCard';
 import { useStore } from '../../store/store';
 import modpackIcon from '../../assets/icons/homestead-modpack-icon.png';
@@ -14,7 +14,7 @@ export const ModpackStatusCard: React.FC = () => {
   const hasUpdate = modpackStatus?.updateAvailable ?? false;
 
   return (
-    <GlassCard className="p-3.5 flex flex-col justify-between h-[122px]">
+    <GlassCard className="p-3.5 flex flex-col justify-between h-[192px]">
       <div className="flex items-center gap-2.5 min-w-0">
         <div className="size-9 shrink-0 rounded-xl overflow-hidden border border-fuchsia-400/25 bg-black/40 shadow-[0_0_12px_rgba(180,92,255,0.15)]">
           <img src={modpackIcon} alt="Icon" className="size-full object-cover" />
@@ -26,6 +26,16 @@ export const ModpackStatusCard: React.FC = () => {
             {name} {version && <span className="text-fuchsia-300 font-semibold">v{version}</span>}
           </div>
         </div>
+      </div>
+
+      <div className="rounded-lg border border-white/[0.04] bg-white/[0.025] px-2.5 py-2">
+        <div className="mb-1 flex items-center gap-1.5 text-[10px] font-medium text-fuchsia-200/70">
+          <Layers3 size={12} className="shrink-0 text-fuchsia-300/60" />
+          Моды и настройки сервера
+        </div>
+        <p className="text-[10px] leading-relaxed text-white/40">
+          {checking ? 'Уточняем установленную версию сборки.' : !hasInstalledVersion ? 'Установим всё необходимое при первом запуске.' : hasUpdate ? 'Новая версия установится при следующем запуске.' : 'Перед каждым запуском проверяем версию сборки.'}
+        </p>
       </div>
 
       <div className="flex items-center justify-between rounded-lg border border-emerald-400/15 bg-emerald-400/[0.06] px-3 py-2">

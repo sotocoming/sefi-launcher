@@ -70,6 +70,7 @@ export interface LauncherConfig {
     title?: string;
     ip: string;
     port: number;
+    endpoints?: { id: string; label: string; host: string; port: number; address: string }[];
   };
   launcher: {
     title: string;

@@ -34,9 +34,8 @@ public final class SefiAuthClient implements ClientModInitializer {
             key = null; connection = null; attempted.set(false); helloSent = false; voiceReconnect.reset(); loginFeedback.reset(); deferredLoginWarning = null;
             if (!System.getProperty("sefi.authPort", "").matches("[0-9]{4,5}")) return;
             var entry = client.getCurrentServerEntry();
-            String expected = System.getProperty("sefi.serverAddress", "").toLowerCase(Locale.ROOT).replaceFirst(":25565$", "");
-            if (entry == null || expected.isBlank()
-                    || !entry.address.toLowerCase(Locale.ROOT).replaceFirst(":25565$", "").equals(expected)) return;
+            String configured = System.getProperty("sefi.serverAddresses", System.getProperty("sefi.serverAddress", ""));
+            if (entry == null || !TrustedServerAddresses.contains(configured, entry.address)) return;
             // Only send a public ephemeral key; never a credential on JOIN.
             try {
                 key = KeyPairGenerator.getInstance("Ed25519").generateKeyPair(); connection = handler;

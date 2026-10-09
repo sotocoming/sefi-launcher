@@ -1,95 +1,50 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
+import { randomUUID } from 'crypto';
 import * as nbt from 'prismarine-nbt';
 
-export interface ServerEntry {
-  name: string;
-  ip: string;
-  acceptTextures?: boolean;
+export interface ServerEntry { id?: string; name: string; ip: string; acceptTextures?: boolean; }
+const canonical = (value: string) => value.trim().toLowerCase().replace(/:25565$/, '');
+
+/** Update SEFI-managed entries together; retain all unrelated servers and NBT data. */
+export async function ensureServersInServersDat(gameDirectory: string, entries: ServerEntry[]): Promise<void> {
+  const file = path.join(gameDirectory, 'servers.dat');
+  await fs.mkdir(gameDirectory, { recursive: true });
+  let raw: Buffer | undefined;
+  let root: any = { type: 'compound', name: '', value: {} };
+  try { raw = await fs.readFile(file); }
+  catch (error: any) { if (error.code !== 'ENOENT') throw error; }
+  if (raw) {
+    try { root = (await nbt.parse(raw)).parsed; }
+    catch { throw new Error('Не удалось прочитать список серверов Minecraft. Существующий файл сохранён.'); }
+  }
+  if (!root?.value || (root.value.servers && !Array.isArray(root.value.servers?.value?.value))) {
+    throw new Error('Неизвестный формат списка серверов Minecraft. Существующий файл сохранён.');
+  }
+  let list: any[] = root.value.servers?.value?.value || [];
+  const ids = new Set(entries.map(e => e.id || 'primary'));
+  list = list.filter(item => !item.sefiEndpointId || ids.has(item.sefiEndpointId.value));
+  const managed: any[] = [];
+  for (const entry of entries) {
+    const id = entry.id || 'primary';
+    const index = list.findIndex(item => item.sefiEndpointId?.value === id || canonical(item.ip?.value || '') === canonical(entry.ip) || (!item.sefiEndpointId && (item.name?.value || '').toLowerCase() === entry.name.toLowerCase()));
+    const item: any = index >= 0 ? list.splice(index, 1)[0] : {};
+    item.name = { type: 'string', value: entry.name };
+    item.ip = { type: 'string', value: entry.ip };
+    item.sefiEndpointId = { type: 'string', value: id };
+    if (!item.acceptTextures) item.acceptTextures = { type: 'byte', value: 1 };
+    managed.push(item);
+  }
+  root.value.servers = { type: 'list', value: { type: 'compound', value: [...managed, ...list] } };
+  const output = nbt.writeUncompressed(root);
+  const temp = file + '.' + randomUUID() + '.tmp';
+  try {
+    await fs.writeFile(temp, output, { flag: 'wx' });
+    if (raw) await fs.writeFile(file + '.sefi-backup', raw);
+    await fs.rename(temp, file);
+  } finally { await fs.unlink(temp).catch(() => {}); }
 }
 
-/**
- * Ensures the specified server is in Minecraft's servers.dat file.
- * If servers.dat does not exist, creates it.
- * If server is already present (by ip/address), updates or retains it without duplicating.
- */
-export async function ensureServerInServersDat(
-  gameDirectory: string,
-  serverName: string,
-  serverAddress: string
-): Promise<void> {
-  const serversDatPath = path.join(gameDirectory, 'servers.dat');
-
-  try {
-    if (!fs.existsSync(gameDirectory)) {
-      fs.mkdirSync(gameDirectory, { recursive: true });
-    }
-
-    let serversList: any[] = [];
-
-    if (fs.existsSync(serversDatPath)) {
-      try {
-        const fileBuffer = fs.readFileSync(serversDatPath);
-        const parsed: any = await nbt.parse(fileBuffer);
-        const rootVal = parsed?.parsed?.value || parsed?.value;
-        const listVal = rootVal?.servers?.value?.value;
-        if (Array.isArray(listVal)) {
-          serversList = listVal;
-        }
-      } catch (readErr) {
-        console.warn('Failed to parse existing servers.dat, creating a fresh one:', readErr);
-        serversList = [];
-      }
-    }
-
-    // Check if the server already exists by address OR by server name
-    const normalizedTargetIp = serverAddress.trim().toLowerCase();
-    const normalizedTargetName = serverName.trim().toLowerCase();
-
-    const existingIndex = serversList.findIndex((item: any) => {
-      const ip = (item?.ip?.value ?? item?.ip ?? '').toString().trim().toLowerCase();
-      const name = (item?.name?.value ?? item?.name ?? '').toString().trim().toLowerCase();
-      // Matches if same address or same server brand/name
-      return ip === normalizedTargetIp || name === normalizedTargetName;
-    });
-
-    const newServerNbtItem = {
-      name: { type: 'string', value: serverName },
-      ip: { type: 'string', value: serverAddress },
-      acceptTextures: { type: 'byte', value: 1 },
-    };
-
-    if (existingIndex >= 0) {
-      // Server already exists: update both name and IP to latest from remote config
-      serversList[existingIndex].name = { type: 'string', value: serverName };
-      serversList[existingIndex].ip = { type: 'string', value: serverAddress };
-      if (!serversList[existingIndex].acceptTextures) {
-        serversList[existingIndex].acceptTextures = { type: 'byte', value: 1 };
-      }
-    } else {
-      // Add our server at the very TOP of the server list so players see it first!
-      serversList.unshift(newServerNbtItem);
-    }
-
-    const nbtData: any = {
-      type: 'compound',
-      name: '',
-      value: {
-        servers: {
-          type: 'list',
-          value: {
-            type: 'compound',
-            value: serversList,
-          },
-        },
-      },
-    };
-
-    // Serialize uncompressed (Minecraft servers.dat is uncompressed NBT)
-    const outputBuffer = nbt.writeUncompressed(nbtData);
-    fs.writeFileSync(serversDatPath, outputBuffer);
-    console.log(`[ServersDat] Successfully ensured server "${serverName}" (${serverAddress}) in servers.dat`);
-  } catch (err) {
-    console.error('[ServersDat] Failed to update servers.dat:', err);
-  }
+export async function ensureServerInServersDat(gameDirectory: string, serverName: string, serverAddress: string): Promise<void> {
+  return ensureServersInServersDat(gameDirectory, [{ id: 'primary', name: serverName, ip: serverAddress }]);
 }

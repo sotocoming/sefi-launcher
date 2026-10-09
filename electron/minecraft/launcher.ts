@@ -9,7 +9,7 @@ import { ensureSefiSkinMod } from './skin-mod';
 import { skinApiOrigin } from './skins';
 import { startTicketBroker, redactLaunchLog } from './ticket-broker';
 import { getModpackStatus, installModpack, ensureSefiAuthMod } from './modpack';
-import { ensureServerInServersDat } from './servers-dat';
+import { ensureServersInServersDat } from './servers-dat';
 import { applyFullscreenSetting } from './window-options';
 
 async function ensureFabricProfile(gameDir: string, mcVersion: string, fabricVersion: string): Promise<string> {
@@ -149,6 +149,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   const serverPort = launcherConfig?.server?.port || 25565;
   const serverName = launcherConfig?.server?.name || 'Sweet Home';
   const fullAddress = serverPort === 25565 ? serverHost : `${serverHost}:${serverPort}`;
+  const endpoints = launcherConfig?.server?.endpoints?.length ? launcherConfig.server.endpoints : [{ id: 'primary', label: 'Основной', host: serverHost, port: serverPort, address: fullAddress }];
 
   await ensureSefiSkinMod(settings.gameDirectory);
   const customArgs: string[] = [`-Dsefi.skinApi=${skinApiOrigin()}`];
@@ -158,7 +159,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     try {
       await ensureSefiAuthMod(settings.gameDirectory);
       broker = await startTicketBroker(activeAccount);
-      customArgs.push(`-Dsefi.authPort=${broker.port}`, `-Dsefi.serverAddress=${fullAddress}`); // Port only, no credential in process arguments.
+      customArgs.push(`-Dsefi.authPort=${broker.port}`, `-Dsefi.serverAddress=${fullAddress}`, `-Dsefi.serverAddresses=${endpoints.map(e => e.address).join(",")}`); // Port only, no credential in process arguments.
     } catch (error) {
       broker?.close();
       onStateChange({ status: 'error', message: error instanceof Error ? error.message : 'Не удалось подготовить автовход.' });
@@ -203,7 +204,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   };
 
   try {
-    await ensureServerInServersDat(settings.gameDirectory, serverName, fullAddress);
+    await ensureServersInServersDat(settings.gameDirectory, endpoints.map(e => ({ id: e.id, name: `${serverName} · ${e.label}`, ip: e.address })));
     await applyFullscreenSetting(settings.gameDirectory, settings.fullscreen);
     const child = await launcher.launch(opts);
     child?.once('error', (error: Error) => {

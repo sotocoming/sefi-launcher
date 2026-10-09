@@ -1,6 +1,6 @@
 {
   "name": "sefi-launcher",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "SEFI Minecraft Launcher",
   "main": "dist-electron/electron/main.js",
   "author": "SEFI Team",

@@ -2,6 +2,7 @@ import { protectMinecraftHandler, trustedGameUrl } from './game-integrity';
 const { Client } = require('minecraft-launcher-core');
 import fs from 'fs/promises';
 import { net } from 'electron';
+import { setTimeout as delay } from 'timers/promises';
 import { atomicWrite } from './atomic-files';
 import path from 'path';
 import type { GameState, DownloadProgress } from '../../src/types';
@@ -35,9 +36,17 @@ async function ensureFabricProfile(gameDir: string, mcVersion: string, fabricVer
   try { if(valid(JSON.parse(await fs.readFile(jsonPath,'utf8'))))return customId; }
   catch(error:any) { if(error.code!=='ENOENT' && !(error instanceof SyntaxError))throw error; }
   const url = 'https://meta.fabricmc.net/v2/versions/loader/'+encodeURIComponent(mcVersion)+'/'+encodeURIComponent(fabricVersion)+'/profile/json';
-  const res = await net.fetch(url,{redirect:'error',signal:AbortSignal.timeout(20000)});
-  if(!res.ok)throw new Error('Не удалось загрузить профиль Fabric: HTTP '+res.status+'. Повторите запуск.');
-  const data=await res.json();
+  let data:any;
+  for(let attempt=0;;attempt++){
+    try {
+      const res = await net.fetch(url,{redirect:'error',signal:AbortSignal.timeout(30000)});
+      if(!res.ok){await res.body?.cancel();throw Object.assign(new Error('HTTP '+res.status),{permanent:res.status>=400 && res.status<500 && ![408,429].includes(res.status)});}
+      data=await res.json();break;
+    } catch(error:any){
+      if(attempt>=2 || error.permanent)throw new Error('Не удалось загрузить профиль Fabric (meta.fabricmc.net): '+(['TimeoutError','AbortError'].includes(error?.name)?'истекло время ожидания сети':error.message)+'. Повторите запуск.');
+      await delay(300*(attempt+1));
+    }
+  }
   if(!valid(data))throw new Error('Источник вернул некорректный профиль Fabric. Повторите запуск позже.');
   await atomicWrite(jsonPath,JSON.stringify(data,null,2));
 
@@ -115,7 +124,8 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   const customVersionId = await ensureFabricProfile(settings.gameDirectory, '1.20.1', '0.18.4');
 
   class VerifiedClient extends Client {
-    printVersion() { super.printVersion(); protectMinecraftHandler(this.handler); }
+    preparationError?: Error;
+    printVersion() { super.printVersion(); protectMinecraftHandler(this.handler, (error) => { this.preparationError = error; }); }
     async startMinecraft(args: string[]) {
       if (activeAccount?.type === 'microsoft') {
         const current = await ensureMicrosoftAccount(activeAccount.id, true);
@@ -247,6 +257,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       onStateChange({ status: 'error', message: error.message || 'Не удалось запустить Java.' });
     });
     if (!child || !child.pid) {
+      if (launcher.preparationError) throw launcher.preparationError;
       throw new Error('Процесс Minecraft не смог стартовать. Java: ' + javaPath + '\n' + startupLog.join('\n').slice(-4000));
     }
     gameRunning = true;

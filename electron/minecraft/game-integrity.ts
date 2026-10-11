@@ -45,6 +45,25 @@ async function response(url:string, signal:AbortSignal) {
   if(!res.ok){await res.body?.cancel();throw Object.assign(new Error('Источник Minecraft ответил HTTP '+res.status+'.'),{permanent:res.status>=400 && res.status<500 && ![408,429].includes(res.status)});}
   return res;
 }
+function networkMessage(error:any):string {
+  return ['TimeoutError','AbortError'].includes(error?.name) ? 'истекло время ожидания сети' : String(error?.message || error);
+}
+async function checksum(url:string, name:string):Promise<string> {
+  for(let attempt=0;;attempt++){
+    try {
+      const res=await response(url+'.sha1',AbortSignal.timeout(30000));
+      const reader=res.body?.getReader();if(!reader)throw new Error('Пустая контрольная сумма библиотеки.');
+      const chunks:Uint8Array[]=[];let size=0;
+      try{while(true){const part=await reader.read();if(part.done)break;size+=part.value.length;if(size>1024)throw Object.assign(new Error('Слишком большая контрольная сумма библиотеки.'),{permanent:true});chunks.push(part.value);}}finally{await reader.cancel().catch(()=>{});}
+      const hash=Buffer.concat(chunks).toString('utf8').trim().split(/\s+/)[0];
+      if(!validHash(hash))throw Object.assign(new Error('Некорректная контрольная сумма библиотеки.'),{permanent:true});
+      return hash;
+    } catch(error:any) {
+      if(attempt>=2 || error.permanent)throw new Error('Не удалось проверить библиотеку '+name+' ('+new URL(url).hostname+'): '+networkMessage(error)+'. Повторите запуск.');
+      await delay(300*(attempt+1));
+    }
+  }
+}
 async function jsonOnce(url:string, expected?:string) {
   const res=await response(url,AbortSignal.timeout(30000));if(!res.body)throw new Error('Пустой ответ источника Minecraft.');
   const chunks:Buffer[]=[];let size=0;
@@ -54,7 +73,7 @@ async function jsonOnce(url:string, expected?:string) {
   return JSON.parse(bytes.toString('utf8'));
 }
 async function json(url:string, expected?:string):Promise<any> {
- for(let attempt=0;;attempt++){try{return await jsonOnce(url,expected);}catch(error:any){if(attempt>=2 || error.permanent)throw error;await delay(300*(attempt+1));}}
+ for(let attempt=0;;attempt++){try{return await jsonOnce(url,expected);}catch(error:any){if(attempt>=2 || error.permanent)throw new Error('Не удалось загрузить каталог Minecraft ('+new URL(url).hostname+'): '+networkMessage(error)+'. Повторите запуск.');await delay(300*(attempt+1));}}
 }
 export async function ensureGameFile(root:string, file:string, url:string, sha1:string, size?:number, emit?:(received:number,total:number)=>void) {
   trustedGameUrl(url);
@@ -111,7 +130,7 @@ export function libraryAllowed(library:any, os:string):boolean {
   }
   return allowed;
 }
-export function protectMinecraftHandler(handler:any) {
+export function protectMinecraftHandler(handler:any, onFailure?:(error:Error)=>void) {
   const root=path.resolve(handler.options.root);
   const progress=(type:string,name:string)=>(current:number,total:number)=>handler.client.emit('download-status',{type,name,current,total});
   handler.checkJava=async(java:string)=>{try{await inspectJava(java);return {run:true};}catch(error:any){return {run:false,message:error.message};}};
@@ -147,12 +166,7 @@ export function protectMinecraftHandler(handler:any) {
         const receipt=gamePath(root,'cache/sefi-hashes/'+createHash('sha256').update(trustedGameUrl(url)).digest('hex')+'.json');
         try{hash=JSON.parse(await fs.readFile(receipt,'utf8')).sha1;}catch(error:any){if(error.code!=='ENOENT' && !(error instanceof SyntaxError))throw error;}
         if(!validHash(hash)){
-          const res=await response(url+'.sha1',AbortSignal.timeout(15000));
-          const reader=res.body?.getReader();if(!reader)throw new Error('Пустая контрольная сумма библиотеки.');
-          const chunks:Uint8Array[]=[];let size=0;
-          try{while(true){const part=await reader.read();if(part.done)break;size+=part.value.length;if(size>1024)throw new Error('Слишком большая контрольная сумма библиотеки.');chunks.push(part.value);}}finally{await reader.cancel().catch(()=>{});}
-          hash=Buffer.concat(chunks).toString('utf8').trim().split(/\s+/)[0];
-          if(!validHash(hash))throw new Error('Некорректная контрольная сумма библиотеки.');
+          hash=await checksum(url, path.basename(file));
           await noLinks(root,receipt);await atomicWrite(receipt,JSON.stringify({sha1:hash}));
         }
       }
@@ -183,4 +197,9 @@ export function protectMinecraftHandler(handler:any) {
       handler.client.emit('progress',{type:'assets',task:++done,total:entries.length});
     });
   };
+  // MCLC catches preparation errors internally and returns null; preserve their cause for the UI.
+  for(const method of ['getVersion','getClasses','getAssets']){
+    const operation=handler[method];
+    handler[method]=async(...args:any[])=>{try{return await operation(...args);}catch(error:any){onFailure?.(error);throw error;}};
+  }
 }

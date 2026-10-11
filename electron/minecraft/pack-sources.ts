@@ -1,3 +1,4 @@
+import { renameFile } from './atomic-files';
 import fs from 'fs/promises';
 import path from 'path';
 import { randomUUID } from 'crypto';
@@ -32,7 +33,7 @@ export async function canonicalPack(gameDir: string, selected?: string): Promise
       try {
         await fs.copyFile(source, temp);
         if (await fileSha256(temp) !== catalog.archive.sha256) throw new Error('Архив изменился при копировании.');
-        await fs.rename(temp, target);
+        await renameFile(temp, target);
       } finally { await fs.unlink(temp).catch(() => {}); }
     }
     return { file: target, name: 'Homestead-1.3.7.zip', sha256: catalog.archive.sha256, size: stat.size };
@@ -61,7 +62,7 @@ export async function obtainFile(key: string, source: File, directory: string, e
         candidate.label === 'SEFI' ? token : undefined);
       if (source.size && downloaded.size !== source.size) throw new Error('Размер файла не совпадает с каталогом.');
       if (downloaded.name !== name) {
-        await fs.rename(downloaded.file, path.join(directory, name));
+        await renameFile(downloaded.file, path.join(directory, name));
         downloaded.name = name; downloaded.file = path.join(directory, name);
       }
       return downloaded;

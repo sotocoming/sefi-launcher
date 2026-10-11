@@ -1,3 +1,4 @@
+import { renameFile } from './atomic-files';
 import { requestDownload } from './download-http';
 import fs from 'fs/promises';
 import { createReadStream, createWriteStream } from 'fs';
@@ -137,7 +138,7 @@ async function downloadAttempt(url: string, directory: string, extension: '.jar'
       const sha256 = hash.digest('hex');
       if (expectedSha256 && sha256 !== expectedSha256.toLowerCase()) throw new Error('Контрольная сумма сборки не совпадает.');
       checkedZip(temp);
-      await fs.rename(temp, dest);
+      await renameFile(temp, dest);
       return { name, file: dest, sha256, size };
     } finally { await fs.unlink(temp).catch(() => {}); }
   } catch (error) {

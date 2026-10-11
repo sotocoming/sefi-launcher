@@ -9,8 +9,8 @@ export function PlayerAvatar({ account }: { account: Account | null }) {
   const official = account?.type === 'microsoft' || account?.mcType === 'microsoft' || Boolean(account?.mcVerifiedAt);
   const png = !official ? skin?.png : undefined;
   useEffect(() => {
-    if (account?.communityToken && !official) void load(account.id).catch(() => {});
-  }, [account?.id, account?.communityToken, official, load]);
+    if (account?.communityConnected && !official) void load(account.id).catch(() => {});
+  }, [account?.id, account?.communityConnected, official, load]);
   useEffect(() => {
     if (!png || !ref.current) return;
     const context = ref.current.getContext('2d');

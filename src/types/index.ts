@@ -29,11 +29,15 @@ export interface Account {
   username: string;
   uuid: string;
   accessToken: string;
+  msRefreshToken?: string;
+  msAccessTokenExpiresAt?: number;
+  msClientId?: string;
   clientToken: string;
   type: 'microsoft' | 'offline';
   skinUrl?: string;
   active: boolean;
   communityToken?: string;
+  communityConnected?: boolean;
   whitelistStatus?: 'pending' | 'approved' | 'rejected';
   twitchLogin?: string;
   twitchAvatar?: string;

@@ -38,23 +38,23 @@ export const ModpackStatusCard: React.FC = () => {
         </p>
       </div>
 
-      <div className="flex items-center justify-between rounded-lg border border-emerald-400/15 bg-emerald-400/[0.06] px-3 py-2">
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center justify-between gap-2 rounded-lg border border-emerald-400/15 bg-emerald-400/[0.06] px-3 py-2">
+        <div className="flex flex-1 items-center gap-2 min-w-0">
           {checking ? (
-            <><Loader2 size={14} className="text-white/40 shrink-0 animate-spin" /><span className="text-[11px] font-semibold text-white/50 truncate">Проверяем сборку</span></>
+            <><Loader2 size={14} className="text-white/40 shrink-0 animate-spin" /><span className="text-[11px] font-semibold text-white/50 leading-4 whitespace-normal">Проверяем сборку</span></>
           ) : !hasInstalledVersion ? (
-            <><Download size={14} className="text-amber-400 shrink-0" /><span className="text-[11px] font-semibold text-amber-300 truncate">Установится при запуске</span></>
+            <><Download size={14} className="text-amber-400 shrink-0" /><span className="text-[11px] font-semibold text-amber-300 leading-4 whitespace-normal">Установится при запуске</span></>
           ) : hasUpdate ? (
             <>
               <ArrowUpCircle size={14} className="text-amber-400 shrink-0" />
-              <span className="text-[11px] font-semibold text-amber-300 truncate">
+              <span className="text-[11px] font-semibold text-amber-300 leading-4 whitespace-normal">
                 Доступно обновление
               </span>
             </>
           ) : (
             <>
               <Check size={14} className="text-emerald-400 shrink-0 stroke-[2.5]" />
-              <span className="text-[11px] font-semibold text-emerald-300 truncate">
+              <span className="text-[11px] font-semibold text-emerald-300 leading-4 whitespace-normal">
                 Готово к запуску
               </span>
             </>

@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { randomUUID } from 'crypto';
+import { atomicWrite } from './atomic-files';
 import * as nbt from 'prismarine-nbt';
 
 export interface ServerEntry { id?: string; name: string; ip: string; acceptTextures?: boolean; }
@@ -37,12 +37,9 @@ export async function ensureServersInServersDat(gameDirectory: string, entries: 
   }
   root.value.servers = { type: 'list', value: { type: 'compound', value: [...managed, ...list] } };
   const output = nbt.writeUncompressed(root);
-  const temp = file + '.' + randomUUID() + '.tmp';
-  try {
-    await fs.writeFile(temp, output, { flag: 'wx' });
-    if (raw) await fs.writeFile(file + '.sefi-backup', raw);
-    await fs.rename(temp, file);
-  } finally { await fs.unlink(temp).catch(() => {}); }
+  if(raw?.equals(output))return;
+  if(raw)await atomicWrite(file+'.sefi-backup',raw);
+  await atomicWrite(file,output);
 }
 
 export async function ensureServerInServersDat(gameDirectory: string, serverName: string, serverAddress: string): Promise<void> {

@@ -1,24 +1,14 @@
-import { app, net } from 'electron';
+import { app } from 'electron';
+import { communityRequest, CommunitySessionError } from './community-request';
 import { createServer } from 'http';
 import { createPublicKey, verify, createHash } from 'crypto';
 import type { Account } from '../../src/types';
 
-const ORIGIN = 'https://mc.sotocoming.ru';
 const liveBrokers = new Set<() => void>();
 app.on('before-quit', () => { for (const close of liveBrokers) close(); });
 
 async function api(path: string, token?: string, body?: object): Promise<any> {
-  let response: Response;
-  try {
-    response = await net.fetch(ORIGIN + '/api/public/community/launcher/ticket' + path, {
-      method: body ? 'POST' : 'GET', redirect: 'error', signal: AbortSignal.timeout(30000),
-      headers: { Accept: 'application/json', ...(body ? { 'Content-Type': 'application/json' } : {}),
-        ...(token ? { 'X-Community-Token': token } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}),
-    });
-  } catch { throw new Error('Сервис автовхода недоступен. Повторите запуск или используйте игровой пароль.'); }
-  const data = await response.json() as any;
-  if (!response.ok) throw new Error(data.error || 'Не удалось подтвердить автовход.');
-  return data;
+  return communityRequest('/api/public/community/launcher/ticket'+path,token,body);
 }
 
 export function redactLaunchLog(message: string): string {
@@ -71,10 +61,10 @@ export async function startTicketBroker(account: Account): Promise<{ port: numbe
       const result = await api('', account.communityToken, { challenge: body.challenge, signature: body.signature });
       if (typeof result.ticket !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(result.ticket)) throw new Error();
       reply(200, { ticket: result.ticket });
-    } catch { reply(403, { error: 'Не удалось подтвердить подключение. Переподключитесь или используйте игровой пароль.' }); }
+    } catch (error) { reply(error instanceof CommunitySessionError && (!error.status || error.status >= 500 || error.status === 429) ? 503 : 403, { error: 'Не удалось подтвердить подключение. Переподключитесь или используйте игровой пароль.' }); }
     finally { busy--; }
   });
-  server.requestTimeout = 5000; server.headersTimeout = 5000; server.setTimeout(5000);
+  server.requestTimeout = 5000; server.headersTimeout = 5000; server.setTimeout(35000);
   await new Promise<void>((resolve, reject) => {
     server.once('error', () => reject(new Error('Не удалось открыть локальный сервис автовхода.')));
     server.listen(0, '127.0.0.1', resolve);

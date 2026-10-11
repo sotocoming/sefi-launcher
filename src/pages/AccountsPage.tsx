@@ -88,7 +88,7 @@ export const AccountsPage: React.FC = () => {
 
   // Identify the accounts:
   // 1. Community (Twitch) side
-  const commAccount = accounts.find((a) => a.communityToken || a.twitchLogin);
+  const commAccount = accounts.find((a) => a.communityConnected || a.twitchLogin);
   // 2. Microsoft / Mojang side
   const msAccount = accounts.find((a) => a.type === 'microsoft');
   // Check if they are unified / linked together

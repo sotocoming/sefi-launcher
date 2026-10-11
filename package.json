@@ -1,6 +1,6 @@
 {
   "name": "sefi-launcher",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "description": "SEFI Minecraft Launcher",
   "main": "dist-electron/electron/main.js",
   "author": "SEFI Team",
@@ -10,7 +10,10 @@
     "dev:electron": "tsc -p tsconfig.node.json && electron .",
     "build": "vite build && tsc -p tsconfig.node.json",
     "package": "npm run build && electron-builder build --win",
-    "start": "electron ."
+    "start": "electron .",
+    "test:resilience": "node scripts/test-resilience.cjs",
+    "test:security": "node scripts/test-ipc-security.cjs .",
+    "test:minecraft": "node scripts/test-game-integrity.cjs && node scripts/test-game-lifecycle.cjs"
   },
   "dependencies": {
     "adm-zip": "0.6.1",
@@ -34,12 +37,19 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "concurrently": "^9.1.2",
-    "electron": "^33.3.1",
-    "electron-builder": "^25.1.8",
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3",
     "postcss": "^8.4.49",
     "resedit": "1.7.2",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3",
     "vite": "^6.0.7"
+  },
+  "overrides": {
+    "minecraft-launcher-core": {
+      "adm-zip": "$adm-zip",
+      "request": "npm:@cypress/request@4.0.1",
+      "uuid": "11.1.1"
+    }
   }
 }

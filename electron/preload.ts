@@ -22,7 +22,7 @@ const api: IElectronAPI = {
   loginMicrosoft: () => ipcRenderer.invoke('login-microsoft'),
   loginCommunity: () => ipcRenderer.invoke('login-community'),
   linkMinecraftAccount: (id: string) => ipcRenderer.invoke('link-minecraft-account', id),
-  refreshCommunityProfile: (token: string) => ipcRenderer.invoke('refresh-community-profile', token),
+  refreshCommunityProfile: (accountId: string) => ipcRenderer.invoke('refresh-community-profile', accountId),
   removeAccount: (id: string) => ipcRenderer.invoke('remove-account', id),
   setActiveAccount: (id: string) => ipcRenderer.invoke('set-active-account', id),
   
@@ -62,4 +62,5 @@ const api: IElectronAPI = {
   close: () => ipcRenderer.send('window-close'),
 };
 
-contextBridge.exposeInMainWorld('electronAPI', api);
+// Remote subframes must never receive the launcher bridge.
+if (process.isMainFrame) contextBridge.exposeInMainWorld('electronAPI', api);

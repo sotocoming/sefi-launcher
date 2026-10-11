@@ -93,39 +93,23 @@ export const useStore = create<StoreState>((set, get) => ({
   setUpdateInfo: (info) => set({ updateInfo: info }),
 
   initStore: async () => {
-    try {
-      const [config, accounts, settings, modpackStatus, serverStatus] = await Promise.all([
-        window.electronAPI.getLauncherConfig().catch(() => null),
-        window.electronAPI.getAccounts().catch(() => []),
-        window.electronAPI.getSettings().catch(() => null),
-        window.electronAPI.getModpackStatus().catch(() => null),
-        window.electronAPI.getServerStatus().catch(() => null)
-      ]);
-
-      let currentAccounts = accounts || [];
-      // Refresh community accounts in background if any exist
-      const commAccounts = currentAccounts.filter((a: Account) => a.communityToken);
-      if (commAccounts.length > 0 && window.electronAPI?.refreshCommunityProfile) {
-        Promise.all(commAccounts.map((a: Account) => window.electronAPI.refreshCommunityProfile(a.communityToken!)))
-          .then(async () => {
-            const fresh = await window.electronAPI.getAccounts();
-            set({ accounts: fresh, activeAccount: fresh.find((a: Account) => a.active) || fresh[0] || null });
-          })
-          .catch(() => {});
+    const local = (async () => {
+      const [accounts, settings] = await Promise.all([window.electronAPI.getAccounts(), window.electronAPI.getSettings()]);
+      set({accounts, activeAccount:accounts.find(a=>a.active) || null, settings});
+      const tokens=accounts.filter(a=>a.communityConnected).map(a=>a.id);
+      if(tokens.length && window.electronAPI.refreshCommunityProfile) {
+        void Promise.all(tokens.map(t=>window.electronAPI.refreshCommunityProfile(t))).then(async()=>{
+          const fresh=await window.electronAPI.getAccounts();
+          set({accounts:fresh,activeAccount:fresh.find(a=>a.active) || null});
+        }).catch(()=>{});
       }
-
-      set({
-        launcherConfig: config,
-        news: config?.news || [],
-        accounts: currentAccounts,
-        activeAccount: currentAccounts.find((a: Account) => a.active) || currentAccounts[0] || null,
-        settings: settings,
-        modpackStatus: modpackStatus,
-        serverStatus: serverStatus
-      });
-    } catch (e) {
-      console.error('Failed to init store', e);
-    }
+    })().catch(error=>set({gameState:{status:'error',message:launchErrorMessage(error)}}));
+    await Promise.all([
+      local,
+      window.electronAPI.getLauncherConfig().then(config=>set({launcherConfig:config,news:config.news || []})).catch(()=>{}),
+      window.electronAPI.getModpackStatus().then(modpackStatus=>set({modpackStatus})).catch(()=>{}),
+      window.electronAPI.getServerStatus().then(serverStatus=>set({serverStatus})).catch(()=>{}),
+    ]);
   },
 
   refreshServerStatus: async () => {

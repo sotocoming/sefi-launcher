@@ -25,13 +25,13 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
   useEffect(() => {
     let cancelled = false;
     setAuthorized(false); setUserVotes({}); setReactionError('');
-    if (activeAccount?.communityToken && window.electronAPI?.getNewsReactions) {
+    if (activeAccount?.communityConnected && window.electronAPI?.getNewsReactions) {
       window.electronAPI.getNewsReactions().then(data => {
         if (!cancelled) { setUserVotes(data.votes || {}); setAuthorized(true); }
       }).catch(() => { if (!cancelled) setReactionError('Обновите вход в SEFI Community, чтобы оценивать новости.'); });
     }
     return () => { cancelled = true; };
-  }, [activeAccount?.id, activeAccount?.communityToken]);
+  }, [activeAccount?.id, activeAccount?.communityConnected]);
 
   const allNewsItems = (news || [])
     .filter(n => (n.status === 'published' || (!n.status && !n.archived)) && !n.archived && n.status !== 'scheduled')

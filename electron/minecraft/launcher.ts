@@ -1,9 +1,14 @@
+import { protectMinecraftHandler, trustedGameUrl } from './game-integrity';
 const { Client } = require('minecraft-launcher-core');
 import fs from 'fs/promises';
+import { net } from 'electron';
+import { atomicWrite } from './atomic-files';
 import path from 'path';
 import type { GameState, DownloadProgress } from '../../src/types';
 import { getSettings, getLauncherConfig } from '../config';
 import { getAccounts } from './accounts';
+import { ensureMicrosoftAccount } from './account-session';
+import { communityRequest } from './community-request';
 import { resolveJava } from './java';
 import { prepareGameDirectory } from './game-directory';
 import { ensureSefiSkinMod } from './skin-mod';
@@ -18,18 +23,23 @@ async function ensureFabricProfile(gameDir: string, mcVersion: string, fabricVer
   const versionDir = path.join(gameDir, 'versions', customId);
   const jsonPath = path.join(versionDir, `${customId}.json`);
 
-  try {
-    await fs.access(jsonPath);
-  } catch {
-    await fs.mkdir(versionDir, { recursive: true });
-    const url = `https://meta.fabricmc.net/v2/versions/loader/${mcVersion}/${fabricVersion}/profile/json`;
-    const res = await fetch(url);
-    if (!res.ok) {
-      throw new Error(`Не удалось загрузить профиль Fabric: ${res.statusText}`);
-    }
-    const data = await res.json();
-    await fs.writeFile(jsonPath, JSON.stringify(data, null, 2), 'utf-8');
-  }
+  const valid=(data:any)=>{
+    try { return data?.id===customId && data.inheritsFrom===mcVersion
+      && data.mainClass==='net.fabricmc.loader.impl.launch.knot.KnotClient'
+      && Array.isArray(data.libraries) && data.libraries.length>0 && data.libraries.length<100
+      && data.libraries.every((lib:any)=>typeof lib?.name==='string'
+        && /^[a-zA-Z0-9_.+\-]+:[a-zA-Z0-9_.+\-]+:[a-zA-Z0-9_.+\-]+(?::[a-zA-Z0-9_.+\-]+)?$/.test(lib.name)
+        && typeof lib.url==='string' && !!trustedGameUrl(lib.url)); }
+    catch { return false; }
+  };
+  try { if(valid(JSON.parse(await fs.readFile(jsonPath,'utf8'))))return customId; }
+  catch(error:any) { if(error.code!=='ENOENT' && !(error instanceof SyntaxError))throw error; }
+  const url = 'https://meta.fabricmc.net/v2/versions/loader/'+encodeURIComponent(mcVersion)+'/'+encodeURIComponent(fabricVersion)+'/profile/json';
+  const res = await net.fetch(url,{redirect:'error',signal:AbortSignal.timeout(20000)});
+  if(!res.ok)throw new Error('Не удалось загрузить профиль Fabric: HTTP '+res.status+'. Повторите запуск.');
+  const data=await res.json();
+  if(!valid(data))throw new Error('Источник вернул некорректный профиль Fabric. Повторите запуск позже.');
+  await atomicWrite(jsonPath,JSON.stringify(data,null,2));
 
   return customId;
 }
@@ -51,7 +61,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
 
   const settings = await getSettings();
   const accounts = await getAccounts();
-  const activeAccount = accounts.find((a) => a.active);
+  let activeAccount = accounts.find((a) => a.active);
 
   if (!activeAccount) {
     onStateChange({ status: 'error', message: 'Активный аккаунт не найден. Выберите или добавьте профиль.' });
@@ -60,12 +70,8 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
 
   if (activeAccount.communityToken) {
     try {
-      const response = await fetch('https://mc.sotocoming.ru/api/public/community/me', {
-        headers: { 'X-Community-Token': activeAccount.communityToken }, redirect: 'error', signal: AbortSignal.timeout(15000)
-      });
-      if (!response.ok) throw new Error('Войдите в SEFI Community заново.');
-      const profile = await response.json() as { user?: {mc_verified_at?: number; mc_nickname?: string; mc_type?: string; mc_uuid?: string} };
-      if (!profile.user) throw new Error('Войдите в SEFI Community заново.');
+      const profile = await communityRequest('/api/public/community/me',activeAccount.communityToken) as {user?: {mc_verified_at?:number;mc_nickname?:string;mc_type?:string;mc_uuid?:string}};
+      if (!profile.user) throw new Error('Сессия SEFI не подтверждена. Войдите в SEFI Community заново.');
       if (profile.user.mc_verified_at) {
         const boundUuid = (profile.user.mc_uuid || '').replace(/-/g, '').toLowerCase();
         const sessionUuid = (activeAccount.uuid || '').replace(/-/g, '').toLowerCase();
@@ -82,6 +88,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     }
   }
 
+  if(activeAccount.type==='microsoft')activeAccount=await ensureMicrosoftAccount(activeAccount.id);
   settings.gameDirectory = await prepareGameDirectory(settings.gameDirectory);
   const javaPath = await resolveJava(settings.javaPath || '', settings.ramMax, (progress) => {
     onStateChange({ status: 'downloading', progress });
@@ -107,8 +114,29 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
 
   const customVersionId = await ensureFabricProfile(settings.gameDirectory, '1.20.1', '0.18.4');
 
-  const launcher = new Client();
+  class VerifiedClient extends Client {
+    printVersion() { super.printVersion(); protectMinecraftHandler(this.handler); }
+    async startMinecraft(args: string[]) {
+      if (activeAccount?.type === 'microsoft') {
+        const current = await ensureMicrosoftAccount(activeAccount.id, true);
+        const token = args.indexOf('--accessToken');
+        if (token < 0 || token + 1 >= args.length) throw new Error('Не найдены параметры авторизации Minecraft.');
+        args[token + 1] = current.accessToken;
+      }
+      return super.startMinecraft(args);
+    }
+  }
+  const launcher = new VerifiedClient();
 
+  launcher.on('download-status', (event: any) => {
+    const total = Number(event.total) || 0;
+    const downloaded = Number(event.current) || 0;
+    onStateChange({ status: 'downloading', progress: {
+      stage: event.type === 'assets' ? 'assets' : 'libraries',
+      task: 'Загрузка: ' + String(event.name), total, downloaded,
+      percentage: total > 0 ? Math.min(100, downloaded / total * 100) : 0,
+    } });
+  });
   launcher.on('progress', (e: any) => {
     let stage: DownloadProgress['stage'] = 'assets';
     if (e.type === 'libraries') stage = 'libraries';
@@ -138,7 +166,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
 
   launcher.on('data', (data: string) => {
     rememberStartup(data);
-    console.log('[Minecraft Log]:', data);
+    console.log('[Minecraft Log]:', redactLaunchLog(data));
   });
 
   let broker: Awaited<ReturnType<typeof startTicketBroker>> | undefined;
@@ -146,7 +174,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     gameRunning = false;
     broker?.close();
     console.log('[Minecraft Closed with code]:', code);
-    onStateChange({ status: 'idle' });
+    onStateChange(code===0 ? {status:'idle'} : {status:'error',message:'Minecraft завершился с ошибкой (код '+code+').\n'+startupLog.join('\n').slice(-4000)});
   });
 
   onStateChange({ status: 'launching' });
@@ -174,6 +202,8 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     }
   }
 
+  // Long modpack downloads may outlive the game token: renew again immediately before spawn.
+  if(activeAccount.type==='microsoft')activeAccount=await ensureMicrosoftAccount(activeAccount.id,true);
   const opts = {
     clientPackage: null,
     authorization: {
@@ -204,10 +234,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       height: settings.windowHeight,
       fullscreen: settings.fullscreen,
     },
-    server: {
-      host: serverHost,
-      port: serverPort,
-    },
+    quickPlay: { type: 'multiplayer', identifier: fullAddress },
   };
 
   try {

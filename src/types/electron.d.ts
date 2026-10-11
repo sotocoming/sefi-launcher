@@ -28,7 +28,7 @@ export interface IElectronAPI {
   loginMicrosoft(): Promise<Account>;
   loginCommunity(): Promise<Account>;
   linkMinecraftAccount(id: string): Promise<Account | null>;
-  refreshCommunityProfile(token: string): Promise<Account | null>;
+  refreshCommunityProfile(accountId: string): Promise<Account | null>;
   removeAccount(id: string): Promise<void>;
   setActiveAccount(id: string): Promise<void>;
 

@@ -1,25 +1,12 @@
-import { app } from 'electron';
 import { communityBrowserCode } from './community-browser';
-import { minecraftSession, MicrosoftSessionError, microsoftFailure } from './microsoft-session';
-import path from 'path';
-import fs from 'fs/promises';
+import { microsoftCodeSession, MicrosoftSessionError, microsoftFailure } from './microsoft-session';
 import { randomUUID, randomBytes, createHash } from 'crypto';
 import type { Account } from '../../src/types';
+import { readAccounts, updateAccounts } from './account-store';
+import { ensureMicrosoftAccount } from './account-session';
+import { communityRequest } from './community-request';
 
-export async function getAccounts(): Promise<Account[]> {
-  const accountsFile = path.join(app.getPath('userData'), 'accounts.json');
-  try {
-    const data = await fs.readFile(accountsFile, 'utf-8');
-    return JSON.parse(data);
-  } catch (e) {
-    return [];
-  }
-}
-
-async function saveAccounts(accounts: Account[]): Promise<void> {
-  const accountsFile = path.join(app.getPath('userData'), 'accounts.json');
-  await fs.writeFile(accountsFile, JSON.stringify(accounts, null, 2));
-}
+export const getAccounts = readAccounts;
 
 export async function addOfflineAccount(username: string): Promise<Account> {
   const cleanName = (username || '').trim();
@@ -30,7 +17,6 @@ export async function addOfflineAccount(username: string): Promise<Account> {
     throw new Error('Никнейм должен состоять из латинских букв, цифр и знака _ (от 3 до 16 символов)');
   }
 
-  const accounts = await getAccounts();
   const newAccount: Account = {
     id: randomUUID(),
     username: cleanName,
@@ -41,9 +27,7 @@ export async function addOfflineAccount(username: string): Promise<Account> {
     active: true,
   };
 
-  accounts.forEach((a) => (a.active = false));
-  accounts.push(newAccount);
-  await saveAccounts(accounts);
+  await updateAccounts(accounts=>{accounts.forEach(a=>a.active=false);accounts.push(newAccount);});
   return newAccount;
 }
 
@@ -88,8 +72,7 @@ export async function loginMicrosoft(): Promise<Account> {
     void win.loadURL(authUrl.toString()).catch(() => finish(undefined, 'Страница Microsoft недоступна.'));
   });
   try {
-    const xboxManager = await authManager.login(code);
-    const token = await minecraftSession(xboxManager);
+    const token = await microsoftCodeSession(code, authManager.token);
     const profile = token.profile;
     const accounts = await getAccounts();
 
@@ -98,6 +81,9 @@ export async function loginMicrosoft(): Promise<Account> {
       username: profile.name,
       uuid: profile.id,
       accessToken: token.accessToken,
+      msRefreshToken: token.refreshToken,
+      msAccessTokenExpiresAt: token.expiresAt,
+      msClientId: authManager.token.client_id,
       clientToken: randomUUID(),
       type: 'microsoft',
       skinUrl: `https://mc-heads.net/avatar/${profile.id || profile.name}/64`,
@@ -131,13 +117,7 @@ export async function loginMicrosoft(): Promise<Account> {
     newAccount.mcVerifiedAt = 0;
     if (newAccount.communityToken) {
       try {
-        const linkRes = await fetch(COMMUNITY_ORIGIN + '/api/public/community/launcher/minecraft/auto-link', {
-          method: 'POST', redirect: 'error', signal: AbortSignal.timeout(60000),
-          headers: { 'Content-Type': 'application/json', 'X-Community-Token': newAccount.communityToken },
-          body: JSON.stringify({ minecraft_access_token: newAccount.accessToken }),
-        });
-        const resData = await linkRes.json() as any;
-        if (!linkRes.ok) throw new Error(typeof resData?.error === 'string' ? resData.error : 'Сервер не подтвердил привязку.');
+        const resData = await communityRequest('/api/public/community/launcher/minecraft/auto-link',newAccount.communityToken,{minecraft_access_token:newAccount.accessToken},false,60000);
         const user = resData?.user;
         if (!user?.mc_verified_at || user.mc_type !== 'microsoft' || typeof user.mc_uuid !== 'string'
           || user.mc_uuid.replace(/-/g, '').toLowerCase() !== newAccount.uuid.replace(/-/g, '').toLowerCase()) {
@@ -154,18 +134,21 @@ export async function loginMicrosoft(): Promise<Account> {
     }
 
     // Keep the standard profile until the backend confirms the new identity.
-    const cleaned = newAccount.mcVerifiedAt
-      ? accounts.filter(a => a.id === newAccount.id || !(a.type === 'offline' && a.communityToken === newAccount.communityToken))
-      : accounts;
-    await saveAccounts(cleaned);
+
+    await updateAccounts(latest=>{
+      const previous=latest.find(a=>a.id===newAccount.id || a.uuid===newAccount.uuid);
+      const merged={...previous,...newAccount};
+      const remaining=latest.filter(a=>a.id!==merged.id && a.uuid!==merged.uuid && !(merged.mcVerifiedAt && a.type==='offline' && a.communityToken===merged.communityToken));
+      remaining.forEach(a=>a.active=false);latest.splice(0,latest.length,...remaining,merged);
+    });
     return newAccount;
   } catch (err: any) {
     if (err instanceof MicrosoftSessionError) throw err;
+    if(err instanceof Error)throw err;
     throw microsoftFailure(err, 'Microsoft / Xbox login');
   }
 }
 
-const COMMUNITY_ORIGIN = 'https://mc.sotocoming.ru';
 const linkGrants = new Map<string, string>();
 let linkingMinecraft = false;
 
@@ -181,18 +164,10 @@ export async function loginCommunity(fresh = false): Promise<Account> {
   const verifier = randomBytes(32).toString('base64url');
   const challenge = createHash('sha256').update(verifier).digest('base64url');
   const code = await communityBrowserCode(authSessionId, challenge, fresh);
-  let response: Response;
-  try {
-    response = await fetch(COMMUNITY_ORIGIN + '/api/public/community/auth/exchange', {
-      method: 'POST', redirect: 'error', signal: AbortSignal.timeout(20000),
-      headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, code_verifier: verifier }),
-    });
-  } catch { throw new Error('Не удалось завершить вход. Проверьте сеть и повторите вход через браузер.'); }
-  const data = await response.json() as { token?: string; user?: any; error?: string; minecraft_link_grant?: string };
-  if (!response.ok || !data.token || !data.user) throw new Error(data.error || 'Не удалось подтвердить вход');
+  const data = await communityRequest('/api/public/community/auth/exchange',undefined,{code,code_verifier:verifier},false,20000) as {token?:string;user?:any;minecraft_link_grant?:string};
+  if(!data.token || !data.user)throw new Error('Не удалось подтвердить вход SEFI.');
     const user = data.user;
     if (!/^[a-zA-Z0-9_]{3,16}$/.test(user.mc_nickname || '')) throw new Error('Игровой профиль требует проверки администратором');
-    const accounts = await getAccounts();
     const newAccount: Account = {
       id: `comm_${user.id}`, username: user.mc_nickname,
       uuid: offlineUuid(user.mc_nickname), accessToken: randomUUID(), clientToken: randomUUID(),
@@ -204,10 +179,11 @@ export async function loginCommunity(fresh = false): Promise<Account> {
       mcUuid: user.mc_verified_at ? user.mc_uuid : undefined,
       mcVerifiedAt: user.mc_verified_at || 0,
     };
-    accounts.forEach(account => { account.active = false; });
-    const index = accounts.findIndex(account => account.id === newAccount.id);
-    if (index >= 0) accounts[index] = newAccount; else accounts.push(newAccount);
-    await saveAccounts(accounts);
+    await updateAccounts(latest=>{
+      latest.forEach(account=>{account.active=false;});
+      const index=latest.findIndex(account=>account.id===newAccount.id);
+      if(index>=0)latest[index]={...latest[index],...newAccount};else latest.push(newAccount);
+    });
     const resolved = newAccount.mcType === 'microsoft' ? await refreshCommunityProfile(data.token) : null;
     const result = resolved || newAccount;
     if (data.minecraft_link_grant) linkGrants.set(result.id, data.minecraft_link_grant);
@@ -216,13 +192,12 @@ export async function loginCommunity(fresh = false): Promise<Account> {
 
 export async function refreshCommunityProfile(token: string): Promise<Account | null> {
   try {
-    const profRes = await fetch(COMMUNITY_ORIGIN + '/api/public/community/me', { headers: { 'X-Community-Token': token } });
-    if (!profRes.ok) return null;
-    const profData = (await profRes.json()) as { user?: any };
+    const profData = await communityRequest('/api/public/community/me', token) as {user?:any};
     const user = profData?.user;
     if (!user) return null;
 
-    const accounts = await getAccounts();
+    return await updateAccounts(accounts=>{
+    if (!accounts.some(account => account.communityToken === token)) return null;
     // Check if there is an associated Microsoft account
     const msIdx = accounts.findIndex(a => a.type === 'microsoft' && user.mc_verified_at && user.mc_uuid
       && a.uuid.replace(/-/g, '').toLowerCase() === user.mc_uuid.replace(/-/g, '').toLowerCase());
@@ -240,8 +215,9 @@ export async function refreshCommunityProfile(token: string): Promise<Account | 
       accounts[msIdx].communityToken = token;
       if (user.mc_nickname) accounts[msIdx].username = user.mc_nickname;
       const cleaned = accounts.filter(a => a.id === accounts[msIdx].id || !(a.type === 'offline' && (a.id === `comm_${user.id}` || a.twitchLogin === user.twitch_login)));
-      await saveAccounts(cleaned);
-      return accounts[msIdx];
+      const selected=accounts[msIdx];
+      accounts.splice(0,accounts.length,...cleaned);
+      return selected;
     }
 
     for (const account of accounts) {
@@ -252,7 +228,7 @@ export async function refreshCommunityProfile(token: string): Promise<Account | 
         account.whitelistStatus = user.whitelist_status;
       }
     }
-    await saveAccounts(accounts);
+
 
     const idx = accounts.findIndex((a) => a.type === 'offline' && (a.communityToken === token || a.id === `comm_${user.id}`));
     if (idx !== -1) {
@@ -267,11 +243,13 @@ export async function refreshCommunityProfile(token: string): Promise<Account | 
       accounts[idx].mcVerifiedAt = user.mc_verified_at || 0;
       accounts[idx].mcType = user.mc_verified_at && user.mc_uuid && user.mc_type === 'microsoft' ? 'microsoft' : 'offline';
       accounts[idx].mcUuid = user.mc_uuid;
-      await saveAccounts(accounts);
+
       return accounts[idx];
     }
+    return null;
+    });
   } catch (err) {
-    console.warn('Failed to refresh community profile:', err);
+    console.warn('[Community] profile refresh unavailable; accounts preserved');
   }
   return null;
 }
@@ -297,23 +275,12 @@ export async function linkMinecraftAccount(accountId: string): Promise<Account |
         throw new Error('Вы вошли в другой Minecraft-профиль. Привязка отменена. Выберите нужный аккаунт и повторите.');
       }
     }
+    microsoft = await ensureMicrosoftAccount(microsoft.id);
     community = await loginCommunity(true);
     const grant = linkGrants.get(community.id);
     linkGrants.delete(community.id);
     if (!grant) throw new Error('Сервер ещё не поддерживает привязку из лаунчера.');
-    const post = async (action: string, body: object) => {
-      let response: Response;
-      try {
-        response = await fetch(COMMUNITY_ORIGIN + '/api/public/community/launcher/minecraft/' + action, {
-          method: 'POST', redirect: 'error', signal: AbortSignal.timeout(60000),
-          headers: { 'Content-Type': 'application/json', 'X-Community-Token': community!.communityToken! },
-          body: JSON.stringify(body),
-        });
-      } catch { throw new Error('Сервис привязки недоступен. Обновите профиль перед повторной попыткой.'); }
-      const data = await response.json() as any;
-      if (!response.ok) throw new Error(data.error || 'Не удалось привязать Minecraft Java.');
-      return data;
-    };
+    const post = (action:string,body:object)=>communityRequest('/api/public/community/launcher/minecraft/'+action,community!.communityToken,body,false,60000);
     const preview = await post('preview', { code: grant, minecraft_access_token: microsoft.accessToken });
     const candidate = preview.candidate;
     if (!candidate || !/^[a-zA-Z0-9_]{3,16}$/.test(candidate.name) || typeof candidate.uuid !== 'string') {
@@ -329,14 +296,14 @@ export async function linkMinecraftAccount(accountId: string): Promise<Account |
     if (confirmation.response !== 0) return null;
     await post('confirm', { code: preview.code });
     const freshCommunity = await refreshCommunityProfile(community.communityToken!);
-    const accounts = await getAccounts();
-    const index = accounts.findIndex(a => a.id === microsoft.id && a.type === 'microsoft');
+    return await updateAccounts(accounts=>{
+    const index = accounts.findIndex(a => a.id === microsoft!.id && a.type === 'microsoft');
     if (index < 0) throw new Error('Привязка завершена. Войдите через Microsoft заново.');
     // Transfer twitch login, avatar, and whitelist status to the Microsoft account
-    accounts[index].twitchLogin = community.twitchLogin;
-    accounts[index].twitchAvatar = community.twitchAvatar;
-    accounts[index].whitelistStatus = freshCommunity?.whitelistStatus || community.whitelistStatus;
-    accounts[index].communityToken = community.communityToken;
+    accounts[index].twitchLogin = community!.twitchLogin;
+    accounts[index].twitchAvatar = community!.twitchAvatar;
+    accounts[index].whitelistStatus = freshCommunity?.whitelistStatus || community!.whitelistStatus;
+    accounts[index].communityToken = community!.communityToken;
     if (!freshCommunity?.mcVerifiedAt || freshCommunity.mcUuid?.replace(/-/g, '').toLowerCase() !== candidate.uuid.replace(/-/g, '').toLowerCase()) {
       throw new Error('Подтверждение отправлено. Обновите профиль сообщества, чтобы проверить результат привязки.');
     }
@@ -350,8 +317,9 @@ export async function linkMinecraftAccount(accountId: string): Promise<Account |
     // Remove redundant/duplicate offline community account now that official license is linked
     const remaining = accounts.filter(a => a.id === accounts[index].id || (a.id !== community?.id && a.uuid !== candidate.uuid));
     remaining.forEach(a => { if (a.id !== accounts[index].id) a.active = false; });
-    await saveAccounts(remaining);
-    return accounts[index];
+    accounts.splice(0,accounts.length,...remaining);
+    return remaining.find(a=>a.id===microsoft!.id)!;
+    });
   } finally {
     if (community) linkGrants.delete(community.id);
     linkingMinecraft = false;
@@ -359,18 +327,15 @@ export async function linkMinecraftAccount(accountId: string): Promise<Account |
 }
 
 export async function removeAccount(id: string): Promise<void> {
-  const accounts = await getAccounts();
-  const filtered = accounts.filter((a) => a.id !== id);
-  if (filtered.length > 0 && !filtered.some((a) => a.active)) {
-    filtered[0].active = true;
-  }
-  await saveAccounts(filtered);
-}
-
-export async function setActiveAccount(id: string): Promise<void> {
-  const accounts = await getAccounts();
-  accounts.forEach((a) => {
-    a.active = a.id === id;
+  await updateAccounts(accounts=>{
+    const remaining=accounts.filter(a=>a.id!==id);
+    if(remaining.length && !remaining.some(a=>a.active))remaining[0].active=true;
+    accounts.splice(0,accounts.length,...remaining);
   });
-  await saveAccounts(accounts);
+}
+export async function setActiveAccount(id: string): Promise<void> {
+  await updateAccounts(accounts=>{
+    if(!accounts.some(a=>a.id===id))throw new Error('Аккаунт не найден. Обновите список аккаунтов.');
+    accounts.forEach(a=>{a.active=a.id===id;});
+  });
 }

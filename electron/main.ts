@@ -1,3 +1,4 @@
+import { trustedIpc, trustedDocument, embeddingHeaders } from './ipc-security';
 import { canonicalPack } from './minecraft/pack-sources';
 import packCatalog from './minecraft/modpack-catalog.json';
 import { app, BrowserWindow, ipcMain, session, dialog, shell, net } from 'electron';
@@ -13,6 +14,7 @@ import { getModpackStatus } from './minecraft/modpack';
 import { chooseSkin, getCommunitySkin, saveCommunitySkin, resetCommunitySkin } from './minecraft/skins';
 import { getJavaStatus, getJavaPath, inspectJava } from './minecraft/java';
 import { prepareGameDirectory } from './minecraft/game-directory';
+import { publicAccount } from './minecraft/account-store';
 import { launchGame } from './minecraft/launcher';
 
 const isDev = !app.isPackaged;
@@ -30,13 +32,19 @@ let mainWindow: BrowserWindow | null = null;
 let hiddenForGame = false;
 let gameBusy = false;
 let updateChecks: UpdateChecks | null = null;
+let integrationsReady = false;
+const indexFile = path.join(app.getAppPath(), 'dist/index.html');
+const secureIpc = trustedIpc(ipcMain, () => mainWindow, indexFile, isDev);
+function sendToMain(channel: string, value: unknown) {
+  if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.webContents.isDestroyed()) mainWindow.webContents.send(channel, value);
+}
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
   app.quit();
 } else {
   app.on('second-instance', () => {
-    if (mainWindow) {
+    if (mainWindow && !mainWindow.isDestroyed()) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.show();
       mainWindow.focus();
@@ -77,22 +85,18 @@ function createWindow() {
     appIconIndex: 0,
   });
 
-  // Allow in-app embedding of server map and news iframe strictly from trusted domain
+  const created = mainWindow;
+  created.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  created.webContents.on('will-navigate', (event, url) => {
+    if (!trustedDocument(url, indexFile, isDev)) event.preventDefault();
+  });
+  created.webContents.on('will-redirect', (event, url, _inPlace, mainFrame) => {
+    if (mainFrame && !trustedDocument(url, indexFile, isDev)) event.preventDefault();
+  });
+  created.webContents.on('will-attach-webview', event => event.preventDefault());
+  created.on('closed', () => { if (mainWindow === created) mainWindow = null; });
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    const responseHeaders = Object.assign({}, details.responseHeaders);
-    try {
-      const parsedUrl = new URL(details.url);
-      if (parsedUrl.hostname.endsWith('sotocoming.ru')) {
-        delete responseHeaders['x-frame-options'];
-        delete responseHeaders['X-Frame-Options'];
-        if (responseHeaders['content-security-policy']) {
-          responseHeaders['content-security-policy'] = responseHeaders['content-security-policy'].map(csp =>
-            csp.replace(/frame-ancestors[^;]+;?/gi, '')
-          );
-        }
-      }
-    } catch {}
-    callback({ responseHeaders });
+    callback({ responseHeaders: embeddingHeaders(details.url, details.resourceType, details.responseHeaders || {}) });
   });
 
   if (isDev) {
@@ -104,23 +108,26 @@ function createWindow() {
     });
   }
 
-  setupIpc();
-  setupAutoUpdater();
+  if (!integrationsReady) {
+    integrationsReady = true;
+    setupIpc();
+    setupAutoUpdater();
+  }
 }
 
 function setupIpc() {
-  ipcMain.on('window-minimize', () => mainWindow?.minimize());
-  ipcMain.on('window-maximize', () => {
+  secureIpc.on('window-minimize', () => mainWindow?.minimize());
+  secureIpc.on('window-maximize', () => {
     if (mainWindow?.isMaximized()) {
       mainWindow?.unmaximize();
     } else {
       mainWindow?.maximize();
     }
   });
-  ipcMain.on('window-close', () => mainWindow?.close());
+  secureIpc.on('window-close', () => mainWindow?.close());
 
-  ipcMain.handle('get-settings', getSettings);
-  ipcMain.handle('save-settings', async (_, settings) => await saveSettings(settings));
+  secureIpc.handle('get-settings', getSettings);
+  secureIpc.handle('save-settings', async (_, settings) => await saveSettings(settings));
 
   function skinWindow(event: Electron.IpcMainInvokeEvent): BrowserWindow {
     if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== mainWindow.webContents.mainFrame) {
@@ -128,15 +135,15 @@ function setupIpc() {
     }
     return mainWindow;
   }
-  ipcMain.handle('choose-skin', event => chooseSkin(skinWindow(event)));
-  ipcMain.handle('get-community-skin', (event, id: string) => { skinWindow(event); return getCommunitySkin(id); });
-  ipcMain.handle('save-community-skin', (event, id: string, png: string, model: 'classic' | 'slim') => {
+  secureIpc.handle('choose-skin', event => chooseSkin(skinWindow(event)));
+  secureIpc.handle('get-community-skin', (event, id: string) => { skinWindow(event); return getCommunitySkin(id); });
+  secureIpc.handle('save-community-skin', (event, id: string, png: string, model: 'classic' | 'slim') => {
     skinWindow(event); return saveCommunitySkin(id, png, model);
   });
-  ipcMain.handle('reset-community-skin', (event, id: string) => { skinWindow(event); return resetCommunitySkin(id); });
+  secureIpc.handle('reset-community-skin', (event, id: string) => { skinWindow(event); return resetCommunitySkin(id); });
 
-  ipcMain.handle('get-accounts', getAccounts);
-  ipcMain.handle('add-offline-account', async (_, username) => await addOfflineAccount(username));
+  secureIpc.handle('get-accounts', async()=> (await getAccounts()).map(a=>publicAccount(a)));
+  secureIpc.handle('add-offline-account', async (_, username) => publicAccount(await addOfflineAccount(username)));
   const bringToFront = () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       if (mainWindow.isMinimized()) mainWindow.restore();
@@ -149,31 +156,34 @@ function setupIpc() {
     }
   };
 
-  ipcMain.handle('login-microsoft', async () => {
+  secureIpc.handle('login-microsoft', async () => {
     const acc = await loginMicrosoft();
     bringToFront();
-    return acc;
+    return publicAccount(acc);
   });
-  ipcMain.handle('login-community', async () => {
+  secureIpc.handle('login-community', async () => {
     const acc = await loginCommunity();
     bringToFront();
-    return acc;
+    return publicAccount(acc);
   });
-  ipcMain.handle('link-minecraft-account', async (event, id: string) => {
+  secureIpc.handle('link-minecraft-account', async (event, id: string) => {
     if (event.sender !== mainWindow?.webContents || event.senderFrame !== mainWindow.webContents.mainFrame) {
       throw new Error('Привязка доступна только из основного окна лаунчера.');
     }
     const acc = await linkMinecraftAccount(id);
     bringToFront();
-    return acc;
+    return publicAccount(acc);
   });
 
-  ipcMain.handle('refresh-community-profile', async (_, token) => await refreshCommunityProfile(token));
-  ipcMain.handle('remove-account', async (_, id) => await removeAccount(id));
-  ipcMain.handle('set-active-account', async (_, id) => await setActiveAccount(id));
+  secureIpc.handle('refresh-community-profile', async (_, accountId: string) => {
+    const account = (await getAccounts()).find(a => a.id === accountId);
+    return account?.communityToken ? publicAccount(await refreshCommunityProfile(account.communityToken)) : null;
+  });
+  secureIpc.handle('remove-account', async (_, id) => await removeAccount(id));
+  secureIpc.handle('set-active-account', async (_, id) => await setActiveAccount(id));
 
-  ipcMain.handle('get-launcher-config', getLauncherConfig);
-  ipcMain.handle('get-server-status', getServerStatus);
+  secureIpc.handle('get-launcher-config', getLauncherConfig);
+  secureIpc.handle('get-server-status', getServerStatus);
 
   async function newsRequest(event: Electron.IpcMainInvokeEvent, body?: object) {
     if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== mainWindow.webContents.mainFrame) {
@@ -190,10 +200,10 @@ function setupIpc() {
     if (!response.ok) throw new Error(data.error || 'Не удалось загрузить реакции.');
     return data;
   }
-  ipcMain.handle('get-news-reactions', event => newsRequest(event));
-  ipcMain.handle('react-news', (event, id: string, reaction: string) => newsRequest(event, {id, reaction}));
+  secureIpc.handle('get-news-reactions', event => newsRequest(event));
+  secureIpc.handle('react-news', (event, id: string, reaction: string) => newsRequest(event, {id, reaction}));
 
-  ipcMain.handle('import-modpack-archive', async event => {
+  secureIpc.handle('import-modpack-archive', async event => {
     if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== mainWindow.webContents.mainFrame) {
       throw new Error('Недоступное окно.');
     }
@@ -209,19 +219,19 @@ function setupIpc() {
     return { cancelled: false, name: imported?.name };
   });
 
-  ipcMain.handle('get-modpack-status', async () => {
+  secureIpc.handle('get-modpack-status', async () => {
     const settings = await getSettings();
     return await getModpackStatus(settings.gameDirectory);
   });
 
-  ipcMain.handle('launch-game', async () => {
+  secureIpc.handle('launch-game', async () => {
     await launchGame((state) => {
       gameBusy = !['idle', 'error'].includes(state.status);
       autoUpdater.autoInstallOnAppQuit = !gameBusy;
       if (!gameBusy) void updateChecks?.run();
-      mainWindow?.webContents.send('game-state-change', state);
+      sendToMain('game-state-change', state);
       if (state.status === 'downloading') {
-        mainWindow?.webContents.send('download-progress', state.progress);
+        sendToMain('download-progress', state.progress);
       }
       if (hiddenForGame && (state.status === 'idle' || state.status === 'error')) {
         hiddenForGame = false;
@@ -235,21 +245,21 @@ function setupIpc() {
     });
   });
 
-  ipcMain.handle('get-java-status', async () => getJavaStatus((await getSettings()).javaPath));
-  ipcMain.handle('prepare-java', async () => {
+  secureIpc.handle('get-java-status', async () => getJavaStatus((await getSettings()).javaPath));
+  secureIpc.handle('prepare-java', async () => {
     if (gameBusy) throw new Error('Дождитесь завершения запуска или закройте игру.');
     gameBusy = true;
     try {
-      mainWindow?.webContents.send('game-state-change', { status: 'checking' });
+      sendToMain('game-state-change', { status: 'checking' });
       await getJavaPath(progress => {
-        mainWindow?.webContents.send('download-progress', progress);
-        mainWindow?.webContents.send('game-state-change', { status: 'downloading', progress });
+        sendToMain('download-progress', progress);
+        sendToMain('game-state-change', { status: 'downloading', progress });
       });
       return await getJavaStatus('');
-    } finally { gameBusy = false; mainWindow?.webContents.send('game-state-change', { status: 'idle' }); }
+    } finally { gameBusy = false; sendToMain('game-state-change', { status: 'idle' }); }
   });
 
-  ipcMain.handle('select-java-path', async () => {
+  secureIpc.handle('select-java-path', async () => {
     if (!mainWindow) return null;
     const result = await dialog.showOpenDialog(mainWindow, {
       title: 'Выберите исполняемый файл Java',
@@ -266,7 +276,7 @@ function setupIpc() {
     return null;
   });
 
-  ipcMain.handle('select-game-directory', async () => {
+  secureIpc.handle('select-game-directory', async () => {
     if (!mainWindow) return null;
     const result = await dialog.showOpenDialog(mainWindow, {
       title: 'Выберите папку установки клиента игры',
@@ -278,8 +288,10 @@ function setupIpc() {
     return null;
   });
 
-  ipcMain.handle('open-directory', async (_, dirPath: string) => {
-    if (!dirPath || typeof dirPath !== 'string') return;
+  secureIpc.handle('open-directory', async (_, dirPath: string) => {
+    if (typeof dirPath !== 'string' || !dirPath || dirPath.length > 32767) throw new Error('Некорректная папка.');
+    const configured = path.resolve((await getSettings()).gameDirectory);
+    if (path.resolve(dirPath).toLowerCase() !== configured.toLowerCase()) throw new Error('Открыть можно только папку игры из настроек.');
     try {
       const resolved = path.resolve(dirPath);
       if (!fs.existsSync(resolved)) {
@@ -287,23 +299,26 @@ function setupIpc() {
       }
       const stat = fs.statSync(resolved);
       if (stat.isDirectory()) {
-        await shell.openPath(resolved);
+        const error = await shell.openPath(resolved);
+        if (error) throw new Error(error);
       }
     } catch (e) {
       console.error('Failed to open directory:', e);
+      throw new Error('Не удалось открыть папку игры. Проверьте доступ и наличие диска.');
     }
   });
 
-  ipcMain.handle('open-external', async (_, url: string) => {
-    if (url.startsWith('https://') || url.startsWith('http://')) {
-      await shell.openExternal(url);
-    }
+  secureIpc.handle('open-external', async (_, url: string) => {
+    if (typeof url !== 'string' || url.length > 4096) throw new Error('Некорректная ссылка.');
+    const target = new URL(url);
+    if (!['https:', 'http:'].includes(target.protocol) || target.username || target.password) throw new Error('Разрешены только веб-ссылки без учётных данных.');
+    await shell.openExternal(target.href);
   });
 }
 
 function setupAutoUpdater() {
   let updateState: UpdateInfo = { status: 'idle' };
-  const publish = (state: UpdateInfo) => { updateState = state; mainWindow?.webContents.send('update-status-change', state); };
+  const publish = (state: UpdateInfo) => { updateState = state; sendToMain('update-status-change', state); };
   updateChecks = new UpdateChecks({
     state: () => updateState,
     blocked: () => gameBusy || !net.isOnline(),
@@ -361,12 +376,12 @@ function setupAutoUpdater() {
     });
   });
 
-  ipcMain.handle('check-for-updates', async () => {
+  secureIpc.handle('check-for-updates', async () => {
     if (isDev) return { status: 'error', error: 'Обновления доступны в установленном лаунчере.' };
     return await updateChecks!.run(true);
   });
 
-  ipcMain.handle('install-update', () => {
+  secureIpc.handle('install-update', () => {
     // isSilent: true installs silently, isForceRunAfter: true launches new version immediately
     if (!gameBusy) autoUpdater.quitAndInstall(false, true);
   });

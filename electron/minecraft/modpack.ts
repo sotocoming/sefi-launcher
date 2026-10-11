@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 import type { ModpackStatus, DownloadProgress } from '../../src/types';
 import { getLauncherConfig } from '../config';
 import { app } from 'electron';
+import { installFile, renameFile, atomicWrite } from './atomic-files';
 import { checkedZip, downloadArchive, fileSha256, safeFileName } from './modpack-download';
 
 type ManagedFile = { directory?: 'mods' | 'resourcepacks' | 'shaderpacks'; name: string; sha256: string; size: number; projectId?: number; fileId?: number };
@@ -39,17 +40,8 @@ async function safeDestination(root: string, relative: string): Promise<string> 
   }
   return current;
 }
-async function atomicFile(source: string, destination: string): Promise<void> {
-  await fs.mkdir(path.dirname(destination), { recursive: true });
-  const temp = path.join(path.dirname(destination), `.sefi-${randomUUID()}.tmp`);
-  try { await fs.copyFile(source, temp); await fs.rename(temp, destination); }
-  finally { await fs.unlink(temp).catch(() => {}); }
-}
-async function atomicJson(destination: string, value: unknown): Promise<void> {
-  const temp = destination + '.' + randomUUID() + '.tmp';
-  try { await fs.writeFile(temp, JSON.stringify(value, null, 2), { flag: 'wx' }); await fs.rename(temp, destination); }
-  finally { await fs.unlink(temp).catch(() => {}); }
-}
+async function atomicFile(source: string, destination: string): Promise<void> { await installFile(source,destination); }
+async function atomicJson(destination: string,value:unknown): Promise<void> {await atomicWrite(destination,JSON.stringify(value,null,2));}
 
 export async function getModpackStatus(gameDir: string): Promise<ModpackStatus> {
   const config = await getLauncherConfig();
@@ -205,7 +197,7 @@ async function performInstall(gameDir: string, onProgress: (p: DownloadProgress)
       catch (error: any) { if (error.code === 'ENOENT') return; throw error; }
       const saved = path.join(backup, relative);
       await fs.mkdir(path.dirname(saved), { recursive: true });
-      if (move) await fs.rename(file, saved); else await fs.copyFile(file, saved);
+      if (move) await renameFile(file, saved); else await fs.copyFile(file, saved);
     }
     for (const file of overrideFiles) {
       const dest = await safeDestination(gameDir, file.relative);
@@ -253,7 +245,7 @@ export async function ensureSefiAuthMod(gameDir: string): Promise<void> {
     if (entry.isFile() && /^sefi-auth-[0-9][A-Za-z0-9.+_-]*\.jar$/.test(entry.name) && entry.name !== name) {
       const backup = await safeDestination(gameDir, 'sefi-backups/auth-' + randomUUID());
       await fs.mkdir(backup, { recursive: true });
-      await fs.rename(path.join(modsDir, entry.name), path.join(backup, entry.name));
+      await renameFile(path.join(modsDir, entry.name), path.join(backup, entry.name));
     }
   }
 }

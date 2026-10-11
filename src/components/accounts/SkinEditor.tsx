@@ -7,7 +7,7 @@ import type { Account, CommunitySkin, SkinDraft } from '../../types';
 const officialUrl = 'https://www.minecraft.net/en-us/msaprofile/mygames/editskin';
 export function SkinEditor({ account }: { account: Account | null }) {
   const official = account?.type === 'microsoft' || account?.mcType === 'microsoft' || Boolean(account?.mcVerifiedAt);
-  const eligible = Boolean(account?.communityToken && !official);
+  const eligible = Boolean(account?.communityConnected && !official);
   const [saved, setSaved] = useState<CommunitySkin | null>(null);
   const [draft, setDraft] = useState<SkinDraft | null>(null);
   const [model, setModel] = useState<'classic' | 'slim'>('classic');

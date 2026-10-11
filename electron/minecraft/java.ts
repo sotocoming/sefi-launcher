@@ -26,6 +26,7 @@ function probeExecutable(executable: string): string {
     ? path.join(path.dirname(executable), 'java.exe') : executable;
 }
 export async function inspectJava(executable: string, ramMax?: number): Promise<{ version: string; architecture: string }> {
+  if (process.platform === 'win32' && !/^javaw?\.exe$/i.test(path.basename(executable))) throw new Error('Выбран установщик или другой файл. Выберите bin\\java.exe установленной Java 21 либо «Java SEFI» в настройках.');
   if (!path.isAbsolute(executable)) throw new Error('Выберите полный путь к исполняемому файлу Java.');
   try { await fs.access(executable); } catch { throw new Error('Файл Java не найден. Выберите «Java SEFI» в настройках.'); }
   const args = ['-XshowSettings:properties', '-version'];
@@ -38,6 +39,7 @@ export async function inspectJava(executable: string, ramMax?: number): Promise<
     const result = await execFileAsync(probeExecutable(executable), args, { timeout: 15000, windowsHide: true, maxBuffer: 128 * 1024 });
     output = result.stdout + result.stderr;
   } catch (error: any) {
+    if (['EACCES', 'EPERM'].includes(error?.code)) throw new Error('Windows запретила запуск Java. Проверьте доступ к bin\\java.exe или выберите «Java SEFI» в настройках.');
     const detail = String(error?.stderr || error?.message || error).slice(0, 1500);
     throw new Error('Java не прошла пробный запуск. ' + detail + '\nВыберите «Java SEFI» в настройках или уменьшите выделенную память.');
   }

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, nativeImage } from 'electron';
+import { app, BrowserWindow, dialog, nativeImage, net } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
 import { getAccounts } from './accounts';
@@ -20,7 +20,7 @@ async function request(accountId: string, body?: object): Promise<CommunitySkin 
     throw new Error('Скин лицензии меняется на Minecraft.net.');
   }
   if (!account.communityToken) throw new Error('Войдите в SEFI Community для синхронизации скина.');
-  const response = await fetch(skinApiOrigin() + '/api/public/community/skin', {
+  const response = await net.fetch(skinApiOrigin() + '/api/public/community/skin', {
     method: body ? 'POST' : 'GET', redirect: 'error', signal: AbortSignal.timeout(15000),
     headers: { 'Content-Type': 'application/json', 'X-Community-Token': account.communityToken },
     ...(body ? { body: JSON.stringify(body) } : {}),

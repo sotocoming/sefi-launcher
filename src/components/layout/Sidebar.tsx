@@ -104,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
 
               <div className="mt-0.5 flex items-center gap-1.5 text-[11px] font-medium leading-none">
                 <span className={`inline-block size-1.5 rounded-full ${
-                  activeAccount?.communityToken
+                  activeAccount?.communityConnected
                     ? activeAccount.whitelistStatus === 'approved'
                       ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]'
                       : activeAccount.whitelistStatus === 'rejected'
@@ -115,7 +115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
                     : 'bg-zinc-500'
                 }`} />
                 <span className={
-                  activeAccount?.communityToken
+                  activeAccount?.communityConnected
                     ? activeAccount.whitelistStatus === 'approved'
                       ? 'text-emerald-400/90'
                       : activeAccount.whitelistStatus === 'rejected'
@@ -125,7 +125,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
                     ? 'text-white/60'
                     : 'text-white/40'
                 }>
-                  {activeAccount?.communityToken
+                  {activeAccount?.communityConnected
                     ? activeAccount.whitelistStatus === 'approved'
                       ? 'Доступ открыт'
                       : activeAccount.whitelistStatus === 'rejected'
@@ -142,7 +142,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
 
           <div className="mt-2.5 flex items-center justify-between">
             <span className="inline-flex rounded-md bg-violet-400/10 px-2 py-0.5 text-[10px] font-medium text-violet-300">
-              {activeAccount?.communityToken
+              {activeAccount?.communityConnected
                 ? 'Twitch'
                 : activeAccount?.type === 'microsoft'
                 ? 'Лицензия'

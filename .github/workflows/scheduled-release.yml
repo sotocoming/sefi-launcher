@@ -34,7 +34,10 @@ jobs:
           tag = os.environ['RELEASE_TAG']
           if not re.fullmatch(r'v\d+\.\d+\.\d+', tag):
               raise SystemExit('Invalid release tag')
-          release = json.loads(subprocess.check_output(['gh', 'api', 'repos/' + os.environ['GH_REPO'] + '/releases/tags/' + tag]))
+          releases = json.loads(subprocess.check_output(['gh', 'api', 'repos/' + os.environ['GH_REPO'] + '/releases?per_page=100']))
+          release = next((item for item in releases if item['tag_name'] == tag), None)
+          if release is None:
+              raise SystemExit('Prepared draft not found')
           if not release['draft']:
               raise SystemExit('Release is already published')
           names = {asset['name'] for asset in release['assets']}
@@ -49,6 +52,6 @@ jobs:
           print('Validated draft; publication at', target.isoformat(), flush=True)
           while time.time() < target.timestamp():
               time.sleep(min(10, target.timestamp() - time.time()))
-          subprocess.run(['gh', 'release', 'edit', tag, '--draft=false', '--latest'], check=True)
+          subprocess.run(['gh', 'api', '--method', 'PATCH', 'repos/' + os.environ['GH_REPO'] + '/releases/' + str(release['id']), '-F', 'draft=false', '-f', 'make_latest=true', '--silent'], check=True)
           print('Release published', tag, flush=True)
           PY

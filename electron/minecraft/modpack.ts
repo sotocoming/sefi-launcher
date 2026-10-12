@@ -58,8 +58,10 @@ export async function getModpackStatus(gameDir: string): Promise<ModpackStatus> 
       if (!await matches(path.join(gameDir, file.directory || 'mods', file.name), file)) { installed = false; break; }
     }
   }
-  return { installed, currentVersion: typeof meta?.version === 'string' ? meta.version : null,
-    latestVersion: config.modpack.version, updateAvailable: !installed || meta?.version !== config.modpack.version, modpack: config.modpack };
+  // A version label can be corrected without changing the installed artifact.
+  const latestVersion = config.modpack.version;
+  return { installed, currentVersion: installed ? latestVersion : typeof meta?.version === 'string' ? meta.version : null,
+    latestVersion, updateAvailable: !installed, modpack: config.modpack };
 }
 
 export function installModpack(gameDir: string, onProgress: (p: DownloadProgress) => void): Promise<void> {

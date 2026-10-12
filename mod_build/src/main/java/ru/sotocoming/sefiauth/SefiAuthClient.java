@@ -24,14 +24,28 @@ public final class SefiAuthClient implements ClientModInitializer {
     private volatile KeyPair key;
     private volatile Object connection;
     private final AtomicBoolean attempted = new AtomicBoolean();
-    private boolean helloSent;
+    private final LoginRetry retry = new LoginRetry();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("SefiAuth-Client");
+    private static long now() { return System.nanoTime() / 1000000; }
+    private void fail(net.minecraft.client.MinecraftClient client, Object handler, KeyPair sessionKey, boolean temporary, String stage, int status) {
+        client.execute(() -> {
+            if (connection != handler || key != sessionKey || !retry.active()) return;
+            LOG.warn("Launcher login attempt={} stage={} status={} temporary={}", retry.attempt(), stage, status, temporary);
+            retry.fail(now(), temporary);
+            if (!retry.active()) finish(client);
+        });
+    }
     private final VoiceChatReconnect voiceReconnect = new VoiceChatReconnect();
     private final LauncherLoginFeedback loginFeedback = new LauncherLoginFeedback();
     private Text deferredLoginWarning;
+    private void finish(net.minecraft.client.MinecraftClient client) {
+        loginFeedback.reset(); deferredLoginWarning = null;
+        if (client.player != null) client.player.sendMessage(Text.literal("§e[SEFI] Автовход не сработал. Переподключитесь к серверу."), false);
+    }
     @Override public void onInitializeClient() {
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> { key = null; connection = null; attempted.set(false); helloSent = false; voiceReconnect.reset(); loginFeedback.reset(); deferredLoginWarning = null; });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> { key = null; connection = null; attempted.set(false); retry.reset(); voiceReconnect.reset(); loginFeedback.reset(); deferredLoginWarning = null; });
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            key = null; connection = null; attempted.set(false); helloSent = false; voiceReconnect.reset(); loginFeedback.reset(); deferredLoginWarning = null;
+            key = null; connection = null; attempted.set(false); retry.reset(); voiceReconnect.reset(); loginFeedback.reset(); deferredLoginWarning = null;
             if (!System.getProperty("sefi.authPort", "").matches("[0-9]{4,5}")) return;
             var entry = client.getCurrentServerEntry();
             String configured = System.getProperty("sefi.serverAddresses", System.getProperty("sefi.serverAddress", ""));
@@ -39,7 +53,7 @@ public final class SefiAuthClient implements ClientModInitializer {
             // Only send a public ephemeral key; never a credential on JOIN.
             try {
                 key = KeyPairGenerator.getInstance("Ed25519").generateKeyPair(); connection = handler;
-                loginFeedback.start();
+                retry.start(now()); loginFeedback.start();
                 if (client.player != null) client.player.sendMessage(Text.literal("§7[SEFI] Подтверждаем вход через лаунчер…"), false);
             } catch (Exception ignored) { key = null; }
         });
@@ -53,61 +67,87 @@ public final class SefiAuthClient implements ClientModInitializer {
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (!overlay && connection != null && message.getString().replaceAll("§[0-9A-FK-ORa-fk-or]", "")
                     .equals("[SEFI] Вход подтверждён лаунчером.")) {
-                loginFeedback.confirmed(); deferredLoginWarning = null;
+                retry.reset(); loginFeedback.confirmed(); deferredLoginWarning = null;
                 voiceReconnect.authenticated();
             }
         });
         // Fabric's channel advertisement can arrive after JOIN; wait for it without sending credentials.
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (connection != null && connection == client.getNetworkHandler() && loginFeedback.tick()) {
+            if (connection != null && connection == client.getNetworkHandler() && !retry.active() && loginFeedback.tick()) {
                 if (deferredLoginWarning != null && client.player != null) client.player.sendMessage(deferredLoginWarning, false);
                 deferredLoginWarning = null;
             }
             voiceReconnect.tick(connection != null && connection == client.getNetworkHandler(), this::retryVoiceChat);
-            if (key == null || helloSent || connection != client.getNetworkHandler()
-                    || !ClientPlayNetworking.canSend(SefiAuthCommon.HELLO)) return;
-            helloSent = true;
-            PacketByteBuf out = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
-            out.writeString(Base64.getEncoder().encodeToString(key.getPublic().getEncoded()));
-            ClientPlayNetworking.send(SefiAuthCommon.HELLO, out);
+            if (key == null || connection != client.getNetworkHandler()) return;
+            boolean wasActive = retry.active();
+            if (retry.tick(now()) && ClientPlayNetworking.canSend(SefiAuthCommon.HELLO)) {
+                attempted.set(false);
+                try { key = KeyPairGenerator.getInstance("Ed25519").generateKeyPair(); }
+                catch (Exception error) { retry.reset(); finish(client); return; }
+                PacketByteBuf out = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create();
+                out.writeString(Base64.getEncoder().encodeToString(key.getPublic().getEncoded()));
+                LOG.info("Launcher login attempt={} stage=hello", retry.attempt());
+                ClientPlayNetworking.send(SefiAuthCommon.HELLO, out);
+            }
+            if (wasActive && !retry.active()) {
+                LOG.warn("Launcher login attempt={} stage=deadline", retry.attempt());
+                finish(client);
+            }
+        });
+        ClientPlayNetworking.registerGlobalReceiver(SefiAuthCommon.FAILURE, (client, handler, buf, sender) -> {
+            final String clientKey;
+            final boolean temporary;
+            try { clientKey = buf.readString(128); temporary = buf.readBoolean(); if (buf.readableBytes() != 0) return; }
+            catch (Exception ignored) { return; }
+            client.execute(() -> {
+                if (connection == handler && key != null && Base64.getEncoder().encodeToString(key.getPublic().getEncoded()).equals(clientKey))
+                    fail(client, handler, key, temporary, "server_verify", 0);
+            });
         });
         ClientPlayNetworking.registerGlobalReceiver(SefiAuthCommon.CHALLENGE, (client, handler, buf, sender) -> {
-            if (connection != handler || key == null || !attempted.compareAndSet(false, true)) return;
             final String challenge, signature;
+            try { challenge = buf.readString(1800); signature = buf.readString(86); if (buf.readableBytes() != 0) return; }
+            catch (Exception ignored) { return; }
+            // All attempt state belongs to the Minecraft client thread.
+            client.execute(() -> {
+            if (connection != handler || key == null || !retry.active()) return;
             final KeyPair sessionKey = key;
             try {
-                challenge = buf.readString(1800); signature = buf.readString(86);
-                if (buf.readableBytes() != 0) return;
                 JsonObject data = JsonParser.parseString(new String(Base64.getUrlDecoder().decode(challenge), StandardCharsets.UTF_8)).getAsJsonObject();
-                if (!Base64.getEncoder().encodeToString(sessionKey.getPublic().getEncoded()).equals(data.get("client_key").getAsString())) return;
-            } catch (Exception ignored) { return; }
+                if (!Base64.getEncoder().encodeToString(sessionKey.getPublic().getEncoded()).equals(data.get("client_key").getAsString())) return; // Delayed challenge from a previous attempt.
+            } catch (Exception ignored) { fail(client, handler, sessionKey, false, "challenge_format", 0); return; }
+            if (!attempted.compareAndSet(false, true)) return;
             try { worker.execute(() -> {
                 try {
                     int port = Integer.parseInt(System.getProperty("sefi.authPort"));
                     if (port < 1024 || port > 65535) return;
                     JsonObject data = new JsonObject(); data.addProperty("challenge", challenge); data.addProperty("signature", signature);
                     HttpRequest request = HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/sefi/game-ticket"))
-                        .timeout(Duration.ofSeconds(15)).header("Content-Type", "application/json")
+                        .timeout(Duration.ofSeconds(20)).header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(data.toString())).build();
                     HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).followRedirects(HttpClient.Redirect.NEVER).build();
-                    HttpResponse<java.io.InputStream> response = http.send(request, HttpResponse.BodyHandlers.ofInputStream());
+                    HttpResponse<byte[]> response = http.send(request, HttpResponse.BodyHandlers.ofByteArray());
                     String ticket;
-                    try (var input = response.body()) {
-                        byte[] raw = input.readNBytes(1025);
-                        if (response.statusCode() != 200 || raw.length > 1024) return;
+                    {
+                        byte[] raw = response.body();
+                        if (response.statusCode() != 200 || raw.length > 1024) {
+                            int status = response.statusCode();
+                            fail(client, handler, sessionKey, status == 429 || status >= 500, "broker_http", status); return;
+                        }
                         ticket = JsonParser.parseString(new String(raw, StandardCharsets.UTF_8)).getAsJsonObject().get("ticket").getAsString();
                     }
-                    if (!ticket.matches("[A-Za-z0-9_-]{43}")) return;
+                    if (!ticket.matches("[A-Za-z0-9_-]{43}")) { fail(client, handler, sessionKey, false, "ticket_format", 200); return; }
                     Signature signer = Signature.getInstance("Ed25519"); signer.initSign(sessionKey.getPrivate());
                     signer.update((challenge + "." + ticket).getBytes(StandardCharsets.UTF_8));
                     String proof = Base64.getUrlEncoder().withoutPadding().encodeToString(signer.sign());
                     client.execute(() -> {
-                        if (connection != handler || client.getNetworkHandler() != handler || key != sessionKey) return;
+                        if (connection != handler || client.getNetworkHandler() != handler || key != sessionKey || !retry.active()) return;
                         PacketByteBuf out = net.fabricmc.fabric.api.networking.v1.PacketByteBufs.create(); out.writeString(ticket); out.writeString(proof);
                         ClientPlayNetworking.send(SefiAuthCommon.TICKET, out);
                     });
-                } catch (Exception ignored) { /* Password fallback, never log credential-bearing exceptions. */ }
-            }); } catch (RejectedExecutionException ignored) { }
+                } catch (Exception error) { fail(client, handler, sessionKey, error instanceof java.io.IOException, "broker_transport", 0); }
+            }); } catch (RejectedExecutionException ignored) { fail(client, handler, sessionKey, true, "worker_busy", 0); }
+            });
         });
     }
     private void retryVoiceChat() {

@@ -7,6 +7,8 @@ export interface Settings {
   windowHeight: number;
   closeOnLaunch: boolean;
   fullscreen: boolean;
+  autoConnect?: boolean;
+  selectedServerId?: string;
 }
 
 export interface CommunityProfile {

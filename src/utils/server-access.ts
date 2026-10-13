@@ -7,7 +7,7 @@ export function serverAccessWarning(account: Account | null): string | null {
   }
   if (account.type === 'microsoft' && (!account.mcVerifiedAt || account.mcType !== 'microsoft'
       || account.mcUuid?.replace(/-/g, '').toLowerCase() !== account.uuid.replace(/-/g, '').toLowerCase())) {
-    return 'Этот Minecraft-профиль ещё не привязан к Twitch. Подтвердите связку в разделе «Аккаунты», иначе сервер не пустит.';
+    return 'Вы вошли в Microsoft, но ещё не связали аккаунт Minecraft с Twitch. Откройте «Аккаунты» и нажмите «Привязать к Twitch». Без этого Minecraft запустится, но зайти на сервер не получится.';
   }
   return null;
 }

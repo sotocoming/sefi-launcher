@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { serverAccessWarning } from '../../utils/server-access';
 import { launchErrorMessage } from '../../utils/errors';
 import { Play, Download, Loader2, AlertCircle } from 'lucide-react';
 import { useStore } from '../../store/store';
 
-export const PlayButton: React.FC = () => {
+export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAccounts }) => {
   const { gameState, launch, activeAccount, settings, launcherConfig } = useStore();
   const host = launcherConfig?.server.ip || 'minecraft.sotocoming.ru';
   const port = launcherConfig?.server.port || 25565;
@@ -15,6 +16,25 @@ export const PlayButton: React.FC = () => {
   const selectedServer = endpoints.find(endpoint => endpoint.id === selectedId);
   const autoConnect = settings?.autoConnect === true;
   const [copyResult, setCopyResult] = useState<{ message: string; ok: boolean } | null>(null);
+  const [warningAccountId, setWarningAccountId] = useState<string | null>(null);
+  const warningDialog = useRef<HTMLDialogElement>(null);
+  const accessWarning = serverAccessWarning(activeAccount);
+  useEffect(() => {
+    if (warningAccountId && accessWarning) warningDialog.current?.showModal();
+    else warningDialog.current?.close();
+  }, [warningAccountId, accessWarning]);
+  const handlePlay = () => {
+    if (accessWarning && activeAccount) setWarningAccountId(activeAccount.id);
+    else void launch();
+  };
+  const continueLaunch = () => {
+    if (activeAccount?.id !== warningAccountId) {
+      setWarningAccountId(null);
+      return;
+    }
+    setWarningAccountId(null);
+    void launch();
+  };
   const errorMessage = launchErrorMessage(gameState.status === 'error' ? gameState.message : '');
   const copyError = async () => {
     try { await navigator.clipboard.writeText(errorMessage); setCopyResult({ message: errorMessage, ok: true }); }
@@ -92,7 +112,7 @@ export const PlayButton: React.FC = () => {
       <motion.button
         whileHover={!isDisabled ? { scale: 1.01 } : {}}
         whileTap={!isDisabled ? { scale: 0.99 } : {}}
-        onClick={launch}
+        onClick={handlePlay}
         disabled={isDisabled}
         className={`group relative h-[86px] w-full overflow-hidden rounded-[18px] border transition-all duration-300 ${
           isDisabled
@@ -149,6 +169,19 @@ export const PlayButton: React.FC = () => {
           </div>
         </div>
       </motion.button>
+      <dialog ref={warningDialog} onCancel={() => setWarningAccountId(null)} onClose={() => setWarningAccountId(null)}
+        aria-labelledby="server-access-title" aria-describedby="server-access-detail"
+        className="max-w-lg rounded-2xl border border-fuchsia-300/25 bg-[#16101d] p-6 text-white shadow-2xl backdrop:bg-black/70">
+        <h2 id="server-access-title" className="text-lg font-bold">Для входа на сервер нужен Twitch</h2>
+        <p id="server-access-detail" className="mt-3 text-sm leading-6 text-white/70">{accessWarning}</p>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <button autoFocus onClick={() => { setWarningAccountId(null); onOpenAccounts(); }}
+            className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold hover:bg-purple-500">Аккаунты</button>
+          <button onClick={continueLaunch} disabled={isDisabled}
+            className="rounded-xl border border-white/20 px-4 py-2 text-sm hover:bg-white/10 disabled:opacity-50">Всё равно запустить</button>
+          <button onClick={() => setWarningAccountId(null)} className="px-3 py-2 text-sm text-white/60 hover:text-white">Отмена</button>
+        </div>
+      </dialog>
       {isError && (
         <div role="alert" className="mt-3 rounded-xl border border-red-400/25 bg-red-950/40 p-4">
           <p className="max-h-40 overflow-y-auto whitespace-pre-wrap break-words text-sm text-red-100 select-text">{errorMessage}</p>

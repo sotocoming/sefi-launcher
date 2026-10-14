@@ -40,14 +40,16 @@ public final class ReportData {
    });
    client.getResourcePackManager().getEnabledProfiles().forEach(p->enabled.add(p.getName()));
    client.getResourcePackManager().getProfiles().forEach(p->available.add(p.getName()));
+   JsonObject graphics=new JsonObject();try{graphics.addProperty("renderer",org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_RENDERER));graphics.addProperty("opengl_version",org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_VERSION));graphics.addProperty("graphics_mode",client.options.getGraphicsMode().getValue().toString());}catch(RuntimeException | LinkageError ignored){graphics.addProperty("available",false);}runtime.add("graphics",graphics);
    runtime.add("mods",mods);runtime.add("enabled_resource_packs",enabled);runtime.add("available_resource_packs",available);runtime.addProperty("java_version",System.getProperty("java.version"));runtime.addProperty("os",System.getProperty("os.name"));runtime.addProperty("reporter_version","0.2.0");
   }
   if(settings)for(KeyBinding k:client.options.allKeys){
    if(!(k==client.options.attackKey || k==client.options.sneakKey || k==client.options.sprintKey || k.getTranslationKey().startsWith("key.jei.") || k.getTranslationKey().startsWith("key.mousewheelie.")))continue;
    JsonObject b=new JsonObject();b.addProperty("name",k.getTranslationKey());b.addProperty("key",((KeyBindingAccess)k).inputdiag$boundKey().getTranslationKey());b.addProperty("modifiers",InputTrace.bindingModifiers(k));bindings.add(b);
   }
+  JsonObject context=new JsonObject();if(settings && client.player!=null){context.addProperty("held_item",net.minecraft.registry.Registries.ITEM.getId(client.player.getMainHandStack().getItem()).toString());context.addProperty("sneaking",client.player.isSneaking());if(client.crosshairTarget instanceof net.minecraft.util.hit.BlockHitResult hit && client.world!=null)context.addProperty("target_block",net.minecraft.registry.Registries.BLOCK.getId(client.world.getBlockState(hit.getBlockPos()).getBlock()).toString());}
   JsonObject effectiveTrees=new JsonObject();
-  if(settings){try{Class<?> ft=Class.forName("me.pandamods.fallingtrees.config.FallingTreesConfig");effectiveTrees.add("client",sanitize(GSON.toJsonTree(ft.getMethod("getClientConfig").invoke(null))));effectiveTrees.add("common",sanitize(GSON.toJsonTree(ft.getMethod("getCommonConfig").invoke(null))));}catch(ReflectiveOperationException ignored){effectiveTrees.addProperty("available",false);}}
+  if(settings){try{Class<?> ft=Class.forName("me.pandamods.fallingtrees.config.FallingTreesConfig");effectiveTrees.add("client",sanitize(GSON.toJsonTree(ft.getMethod("getClientConfig").invoke(null))));effectiveTrees.add("common",sanitize(GSON.toJsonTree(ft.getMethod("getCommonConfig").invoke(null))));}catch(ReflectiveOperationException | RuntimeException ignored){effectiveTrees.addProperty("available",false);}}
   Path root=FabricLoader.getInstance().getGameDir(),recording=InputTrace.recordingFile();
   return CompletableFuture.supplyAsync(()->{
    try{
@@ -55,9 +57,9 @@ public final class ReportData {
     if(settings){JsonObject settingsData=new JsonObject(),configs=new JsonObject();for(String rel:CONFIGS){Path p=root.resolve("config").resolve(rel);if(!readable(root,p,128*1024))continue;
      if(rel.endsWith(".json")){try{configs.add(rel,sanitize(JsonParser.parseString(Files.readString(p))));}catch(JsonParseException ignored){JsonObject invalid=new JsonObject();invalid.addProperty("parse_error",true);configs.add(rel,invalid);}}
      else{JsonObject cfg=new JsonObject();for(String line:Files.readAllLines(p)){String[] pair=line.split("=",2);if(pair.length==2 && pair[0].matches("[A-Za-z]{1,40}") && pair[1].matches("[0-9-]{1,12}"))cfg.addProperty(pair[0],pair[1]);}configs.add(rel,cfg);}
-    }settingsData.add("configs",configs);settingsData.add("bindings",bindings);settingsData.add("effective_fallingtrees",effectiveTrees);diagnostic.add("settings",settingsData);}
+    }settingsData.add("configs",configs);settingsData.add("bindings",bindings);settingsData.add("effective_fallingtrees",effectiveTrees);settingsData.add("context",context);diagnostic.add("settings",settingsData);}
     if(errors){JsonArray messages=new JsonArray();Path p=root.resolve("logs/latest.log");if(readable(root,p,8*1024*1024)){List<String> lines=Files.readAllLines(p);for(String line:lines.subList(Math.max(0,lines.size()-1200),lines.size())){
-      if(!(line.contains("/WARN]")||line.contains("/ERROR]")) || line.matches("(?i).*(chat|token|password|secret|cookie|session|authorization|bearer|https?://|[A-Z]:\\\\|/home/).*"))continue;
+      if(!(line.contains("/WARN]")||line.contains("/ERROR]")) || line.matches("(?i).*(chat|sefi[.]report|sefi[.]ticket|token|password|secret|cookie|session|authorization|bearer|https?://|[A-Z]:\\\\|/home/).*"))continue;
       messages.add(line.substring(0,Math.min(line.length(),800)));if(messages.size()>=120)break;
     }}diagnostic.add("errors",messages);}
     if(input){JsonArray records=new JsonArray();if(recording!=null && readable(root,recording,8*1024*1024)){List<String> lines=Files.readAllLines(recording);for(String line:lines.subList(Math.max(0,lines.size()-1200),lines.size())){try{JsonObject row=JsonParser.parseString(line).getAsJsonObject(),out=new JsonObject();if(!row.has("physical_lmb"))continue;for(String key:INPUT_KEYS)if(row.has(key))out.add(key,row.get(key));records.add(out);}catch(JsonParseException ignored){}}}diagnostic.add("input",records);}
@@ -88,7 +90,7 @@ public final class ReportData {
    String port=System.getProperty("sefi.reportPort",""),key=System.getProperty("sefi.reportKey","");
    if(!port.matches("[0-9]{1,5}") || !key.matches("[0-9a-f]{64}"))return "Копия сохранена. Для отправки нужен обновлённый SEFI Launcher.";
    HttpRequest request=HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+"/sefi/report")).timeout(Duration.ofSeconds(25)).header("Content-Type","application/json").header("X-SEFI-Report-Key",key).POST(HttpRequest.BodyPublishers.ofString(COMPACT.toJson(body))).build();
-   HttpResponse<String> response=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).followRedirects(HttpClient.Redirect.NEVER).build().send(request,HttpResponse.BodyHandlers.ofString());
+   HttpResponse<String> response=HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).proxy(new java.net.ProxySelector(){public java.util.List<java.net.Proxy> select(URI uri){return java.util.List.of(java.net.Proxy.NO_PROXY);}public void connectFailed(URI uri,java.net.SocketAddress address,java.io.IOException error){}}).connectTimeout(Duration.ofSeconds(3)).followRedirects(HttpClient.Redirect.NEVER).build().send(request,HttpResponse.BodyHandlers.ofString());
    JsonObject result=JsonParser.parseString(response.body()).getAsJsonObject();
    if(response.statusCode()!=200 || !result.has("ok") || !result.get("ok").getAsBoolean())return "Не отправлено. Копия сохранена; проверьте вход в лаунчере и повторите позже.";
    if(result.has("ticket_id")&&!result.get("ticket_id").isJsonNull())return "Отправлено. Discord-тикет #"+result.get("ticket_id").getAsInt();

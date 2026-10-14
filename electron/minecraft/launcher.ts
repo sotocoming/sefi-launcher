@@ -221,8 +221,15 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
 
   // Long modpack downloads may outlive the game token: renew again immediately before spawn.
   if(activeAccount.type==='microsoft')activeAccount=await ensureMicrosoftAccount(activeAccount.id,true);
-  await ensureReportMod(settings.gameDirectory);
-  const reportBroker = await startReportBroker(activeAccount);
+  let reportBroker: Awaited<ReturnType<typeof startReportBroker>>;
+  try {
+    await ensureReportMod(settings.gameDirectory);
+    reportBroker = await startReportBroker(activeAccount);
+  } catch (error) {
+    broker?.close();
+    onStateChange({ status: 'error', message: error instanceof Error ? error.message : 'Не удалось подготовить отчёты.' });
+    return;
+  }
   customArgs.push('-Dsefi.reportPort=' + reportBroker.port, '-Dsefi.reportKey=' + reportBroker.key);
   const opts = {
     clientPackage: null,
@@ -276,6 +283,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     onStateChange({ status: 'running', pid: child.pid });
     onStarted?.(settings.closeOnLaunch === true);
   } catch (err: any) {
+    reportBroker.close();
     broker?.close();
     console.error('Launch failed:', err);
     onStateChange({ status: 'error', message: err.message || String(err) });

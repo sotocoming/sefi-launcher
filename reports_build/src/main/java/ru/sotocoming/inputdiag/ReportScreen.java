@@ -21,7 +21,7 @@ public final class ReportScreen extends Screen {
   y+=areaHeight+18;
   steps=addDrawableChild(new TextFieldWidget(textRenderer,left,y,formWidth,18,Text.literal("Как повторить (необязательно)")));steps.setMaxLength(500);steps.setText(draft.steps);steps.setChangedListener(s->{draft.steps=s;draft.changed();});
   y+=24;int half=(formWidth-6)/2;
-  addDrawableChild(ButtonWidget.builder(Text.literal("Приложения…"),b->{if(!busy)client.setScreen(new OptionsScreen(this));}).dimensions(left,y,half,20).build());
+  addDrawableChild(ButtonWidget.builder(Text.literal("Приложения ("+((draft.build?1:0)+(draft.settings?1:0)+(draft.errors?1:0)+(draft.input?1:0))+")…"),b->{if(!busy)client.setScreen(new OptionsScreen(this));}).dimensions(left,y,half,20).build());
   addDrawableChild(ButtonWidget.builder(Text.literal("Посмотреть данные"),b->prepare(false,true)).dimensions(left+half+6,y,half,20).build());
   y+=24;
   addDrawableChild(ButtonWidget.builder(Text.literal("Отправить"),b->prepare(true,false)).dimensions(left,y,half,20).build());
@@ -32,7 +32,9 @@ public final class ReportScreen extends Screen {
   if(busy)return;
   if(draft.title.trim().length()<3 || draft.description.trim().length()<10){draft.message="Заполните тему (от 3 символов) и описание (от 10).";return;}
   busy=true;subject.active=false;steps.active=false;description.active=false;draft.message="Подготовка выбранных данных…";
-  ReportData.collect(client,draft).whenComplete((body,error)->client.execute(()->{
+  java.util.concurrent.CompletableFuture<JsonObject> gathering;
+  try{gathering=ReportData.collect(client,draft);}catch(RuntimeException | LinkageError error){busy=false;subject.active=true;steps.active=true;description.active=true;draft.message="Часть диагностики недоступна. Снимите приложения и попробуйте снова.";return;}
+  gathering.whenComplete((body,error)->client.execute(()->{
    if(error!=null){busy=false;subject.active=true;steps.active=true;description.active=true;draft.message="Не удалось собрать данные. Снимите часть приложений.";return;}
    draft.prepared=body;
    if(preview){busy=false;subject.active=true;steps.active=true;description.active=true;client.setScreen(new PreviewScreen(this,body));return;}
@@ -48,7 +50,7 @@ public final class ReportScreen extends Screen {
   ctx.drawTextWithShadow(textRenderer,Text.literal("Описание"),left,description.getY()-12,0xBBBBBB);
   ctx.drawTextWithShadow(textRenderer,Text.literal("Как повторить (необязательно)"),left,steps.getY()-12,0xBBBBBB);
   super.render(ctx,mx,my,delta);
-  ctx.drawTextWrapped(textRenderer,Text.literal(draft.message.isEmpty()?"Приложится только выбранная диагностика. Чат и пароли не собираются.":draft.message),left,statusY,formWidth,0xBBBBBB);
+  ctx.drawTextWrapped(textRenderer,Text.literal(draft.message.isEmpty()?"Приложится: "+(draft.build?"сборка; ":"")+(draft.settings?"настройки; ":"")+(draft.errors?"ошибки; ":"")+(draft.input?"кнопки; ":"")+"без чата и паролей.":draft.message),left,statusY,formWidth,0xBBBBBB);
  }
  private static final class OptionsScreen extends Screen {
   private final ReportScreen parent;private int x,y,w;
@@ -72,8 +74,8 @@ public final class ReportScreen extends Screen {
   PreviewScreen(ReportScreen parent,JsonObject body){super(Text.literal("Данные отчёта"));this.parent=parent;this.body=body;}
   @Override protected void init(){int w=Math.min(540,width-24),x=(width-w)/2;EditBoxWidget box=new EditBoxWidget(textRenderer,x,28,w,height-66,Text.empty(),title){
     @Override public boolean charTyped(char chr,int mods){return false;}
-    @Override public boolean keyPressed(int key,int scan,int mods){return (key==262||key==263||key==264||key==265||key==268||key==269||key==266||key==267||(Screen.hasControlDown()&&key==67)) && super.keyPressed(key,scan,mods);}
-   };box.setMaxLength(800000);box.setText(ReportData.preview(body));box.setChangeListener(s->{});addDrawableChild(box);addDrawableChild(ButtonWidget.builder(Text.literal("Назад"),b->close()).dimensions(x,height-30,w,20).build());}
+    @Override public boolean keyPressed(int key,int scan,int mods){return (key==262||key==263||key==264||key==265||key==268||key==269||key==266||key==267||(Screen.hasControlDown()&&(key==65||key==67))) && super.keyPressed(key,scan,mods);}
+   };box.setMaxLength(3000000);box.setText(ReportData.preview(body));box.setChangeListener(s->{});addDrawableChild(box);addDrawableChild(ButtonWidget.builder(Text.literal("Назад"),b->close()).dimensions(x,height-30,w,20).build());}
   @Override public void close(){client.setScreen(parent);}
   @Override public boolean shouldPause(){return false;}
   @Override public void render(DrawContext ctx,int mx,int my,float delta){renderBackground(ctx);ctx.drawCenteredTextWithShadow(textRenderer,title,width/2,12,0xFFFFFF);super.render(ctx,mx,my,delta);}

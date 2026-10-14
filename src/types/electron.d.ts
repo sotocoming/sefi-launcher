@@ -13,6 +13,8 @@ export interface IElectronAPI {
   // Game
   launchGame(): Promise<void>;
 
+  repairClickBindings(): Promise<import('./index').ControlRepairResult>;
+
   // Settings
   getSettings(): Promise<Settings>;
   saveSettings(settings: Settings): Promise<void>;

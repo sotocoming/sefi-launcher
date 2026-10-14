@@ -132,3 +132,11 @@ node scripts/test-skins-packaged.cjs
 Последняя проверка интерфейса использует Playwright из локального Codex runtime и
 установленный Edge; её пути можно изменить под свою среду. Проверки API в панели:
 `python panel/deploy/test_community_skins.py`.
+
+## Исправление Shift/Ctrl + ЛКМ
+
+В «Настройки → Управление в Minecraft» есть кнопка «Исправить Shift/Ctrl + ЛКМ». Она отключает пять конфликтующих назначений JEI на левую кнопку мыши, сохраняет остальные настройки и назначения на другие клавиши. Отсутствующие записи добавляются как отключённые, чтобы не включились конфликтующие значения по умолчанию.
+
+Minecraft должен быть закрыт. Лаунчер проверяет свой статус и запущенные процессы Minecraft, сохраняет исходный options.txt в sefi-backups/controls, проверяет отсутствие параллельных изменений и атомарно заменяет файл. Повторное исправление не создаёт новые копии. Для текущих версий доступен scripts/repair-click-bindings.ps1; параметр -GameDirectory задаёт папку вручную, по умолчанию читается settings.json лаунчера.
+
+Проверки: node scripts/test-control-repair.cjs; powershell -NoProfile -File scripts/test-control-repair.ps1; node scripts/test-control-repair-ui.cjs. Проверка интерфейса использует изолированный Edge и Playwright из Codex runtime; это тестовые зависимости, не зависимости установленного лаунчера.

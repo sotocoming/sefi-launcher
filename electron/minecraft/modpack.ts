@@ -58,8 +58,10 @@ export async function getModpackStatus(gameDir: string): Promise<ModpackStatus> 
       if (!await matches(path.join(gameDir, file.directory || 'mods', file.name), file)) { installed = false; break; }
     }
   }
-  return { installed, currentVersion: typeof meta?.version === 'string' ? meta.version : null,
-    latestVersion: config.modpack.version, updateAvailable: !installed || meta?.version !== config.modpack.version, modpack: config.modpack };
+  // A version label can be corrected without changing the installed artifact.
+  const latestVersion = config.modpack.version;
+  return { installed, currentVersion: installed ? latestVersion : typeof meta?.version === 'string' ? meta.version : null,
+    latestVersion, updateAvailable: !installed, modpack: config.modpack };
 }
 
 export function installModpack(gameDir: string, onProgress: (p: DownloadProgress) => void): Promise<void> {
@@ -180,7 +182,7 @@ async function performInstall(gameDir: string, onProgress: (p: DownloadProgress)
       } else overrideFiles.push({ relative, source: path.join(extracted, overrides, relative) });
     }
     await ensureSefiAuthMod(stage);
-    const authName = 'sefi-auth-2.0.2.jar';
+    const authName = 'sefi-auth-2.0.3.jar';
     const auth = path.join(stagedMods, authName);
     checkedZip(auth);
     if (names.has(authName.toLowerCase())) throw new Error('Сборка содержит собственную копию SEFI Auth.');
@@ -235,7 +237,7 @@ async function performInstall(gameDir: string, onProgress: (p: DownloadProgress)
 export async function ensureSefiAuthMod(gameDir: string): Promise<void> {
   const modsDir = await safeDestination(gameDir, 'mods');
   await fs.mkdir(modsDir, { recursive: true });
-  const name = 'sefi-auth-2.0.2.jar';
+  const name = 'sefi-auth-2.0.3.jar';
   const sources = [path.join(process.resourcesPath || '', 'resources', 'mods', name), path.join(app.getAppPath(), 'resources', 'mods', name)];
   let source: string | undefined;
   for (const candidate of sources) if (await fs.access(candidate).then(() => true, () => false)) { source = candidate; break; }

@@ -1,0 +1,57 @@
+name: Publish prepared release at scheduled time
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing draft release tag
+        required: true
+      publish_at:
+        description: Publication time in UTC (ISO 8601)
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scheduled-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Validate draft and wait for publication time
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          PUBLISH_AT: ${{ inputs.publish_at }}
+        run: |
+          python3 - <<'PY'
+          import datetime, json, os, re, subprocess, time
+          tag = os.environ['RELEASE_TAG']
+          if not re.fullmatch(r'v\d+\.\d+\.\d+', tag):
+              raise SystemExit('Invalid release tag')
+          releases = json.loads(subprocess.check_output(['gh', 'api', 'repos/' + os.environ['GH_REPO'] + '/releases?per_page=100']))
+          release = next((item for item in releases if item['tag_name'] == tag), None)
+          if release is None:
+              raise SystemExit('Prepared draft not found')
+          if not release['draft']:
+              raise SystemExit('Release is already published')
+          names = {asset['name'] for asset in release['assets']}
+          if not {'SEFI-Launcher-Setup.exe', 'SEFI-Launcher-Setup.exe.blockmap', 'latest.yml'}.issubset(names):
+              raise SystemExit('Prepared release is missing assets')
+          target = datetime.datetime.fromisoformat(os.environ['PUBLISH_AT'].replace('Z', '+00:00'))
+          if target.tzinfo is None:
+              raise SystemExit('Explicit timezone required')
+          remaining = target.timestamp() - time.time()
+          if not -120 <= remaining <= 1800:
+              raise SystemExit('Publication time outside permitted window')
+          print('Validated draft; publication at', target.isoformat(), flush=True)
+          while time.time() < target.timestamp():
+              time.sleep(min(10, target.timestamp() - time.time()))
+          subprocess.run(['gh', 'api', '--method', 'PATCH', 'repos/' + os.environ['GH_REPO'] + '/releases/' + str(release['id']), '-F', 'draft=false', '-f', 'make_latest=true', '--silent'], check=True)
+          print('Release published', tag, flush=True)
+          PY

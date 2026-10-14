@@ -195,8 +195,13 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   const serverHost = launcherConfig?.server?.ip || 'minecraft.sotocoming.ru';
   const serverPort = launcherConfig?.server?.port || 25565;
   const serverName = launcherConfig?.server?.name || 'Sweet Home';
-  const fullAddress = serverPort === 25565 ? serverHost : `${serverHost}:${serverPort}`;
-  const endpoints = launcherConfig?.server?.endpoints?.length ? launcherConfig.server.endpoints : [{ id: 'primary', label: 'Основной', host: serverHost, port: serverPort, address: fullAddress }];
+  const primaryAddress = serverPort === 25565 ? serverHost : `${serverHost}:${serverPort}`;
+  const endpoints = launcherConfig?.server?.endpoints?.length ? launcherConfig.server.endpoints : [{ id: 'primary', label: 'Основной', host: serverHost, port: serverPort, address: primaryAddress }];
+  const selectedServer = settings.selectedServerId ? endpoints.find(e => e.id === settings.selectedServerId) : endpoints[0];
+  if (settings.autoConnect === true && !selectedServer) {
+    throw new Error('Выбранный адрес сервера больше недоступен. Выберите другой адрес рядом с «Играть» или отключите «Подключаться сразу».');
+  }
+  const fullAddress = selectedServer?.address || primaryAddress;
 
   await ensureSefiSkinMod(settings.gameDirectory);
   const customArgs: string[] = [`-Dsefi.skinApi=${skinApiOrigin()}`];
@@ -249,7 +254,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       height: settings.windowHeight,
       fullscreen: settings.fullscreen,
     },
-    quickPlay: { type: 'multiplayer', identifier: fullAddress },
+    ...(settings.autoConnect === true ? { quickPlay: { type: 'multiplayer', identifier: fullAddress } } : {}),
   };
 
   try {

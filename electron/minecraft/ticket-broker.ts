@@ -61,7 +61,7 @@ export async function startTicketBroker(account: Account): Promise<{ port: numbe
       const result = await api('', account.communityToken, { challenge: body.challenge, signature: body.signature });
       if (typeof result.ticket !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(result.ticket)) throw new Error();
       reply(200, { ticket: result.ticket });
-    } catch (error) { reply(error instanceof CommunitySessionError && (!error.status || error.status >= 500 || error.status === 429) ? 503 : 403, { error: 'Не удалось подтвердить подключение. Переподключитесь или используйте игровой пароль.' }); }
+    } catch (error) { console.warn('[SEFI auth] stage=broker status=' + (error instanceof CommunitySessionError ? error.status || 0 : 403)); reply(error instanceof CommunitySessionError && (!error.status || error.status >= 500 || error.status === 429) ? 503 : 403, { error: 'Не удалось подтвердить подключение. Переподключитесь или используйте игровой пароль.' }); }
     finally { busy--; }
   });
   server.requestTimeout = 5000; server.headersTimeout = 5000; server.setTimeout(35000);

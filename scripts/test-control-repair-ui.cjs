@@ -13,12 +13,13 @@ const {chromium}=require(process.env.PLAYWRIGHT_PATH || 'C:/Users/Creep/.cache/c
    await route.fulfill({body:fs.readFileSync(file),contentType:file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':file.endsWith('.png')?'image/png':'text/html'});
   });
   await page.addInitScript(()=>{
-   window.repairCalls=0;window.repairMode='changed';window.gameListeners=[];
+   window.resourceRepairCalls=0;window.repairCalls=0;window.repairMode='changed';window.gameListeners=[];
    window.electronAPI=new Proxy({
     getAccounts:async()=>[],getSettings:async()=>({ramMin:2048,ramMax:4096,gameDirectory:'C:/fixture/game',javaPath:'',fullscreen:false,closeOnLaunch:false,windowWidth:854,windowHeight:480}),
     getLauncherConfig:async()=>({news:[],community_links:[],modpack:{name:'Homestead',version:'1.3.7'},server:{ip:'fixture',port:25565}}),
     getModpackStatus:async()=>({installed:true,updateAvailable:false}),getServerStatus:async()=>({online:false,players:0,maxPlayers:20}),getJavaStatus:async()=>({status:'ready',source:'managed',version:'21'}),
     onGameStateChange:callback=>{window.gameListeners.push(callback);return()=>{};},
+    repairResourcePacks:async()=>{window.resourceRepairCalls++;return {changed:1};},
     repairClickBindings:async()=>{window.repairCalls++;if(window.repairMode==='error')throw Error('Закройте Minecraft перед исправлением.');return {changed:window.repairMode==='changed'?5:0};},
    },{get:(object,key)=>key in object?object[key]:()=>()=>{}});
   });
@@ -26,9 +27,11 @@ const {chromium}=require(process.env.PLAYWRIGHT_PATH || 'C:/Users/Creep/.cache/c
   const button=page.getByRole('button',{name:'Исправить Shift/Ctrl + ЛКМ',exact:true});await button.scrollIntoViewIfNeeded();
   assert.equal(await button.isEnabled(),true);await button.click();await page.getByRole('status').filter({hasText:'Конфликтующие сочетания JEI отключены'}).waitFor();
   await page.screenshot({path:path.join(__dirname,'../../settings-click-fix.png')});
+  await page.getByRole('button',{name:'Вернуть интерфейс сборки',exact:true}).click();await page.getByRole('status').filter({hasText:'Интерфейс Homestead включён'}).waitFor();assert.equal(await page.evaluate(()=>window.resourceRepairCalls),1);
   await page.evaluate(()=>window.repairMode='fixed');await button.click();await page.getByRole('status').filter({hasText:'Исправление уже применено'}).waitFor();
   await page.evaluate(()=>window.repairMode='error');await button.click();await page.getByRole('alert').filter({hasText:'Закройте Minecraft'}).waitFor();
   await page.evaluate(()=>window.gameListeners.forEach(callback=>callback({status:'running',pid:123})));await page.waitForFunction(()=>Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='Исправить Shift/Ctrl + ЛКМ')?.disabled);
+  assert.equal(await page.getByRole('button',{name:'Вернуть интерфейс сборки',exact:true}).isDisabled(),true);
   assert.equal(await page.evaluate(()=>window.repairCalls),3);assert.deepEqual(errors,[]);
   console.log('PASS: settings button, success, already fixed, error and disabled during Minecraft');
  }finally{await browser.close();}

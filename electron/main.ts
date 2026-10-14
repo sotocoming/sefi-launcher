@@ -16,7 +16,7 @@ import { getJavaStatus, getJavaPath, inspectJava } from './minecraft/java';
 import { prepareGameDirectory } from './minecraft/game-directory';
 import { publicAccount } from './minecraft/account-store';
 import { launchGame } from './minecraft/launcher';
-import { repairClickBindings } from './minecraft/control-repair';
+import { repairClickBindings, repairResourcePacks } from './minecraft/control-repair';
 
 const isDev = !app.isPackaged;
 const profileDirectory = app.commandLine.getSwitchValue('user-data-dir');
@@ -254,6 +254,14 @@ function setupIpc() {
     gameBusy = true;
     sendToMain('game-state-change', { status: 'checking' });
     try { return await repairClickBindings((await getSettings()).gameDirectory); }
+    finally { controlsRepairBusy = false; gameBusy = false; sendToMain('game-state-change', { status: 'idle' }); }
+  });
+
+  secureIpc.handle('repair-resource-packs', async () => {
+    if (gameBusy || controlsRepairBusy) throw new Error('Закройте Minecraft и дождитесь завершения запуска.');
+    controlsRepairBusy = true; gameBusy = true;
+    sendToMain('game-state-change', { status: 'checking' });
+    try { return await repairResourcePacks((await getSettings()).gameDirectory); }
     finally { controlsRepairBusy = false; gameBusy = false; sendToMain('game-state-change', { status: 'idle' }); }
   });
 

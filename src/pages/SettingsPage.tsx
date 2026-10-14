@@ -39,6 +39,15 @@ export const SettingsPage: React.FC = () => {
       setControlsMessage((error instanceof Error ? error.message : 'Не удалось исправить управление.').replace(/^Error invoking remote method '[^']+': (?:Error: )?/, ''));
     } finally { setRepairingControls(false); }
   };
+  const handleRepairResources = async () => {
+    if (playing || repairingControls || !settings) return;
+    setRepairingControls(true); setControlsMessage(''); setControlsError(false);
+    try {
+      const result = await window.electronAPI.repairResourcePacks();
+      setControlsMessage(result.changed ? 'Интерфейс Homestead включён. Другие ресурс-паки сохранены, резервная копия создана.' : 'Интерфейс Homestead уже включён.');
+    } catch (error) { setControlsError(true); setControlsMessage((error instanceof Error ? error.message : 'Не удалось восстановить интерфейс.').replace(/^Error invoking remote method '[^']+': (?:Error: )?/, '')); }
+    finally { setRepairingControls(false); }
+  };
   useEffect(() => { setControlsMessage(''); setControlsError(false); }, [settings?.gameDirectory]);
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
@@ -192,6 +201,8 @@ export const SettingsPage: React.FC = () => {
             className="mt-4 rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-4 py-2 text-sm text-fuchsia-200 disabled:opacity-50">
             {repairingControls ? 'Исправляем управление…' : 'Исправить Shift/Ctrl + ЛКМ'}
           </button>
+          <button type="button" disabled={playing || repairingControls || !settings} onClick={handleRepairResources}
+            className="ml-2 mt-4 rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-4 py-2 text-sm text-fuchsia-200 disabled:opacity-50">Вернуть интерфейс сборки</button>
           <p className="mt-2 text-xs text-white/40">Перед исправлением закройте Minecraft. Сочетания можно назначить заново в игре.</p>
           {controlsMessage && <p role={controlsError ? 'alert' : 'status'} className={`mt-3 text-xs leading-relaxed select-text ${controlsError ? 'text-rose-300' : 'text-emerald-300'}`}>{controlsMessage}</p>}
         </GlassCard>

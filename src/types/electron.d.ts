@@ -13,6 +13,7 @@ export interface IElectronAPI {
   // Game
   launchGame(): Promise<void>;
 
+  repairResourcePacks(): Promise<import('./index').ControlRepairResult>;
   repairClickBindings(): Promise<import('./index').ControlRepairResult>;
 
   // Settings

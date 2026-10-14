@@ -52,7 +52,27 @@ export async function assertMinecraftClosed(): Promise<void> {
  if(running) throw new Error('Закройте Minecraft перед исправлением: открытая игра может перезаписать настройки.');
 }
 
-export async function repairClickBindings(directory: string, assertIdle = assertMinecraftClosed): Promise<ControlRepairResult> {
+export function repairResourcePacksText(text: string): {text:string; changed:string[]} {
+ let found=false,changed=false;
+ const output=text.replace(/(^|\r?\n)resourcePacks:([^\r\n]*)/g,(line,prefix,value)=>{
+  found=true;let packs:unknown;try{packs=JSON.parse(value);}catch{throw new Error('Список ресурс-паков повреждён. Исправление отменено.');}
+  if(!Array.isArray(packs) || packs.some(p=>typeof p!=='string'))throw new Error('Некорректный список ресурс-паков.');
+  if(packs.includes('file/Homestead GUI'))return line;
+  changed=true;return prefix+'resourcePacks:'+JSON.stringify([...packs,'file/Homestead GUI']);
+ });
+ if(!found)throw new Error('В настройках нет списка ресурс-паков. Сначала запустите и закройте Minecraft.');
+ return {text:output,changed:changed?['resourcePacks']:[]};
+}
+export async function repairClickBindings(directory:string,assertIdle=assertMinecraftClosed):Promise<ControlRepairResult>{
+ return repairOptions(directory,repairClickBindingsText,assertIdle);
+}
+export async function repairResourcePacks(directory:string,assertIdle=assertMinecraftClosed):Promise<ControlRepairResult>{
+ await assertIdle();
+ const pack=path.join(normalizeGameDirectory(directory),'resourcepacks','Homestead GUI','pack.mcmeta');
+ if(!(await fs.lstat(pack).catch(()=>null))?.isFile())throw new Error('Ресурс-пак Homestead GUI не установлен. Сначала восстановите сборку.');
+ return repairOptions(directory,repairResourcePacksText,assertIdle);
+}
+async function repairOptions(directory:string,transform:(text:string)=>{text:string;changed:string[]},assertIdle:()=>Promise<void>):Promise<ControlRepairResult>{
  await assertIdle();
  const root = await fs.realpath(normalizeGameDirectory(directory));
  const file = path.join(root, 'options.txt');
@@ -66,7 +86,9 @@ export async function repairClickBindings(directory: string, assertIdle = assert
  catch(error: any) { if(error.code === 'EEXIST') throw new Error('Исправление уже выполняется. Дождитесь завершения.'); throw error; }
  try {
   const original = await fs.readFile(file);
-  const update = repairClickBindingsText(original.toString('utf8'));
+  const text=original.toString('utf8');
+  if(!Buffer.from(text,'utf8').equals(original))throw new Error('Файл настроек повреждён. Исправление отменено.');
+  const update = transform(text);
   if(!update.changed.length) return { changed: 0 };
   const backupDir = path.join(root, 'sefi-backups', 'controls');
   for(const dir of [path.join(root, 'sefi-backups'), backupDir]) {

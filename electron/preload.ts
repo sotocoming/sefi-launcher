@@ -5,6 +5,7 @@ import type { GameState, DownloadProgress, Settings } from '../src/types';
 const api: IElectronAPI = {
   launchGame: () => ipcRenderer.invoke('launch-game'),
   
+  repairResourcePacks: () => ipcRenderer.invoke('repair-resource-packs'),
   repairClickBindings: () => ipcRenderer.invoke('repair-click-bindings'),
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings: Settings) => ipcRenderer.invoke('save-settings', settings),

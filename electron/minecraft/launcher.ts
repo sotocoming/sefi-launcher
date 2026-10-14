@@ -1,3 +1,5 @@
+import { startReportBroker } from './report-broker';
+import { ensureReportMod } from './report-mod';
 import { protectMinecraftHandler, trustedGameUrl } from './game-integrity';
 const { Client } = require('minecraft-launcher-core');
 import fs from 'fs/promises';
@@ -214,6 +216,9 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
 
   // Long modpack downloads may outlive the game token: renew again immediately before spawn.
   if(activeAccount.type==='microsoft')activeAccount=await ensureMicrosoftAccount(activeAccount.id,true);
+  await ensureReportMod(settings.gameDirectory);
+  const reportBroker = await startReportBroker(activeAccount);
+  customArgs.push('-Dsefi.reportPort=' + reportBroker.port, '-Dsefi.reportKey=' + reportBroker.key);
   const opts = {
     clientPackage: null,
     authorization: {
@@ -251,7 +256,9 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     await ensureServersInServersDat(settings.gameDirectory, endpoints.map(e => ({ id: e.id, name: `${serverName} · ${e.label}`, ip: e.address })));
     await applyFullscreenSetting(settings.gameDirectory, settings.fullscreen);
     const child = await launcher.launch(opts);
+    child?.once('close', () => reportBroker.close());
     child?.once('error', (error: Error) => {
+      reportBroker.close();
       gameRunning = false;
       broker?.close();
       onStateChange({ status: 'error', message: error.message || 'Не удалось запустить Java.' });

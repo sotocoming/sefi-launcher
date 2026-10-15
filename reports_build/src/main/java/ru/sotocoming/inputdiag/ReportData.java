@@ -20,18 +20,18 @@ public final class ReportData {
  public static final Set<String> INPUT_KEYS=Set.of("event","seq","utc","elapsed_us","physical_lmb","physical_rmb","left_shift","right_shift","left_ctrl","right_ctrl","focused","attack_pressed","attack_queued","use_pressed","sneak_pressed","sprint_pressed","screen","player_present","player_instance","dead","world_present","amecs_current_modifiers","code","action","glfw_modifiers","requested_attack_pressed","caller_stack");
  public static final class Draft {
   public String title="",description="",steps="",message="";
-  public boolean build=true,settings=false,errors=false,input=false,discord=false;
+  public boolean build=true,settings=true,errors=true,input=true,discord=true;
   public boolean sending;
   public JsonObject prepared;
   public int revision;
   public void changed(){revision++;prepared=null;message="";}
-  public void clear(){title="";description="";steps="";build=true;settings=false;errors=false;input=false;discord=false;sending=false;changed();}
+  public void clear(){title="";description="";steps="";build=true;settings=true;errors=true;input=true;discord=true;sending=false;changed();}
  }
  public static final Draft DRAFT=new Draft();
  public static CompletableFuture<JsonObject> collect(MinecraftClient client,Draft draft){
   if(draft.prepared!=null)return CompletableFuture.completedFuture(draft.prepared);
   final int revision=draft.revision;
-  final boolean build=draft.build,settings=draft.settings,errors=draft.errors,input=draft.input;
+  final boolean build=draft.build,settings=draft.settings,errors=draft.errors,input=draft.input && InputTrace.hasRecording();
   JsonObject body=new JsonObject();body.addProperty("id",UUID.randomUUID().toString());body.addProperty("title",draft.title.trim());body.addProperty("description",draft.description.trim());body.addProperty("steps",draft.steps.trim());body.addProperty("discord",draft.discord);
   JsonArray selected=new JsonArray();if(build)selected.add("build");if(settings)selected.add("settings");if(errors)selected.add("errors");if(input)selected.add("input");body.add("sections",selected);
   JsonObject diagnostic=new JsonObject(),runtime=new JsonObject();JsonArray mods=new JsonArray(),enabled=new JsonArray(),available=new JsonArray(),bindings=new JsonArray();

@@ -22,7 +22,7 @@ public final class ReportScreen extends Screen {
   y+=areaHeight+18;
   steps=addDrawableChild(new TextFieldWidget(textRenderer,left,y,formWidth,18,Text.literal("Как повторить (необязательно)")));steps.setMaxLength(500);steps.setText(draft.steps);steps.setChangedListener(s->{draft.steps=s;draft.changed();});
   y+=24;int half=(formWidth-6)/2;
-  addDrawableChild(ButtonWidget.builder(Text.literal("Приложения ("+((draft.build?1:0)+(draft.settings?1:0)+(draft.errors?1:0)+(draft.input?1:0))+")…"),b->{if(!busy)client.setScreen(new OptionsScreen(this));}).dimensions(left,y,half,20).build());
+  addDrawableChild(ButtonWidget.builder(Text.literal("Приложения ("+((draft.build?1:0)+(draft.settings?1:0)+(draft.errors?1:0)+(draft.input && InputTrace.hasRecording()?1:0))+")…"),b->{if(!busy)client.setScreen(new OptionsScreen(this));}).dimensions(left,y,half,20).build());
   addDrawableChild(ButtonWidget.builder(Text.literal("Посмотреть данные"),b->prepare(false,true)).dimensions(left+half+6,y,half,20).build());
   y+=24;
   addDrawableChild(ButtonWidget.builder(Text.literal("Отправить"),b->prepare(true,false)).dimensions(left,y,half,20).build());
@@ -65,7 +65,7 @@ public final class ReportScreen extends Screen {
   ctx.drawTextWithShadow(textRenderer,Text.literal("Описание"),left,description.getY()-12,0xBBBBBB);
   ctx.drawTextWithShadow(textRenderer,Text.literal("Как повторить (необязательно)"),left,steps.getY()-12,0xBBBBBB);
   super.render(ctx,mx,my,delta);
-  ctx.drawTextWrapped(textRenderer,Text.literal(draft.message.isEmpty()?"Приложится: "+(draft.build?"сборка; ":"")+(draft.settings?"настройки; ":"")+(draft.errors?"ошибки; ":"")+(draft.input?"кнопки; ":"")+"без чата и паролей.":draft.message),left,statusY,formWidth,0xBBBBBB);
+  ctx.drawTextWrapped(textRenderer,Text.literal(draft.message.isEmpty()?"Приложится: "+(draft.build?"сборка; ":"")+(draft.settings?"настройки; ":"")+(draft.errors?"ошибки; ":"")+(draft.input && InputTrace.hasRecording()?"кнопки; ":"")+"без чата и паролей.":draft.message),left,statusY,formWidth,0xBBBBBB);
  }
  private static final class OptionsScreen extends Screen {
   private final ReportScreen parent;private int x,y,w;

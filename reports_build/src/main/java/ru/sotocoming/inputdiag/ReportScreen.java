@@ -73,8 +73,8 @@ public final class ReportScreen extends Screen {
   OptionsScreen(ReportScreen parent){super(Text.literal("Что приложить"));this.parent=parent;}
   @Override protected void init(){
    w=Math.min(420,width-24);x=(width-w)/2;y=Math.max(8,(height-230)/2);int row=y+25;
-   toggle("Версии модов и ресурс-паки",0,row);toggle("Настройки модов и управления",1,row+24);toggle("Ошибки игры (без чата)",2,row+48);toggle("Создать тикет в Discord",4,row+96);
-   recording=addDrawableChild(ButtonWidget.builder(Text.empty(),b->client.setScreen(new RecordingScreen(this))).dimensions(x,row+72,w,20).build());updateRecording();
+   toggle("Версии модов и ресурс-паки",0,row);toggle("Настройки модов и управления",1,row+24);toggle("Ошибки игры (без чата)",2,row+48);toggle("Создать тикет в Discord",4,row+72);
+   recording=addDrawableChild(ButtonWidget.builder(Text.empty(),b->client.setScreen(new RecordingScreen(this))).dimensions(x,row+96,w,20).build());updateRecording();
    addDrawableChild(ButtonWidget.builder(Text.literal("Готово"),b->close()).dimensions(x,y+205,w,20).build());
   }
   private void updateRecording(){recording.setMessage(Text.literal(!InputTrace.hasRecording()?"Кнопки: записи нет — настроить…":"Кнопки: "+(InputTrace.isRecording()?"идёт запись":"запись готова")+(parent.draft.input?" · приложится":" · не приложится")));}

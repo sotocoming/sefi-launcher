@@ -67,6 +67,7 @@ public final class InputTrace implements ClientModInitializer {
  public static boolean isRecording(){return active;}
  public static Path recordingFile(){return traceFile;}
  public static void stopRecording(){close();}
+ public static synchronized void clearRecording(){close();traceFile=null;}
  public static void input(String event,long window,int code,int action,int mods) {
   safe(()->inputImpl(event,window,code,action,mods));
  }

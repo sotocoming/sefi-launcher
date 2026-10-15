@@ -1,7 +1,7 @@
 import { app } from 'electron';
 import { createServer } from 'http';
 import { randomBytes, timingSafeEqual } from 'crypto';
-import { communityRequest } from './community-request';
+import { communityRequest, CommunitySessionError } from './community-request';
 import type { Account } from '../../src/types';
 
 const brokers = new Set<() => void>();
@@ -27,7 +27,17 @@ export async function startReportBroker(account: Account): Promise<{port:number;
     || !Array.isArray(body.sections) || body.sections.some((s:unknown)=>!['build','settings','errors','input'].includes(String(s))) || typeof body.diagnostics!=='object') return reply(400,{error:'Некорректный отчёт.'});
    const result=await communityRequest('/api/public/community/client-report',account.communityToken,body,false,20000);
    reply(200,{ok:result.ok===true,id:result.id,ticket_id:result.ticket_id,ticket_error:result.ticket_error});
-  } catch { reply(503,{error:'Не удалось отправить отчёт. Локальная копия сохранена; повторите отправку позже.'}); }
+  } catch (error) {
+   if(error instanceof CommunitySessionError && error.status===429) {
+    reply(429,{error:'Слишком часто: один новый отчёт в минуту, максимум 10 за сутки. Копия сохранена.'});
+   } else if(error instanceof CommunitySessionError && error.status===401) {
+    reply(401,{error:'Сессия SEFI истекла. Войдите в SEFI Community в лаунчере заново. Копия сохранена.'});
+   } else if(error instanceof CommunitySessionError && error.status && error.status>=400 && error.status<500) {
+    reply(error.status,{error:error.message.slice(0,500)});
+   } else {
+    reply(503,{error:'Сервис отчётов временно недоступен. Копия сохранена; повторите отправку позже.'});
+   }
+  }
   finally {busy=false;}
  });
  server.requestTimeout=10000;server.headersTimeout=10000;server.setTimeout(25000);

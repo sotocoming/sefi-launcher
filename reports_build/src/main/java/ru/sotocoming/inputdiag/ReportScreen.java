@@ -13,6 +13,7 @@ public final class ReportScreen extends Screen {
  private int left,top,formWidth,statusY;
  public ReportScreen(){super(Text.literal("Сообщить о проблеме"));}
  @Override protected void init(){
+  busy=draft.sending;
   formWidth=Math.min(440,width-24);left=(width-formWidth)/2;top=Math.max(6,(height-300)/2);
   int y=top+32;
   subject=addDrawableChild(new TextFieldWidget(textRenderer,left,y,formWidth,18,Text.literal("Коротко о проблеме")));subject.setMaxLength(80);subject.setText(draft.title);subject.setChangedListener(s->{draft.title=s;draft.changed();});
@@ -26,19 +27,30 @@ public final class ReportScreen extends Screen {
   y+=24;
   addDrawableChild(ButtonWidget.builder(Text.literal("Отправить"),b->prepare(true,false)).dimensions(left,y,half,20).build());
   addDrawableChild(ButtonWidget.builder(Text.literal("Сохранить копию"),b->prepare(false,false)).dimensions(left+half+6,y,half,20).build());
-  statusY=y+25;setInitialFocus(subject);
+  statusY=y+25;subject.active=!busy;steps.active=!busy;description.active=!busy;setInitialFocus(subject);
+ }
+ private void release(){
+  draft.sending=false;busy=false;subject.active=true;steps.active=true;description.active=true;
+  if(client.currentScreen instanceof ReportScreen report && report!=this){report.busy=false;report.clearAndInit();}
  }
  private void prepare(boolean send,boolean preview){
-  if(busy)return;
+  if(busy || draft.sending)return;
   if(draft.title.trim().length()<3 || draft.description.trim().length()<10){draft.message="Заполните тему (от 3 символов) и описание (от 10).";return;}
-  busy=true;subject.active=false;steps.active=false;description.active=false;draft.message="Подготовка выбранных данных…";
+  busy=true;draft.sending=true;subject.active=false;steps.active=false;description.active=false;draft.message="Подготовка выбранных данных…";
   java.util.concurrent.CompletableFuture<JsonObject> gathering;
-  try{gathering=ReportData.collect(client,draft);}catch(RuntimeException | LinkageError error){busy=false;subject.active=true;steps.active=true;description.active=true;draft.message="Часть диагностики недоступна. Снимите приложения и попробуйте снова.";return;}
+  try{gathering=ReportData.collect(client,draft);}catch(RuntimeException | LinkageError error){draft.message="Часть диагностики недоступна. Снимите приложения и попробуйте снова.";release();return;}
   gathering.whenComplete((body,error)->client.execute(()->{
-   if(error!=null){busy=false;subject.active=true;steps.active=true;description.active=true;draft.message="Не удалось собрать данные. Снимите часть приложений.";return;}
+   if(error!=null){draft.message="Не удалось собрать данные. Снимите часть приложений.";release();return;}
    draft.prepared=body;
-   if(preview){busy=false;subject.active=true;steps.active=true;description.active=true;client.setScreen(new PreviewScreen(this,body));return;}
-   ReportData.deliver(body,send).thenAccept(message->client.execute(()->{busy=false;subject.active=true;steps.active=true;description.active=true;draft.message=message;}));
+   if(preview){release();client.setScreen(new PreviewScreen(this,body));return;}
+   ReportData.deliver(body,send).thenAccept(result->client.execute(()->{
+    if(result.sent()){
+     draft.clear();InputTrace.clearRecording();
+     client.inGameHud.getChatHud().addMessage(Text.literal("[SEFI] "+result.message()));
+     release();
+     if(client.currentScreen instanceof ReportScreen)client.setScreen(null);
+    }else{draft.message=result.message();release();}
+   }));
   }));
  }
  @Override public void tick(){subject.tick();steps.tick();description.tick();}

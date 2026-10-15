@@ -21,9 +21,11 @@ public final class ReportData {
  public static final class Draft {
   public String title="",description="",steps="",message="";
   public boolean build=true,settings=false,errors=false,input=false,discord=false;
+  public boolean sending;
   public JsonObject prepared;
   public int revision;
   public void changed(){revision++;prepared=null;message="";}
+  public void clear(){title="";description="";steps="";build=true;settings=false;errors=false;input=false;discord=false;sending=false;changed();}
  }
  public static final Draft DRAFT=new Draft();
  public static CompletableFuture<JsonObject> collect(MinecraftClient client,Draft draft){
@@ -82,20 +84,25 @@ public final class ReportData {
   if(el.isJsonArray()){JsonArray out=new JsonArray();el.getAsJsonArray().forEach(v->out.add(sanitize(v)));return out;}
   return el;
  }
- public static CompletableFuture<String> deliver(JsonObject body,boolean send){return CompletableFuture.supplyAsync(()->{
+ public record DeliveryResult(boolean sent,String message) {}
+ public static CompletableFuture<DeliveryResult> deliver(JsonObject body,boolean send){return CompletableFuture.supplyAsync(()->{
   try{
    Path root=FabricLoader.getInstance().getGameDir(),dir=root.resolve("sefi-reports");if(Files.isSymbolicLink(dir))throw new IllegalStateException("Папка отчётов недоступна.");Files.createDirectories(dir);
    Path file=dir.resolve(body.get("id").getAsString()+".json"),temp=dir.resolve(body.get("id").getAsString()+".tmp");Files.writeString(temp,GSON.toJson(body),StandardCharsets.UTF_8,StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING);Files.move(temp,file,StandardCopyOption.REPLACE_EXISTING);
-   if(!send)return "Копия сохранена в папке игры: sefi-reports.";
+   if(!send)return new DeliveryResult(false,"Копия сохранена в папке игры: sefi-reports.");
    String port=System.getProperty("sefi.reportPort",""),key=System.getProperty("sefi.reportKey","");
-   if(!port.matches("[0-9]{1,5}") || !key.matches("[0-9a-f]{64}"))return "Копия сохранена. Для отправки нужен обновлённый SEFI Launcher.";
+   if(!port.matches("[0-9]{1,5}") || !key.matches("[0-9a-f]{64}"))return new DeliveryResult(false,"Копия сохранена. Для отправки нужен обновлённый SEFI Launcher.");
    HttpRequest request=HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+"/sefi/report")).timeout(Duration.ofSeconds(25)).header("Content-Type","application/json").header("X-SEFI-Report-Key",key).POST(HttpRequest.BodyPublishers.ofString(COMPACT.toJson(body))).build();
    HttpResponse<String> response=HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).proxy(new java.net.ProxySelector(){public java.util.List<java.net.Proxy> select(URI uri){return java.util.List.of(java.net.Proxy.NO_PROXY);}public void connectFailed(URI uri,java.net.SocketAddress address,java.io.IOException error){}}).connectTimeout(Duration.ofSeconds(3)).followRedirects(HttpClient.Redirect.NEVER).build().send(request,HttpResponse.BodyHandlers.ofString());
    JsonObject result=JsonParser.parseString(response.body()).getAsJsonObject();
-   if(response.statusCode()!=200 || !result.has("ok") || !result.get("ok").getAsBoolean())return "Не отправлено. Копия сохранена; проверьте вход в лаунчере и повторите позже.";
-   if(result.has("ticket_id")&&!result.get("ticket_id").isJsonNull())return "Отправлено. Discord-тикет #"+result.get("ticket_id").getAsInt();
-   return "Отправлено. Номер отчёта: "+body.get("id").getAsString().substring(0,8)+(body.get("discord").getAsBoolean()?". Discord-тикет недоступен.":"");
-  }catch(Exception e){return "Не удалось отправить. Если копия сохранена, она в sefi-reports; повторите позже.";}
+   if(response.statusCode()!=200 || !result.has("ok") || !result.get("ok").getAsBoolean()){
+    String error=result.has("error") && result.get("error").isJsonPrimitive()?result.get("error").getAsString():"Не отправлено. Копия сохранена; повторите позже.";
+    return new DeliveryResult(false,error.substring(0,Math.min(error.length(),500)));
+   }
+   if(result.has("ticket_id")&&!result.get("ticket_id").isJsonNull())return new DeliveryResult(true,"Отчёт отправлен. Discord-тикет #"+result.get("ticket_id").getAsInt()+" появится после обработки ботом.");
+   String notice=result.has("ticket_error") && !result.get("ticket_error").isJsonNull()?result.get("ticket_error").getAsString():"";
+   return new DeliveryResult(true,"Отчёт отправлен. Номер: "+body.get("id").getAsString().substring(0,8)+(notice.isBlank()?"":". "+notice.substring(0,Math.min(notice.length(),300))));
+  }catch(Exception e){return new DeliveryResult(false,"Не удалось отправить. Если копия сохранена, она в sefi-reports; повторите позже.");}
  });}
  public static String preview(JsonObject body){return GSON.toJson(body);}
 }

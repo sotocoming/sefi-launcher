@@ -14,7 +14,7 @@ const fs = require('node:fs'), path = require('node:path'), assert = require('no
     await page.addInitScript(() => {
       window.launches = [];
       window.electronAPI = new Proxy({
-        getAccounts: async () => [{ id: 'fixture', username: 'Player', type: 'microsoft', active: true }],
+        getAccounts: async () => [{ id: 'fixture', username: 'Player', type: 'microsoft', uuid: 'fixture-uuid', active: true, communityConnected: true, twitchLogin: 'fixture', mcType: 'microsoft', mcUuid: 'fixture-uuid', mcVerifiedAt: 123 }],
         getSettings: async () => JSON.parse(localStorage.getItem('settings') || '{"ramMax":4096}'),
         saveSettings: async settings => { await new Promise(resolve => setTimeout(resolve, 80)); localStorage.setItem('settings', JSON.stringify(settings)); },
         launchGame: async () => { window.launches.push(JSON.parse(localStorage.getItem('settings') || '{}')); },

@@ -155,3 +155,8 @@ export interface JavaStatus {
   path?: string;
   message?: string;
 }
+
+export interface ControlRepairResult {
+  changed: number;
+  backupPath?: string;
+}

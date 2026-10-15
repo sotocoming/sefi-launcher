@@ -73,7 +73,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
           {/* Play Button Row */}
           <div className="w-full">
-            <PlayButton />
+            <PlayButton onOpenAccounts={() => onNavigate('accounts')} />
           </div>
         </div>
       </div>

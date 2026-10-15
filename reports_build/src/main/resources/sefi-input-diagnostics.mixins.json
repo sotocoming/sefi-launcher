@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "ru.sotocoming.inputdiag.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "MouseTraceMixin",
+    "KeyboardTraceMixin",
+    "KeyBindingAccess",
+    "KeyBindingTraceMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "sefi-input-diagnostics-refmap.json"
+}

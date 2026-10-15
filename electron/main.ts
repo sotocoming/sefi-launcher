@@ -16,6 +16,7 @@ import { getJavaStatus, getJavaPath, inspectJava } from './minecraft/java';
 import { prepareGameDirectory } from './minecraft/game-directory';
 import { publicAccount } from './minecraft/account-store';
 import { launchGame } from './minecraft/launcher';
+import { repairClickBindings, repairResourcePacks } from './minecraft/control-repair';
 
 const isDev = !app.isPackaged;
 const profileDirectory = app.commandLine.getSwitchValue('user-data-dir');
@@ -31,6 +32,7 @@ if (process.platform === 'win32') {
 let mainWindow: BrowserWindow | null = null;
 let hiddenForGame = false;
 let gameBusy = false;
+let controlsRepairBusy = false;
 let updateChecks: UpdateChecks | null = null;
 let integrationsReady = false;
 const indexFile = path.join(app.getAppPath(), 'dist/index.html');
@@ -225,6 +227,7 @@ function setupIpc() {
   });
 
   secureIpc.handle('launch-game', async () => {
+    if (controlsRepairBusy) throw new Error('Дождитесь завершения исправления управления.');
     await launchGame((state) => {
       gameBusy = !['idle', 'error'].includes(state.status);
       autoUpdater.autoInstallOnAppQuit = !gameBusy;
@@ -243,6 +246,23 @@ function setupIpc() {
         mainWindow.hide();
       }
     });
+  });
+
+  secureIpc.handle('repair-click-bindings', async () => {
+    if (gameBusy || controlsRepairBusy) throw new Error('Закройте Minecraft и дождитесь завершения запуска.');
+    controlsRepairBusy = true;
+    gameBusy = true;
+    sendToMain('game-state-change', { status: 'checking' });
+    try { return await repairClickBindings((await getSettings()).gameDirectory); }
+    finally { controlsRepairBusy = false; gameBusy = false; sendToMain('game-state-change', { status: 'idle' }); }
+  });
+
+  secureIpc.handle('repair-resource-packs', async () => {
+    if (gameBusy || controlsRepairBusy) throw new Error('Закройте Minecraft и дождитесь завершения запуска.');
+    controlsRepairBusy = true; gameBusy = true;
+    sendToMain('game-state-change', { status: 'checking' });
+    try { return await repairResourcePacks((await getSettings()).gameDirectory); }
+    finally { controlsRepairBusy = false; gameBusy = false; sendToMain('game-state-change', { status: 'idle' }); }
   });
 
   secureIpc.handle('get-java-status', async () => getJavaStatus((await getSettings()).javaPath));

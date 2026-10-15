@@ -28,6 +28,7 @@ public final class InputTrace implements ClientModInitializer {
  private static boolean active;
  private static Path traceFile;
  private static long traceDeadline;
+ private static long traceStarted,traceStopped;
  private static Method boundModifiers,modifierGet;
  private static java.lang.reflect.Field currentModifiers;
  private static Object[] modifierValues;
@@ -59,12 +60,15 @@ public final class InputTrace implements ClientModInitializer {
    String stamp=DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS").withZone(ZoneOffset.UTC).format(Instant.now());
    traceFile=dir.resolve("input-"+stamp+".jsonl");
    writer=Files.newBufferedWriter(traceFile,StandardCharsets.UTF_8,StandardOpenOption.CREATE_NEW);
-   bytes=0;sequence=0;ticks=0;previousStart="";previousEnd="";traceDeadline=System.nanoTime()+120_000_000_000L;active=true;
+   bytes=0;sequence=0;ticks=0;previousStart="";previousEnd="";traceStarted=System.nanoTime();traceStopped=0;traceDeadline=traceStarted+120_000_000_000L;active=true;
    LOG.info("Player enabled input diagnostics for up to 2 minutes");
   } catch(Exception e) {traceFile=null;LOG.warn("Unable to start input recording",e);close();}
  }
  public static String bindingModifiers(KeyBinding key){return modifiers(key);}
  public static boolean isRecording(){return active;}
+ public static boolean hasRecording(){return traceFile!=null;}
+ public static long remainingSeconds(){return active?Math.max(0,(traceDeadline-System.nanoTime()+999_999_999L)/1_000_000_000L):0;}
+ public static long recordedSeconds(){return traceFile==null?0:Math.max(0,((active?System.nanoTime():traceStopped)-traceStarted)/1_000_000_000L);}
  public static Path recordingFile(){return traceFile;}
  public static void stopRecording(){close();}
  public static synchronized void clearRecording(){close();traceFile=null;}
@@ -160,6 +164,6 @@ public final class InputTrace implements ClientModInitializer {
   try {task.run();} catch(RuntimeException | LinkageError e) {LOG.warn("Trace disabled after observation error; gameplay unchanged",e);close();}
  }
  private static synchronized void close() {
-  active=false;if(writer!=null) {try {writer.close();} catch(Exception ignored) {} writer=null;}
+  if(active)traceStopped=System.nanoTime();active=false;if(writer!=null) {try {writer.close();} catch(Exception ignored) {} writer=null;}
  }
 }

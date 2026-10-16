@@ -2,7 +2,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=r
 const {rpcFrame,RpcFrames,discordPipe}=require('../dist-electron/electron/discord-rpc');
 const {activityFor,playerCount}=require('../dist-electron/electron/discord-presence');
 const {watchGamePresence,gameLocation}=require('../dist-electron/electron/game-presence');
-const discordConfig=require('../electron/discord-presence-config.json');
+const testIcon='https://cdn.discordapp.com/app-icons/1560635017212854363/'+'a'.repeat(32)+'.png?size=512';
 const config={server:{name:'Sweet Home',ip:'mc.sotocoming.ru',port:25565,endpoints:[{address:'mc.sotocoming.ru',label:'EURO'},{address:'minecraft.sotocoming.ru',label:'RU'}]}};
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(check){for(let i=0;i<100;i++){if(check())return;await wait(30);}throw Error('Timed out');}
@@ -13,10 +13,10 @@ async function until(check){for(let i=0;i<100;i++){if(check())return;await wait(
  assert.deepEqual(parser.push(Buffer.concat([frame.subarray(11),rpcFrame(3,{heartbeat:1})])).map(v=>v.opcode),[1,3]);
  const oversized=Buffer.alloc(8);oversized.writeUInt32LE(65537,4);assert.throws(()=>new RpcFrames().push(oversized));
  if(process.platform==='win32')assert.equal(discordPipe(0),'\\\\?\\pipe\\discord-ipc-0');
- const active=(location)=>activityFor({status:'running',pid:10},location,config,123);
+ const active=(location)=>activityFor({status:'running',pid:10},location,config,123,testIcon);
  for(const server of ['mc.sotocoming.ru','MC.SOTOCOMING.RU:25565','minecraft.sotocoming.ru']) {
   const a=active({mode:'multiplayer',server});assert.equal(a.details,'На сервере');assert.equal(a.timestamps.start,123);
-  assert.equal(a.assets.large_image,discordConfig.imageUrl||'sweet_home');assert(!JSON.stringify({details:a.details,state:a.state}).includes(server));
+  assert.equal(a.assets.large_image,testIcon);assert(!JSON.stringify({details:a.details,state:a.state}).includes(server));
  }
  for(const [dimension,label] of [['minecraft:overworld','Обычный мир'],['minecraft:the_nether','Незер'],['minecraft:the_end','Энд']]) {
   for(const [server,region] of [['mc.sotocoming.ru','EURO'],['minecraft.sotocoming.ru','RU']]) {

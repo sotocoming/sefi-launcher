@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 export type DiscordActivity = {
   type: 0; details: string; state: string;
   timestamps?: { start: number };
-  assets?: { large_image: string; large_text: string };
+  assets?: { large_image?: string; large_text: string };
   buttons?: { label: string; url: string }[];
 };
 

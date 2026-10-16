@@ -1,3 +1,5 @@
+import { startReportBroker } from './report-broker';
+import { ensureReportMod } from './report-mod';
 import { protectMinecraftHandler } from './game-integrity';
 const { Client } = require('minecraft-launcher-core');
 import fs from 'fs/promises';
@@ -17,21 +19,22 @@ import { startTicketBroker, redactLaunchLog } from './ticket-broker';
 import { getModpackStatus, installModpack, ensureSefiAuthMod } from './modpack';
 import { ensureServersInServersDat } from './servers-dat';
 import { applyFullscreenSetting } from './window-options';
+import { watchGamePresence, type GameLocation } from '../game-presence';
 
 
 let launchBusy = false;
 let gameRunning = false;
 
-export async function launchGame(onStateChange: (state: GameState) => void, onStarted?: (hideWindow: boolean) => void) {
+export async function launchGame(onStateChange: (state: GameState) => void, onStarted?: (hideWindow: boolean) => void, onLocation?: (location: GameLocation | null) => void) {
   if (launchBusy || gameRunning) return;
   launchBusy = true;
-  try { await performLaunch(onStateChange, onStarted); }
+  try { await performLaunch(onStateChange, onStarted, onLocation); }
   catch (error) {
     onStateChange({ status: 'error', message: error instanceof Error ? error.message : 'Не удалось подготовить игру.' });
   } finally { launchBusy = false; }
 }
 
-async function performLaunch(onStateChange: (state: GameState) => void, onStarted?: (hideWindow: boolean) => void) {
+async function performLaunch(onStateChange: (state: GameState) => void, onStarted?: (hideWindow: boolean) => void, onLocation?: (location: GameLocation | null) => void) {
   onStateChange({ status: 'checking' });
 
   const settings = await getSettings();
@@ -146,9 +149,11 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   });
 
   let broker: Awaited<ReturnType<typeof startTicketBroker>> | undefined;
+  let presence: Awaited<ReturnType<typeof watchGamePresence>> | undefined;
   launcher.on('close', (code: any) => {
     gameRunning = false;
     broker?.close();
+    presence?.close();
     console.log('[Minecraft Closed with code]:', code);
     onStateChange(code===0 ? {status:'idle'} : {status:'error',message:'Minecraft завершился с ошибкой (код '+code+').\n'+startupLog.join('\n').slice(-4000)});
   });
@@ -159,8 +164,13 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   const serverHost = launcherConfig?.server?.ip || 'minecraft.sotocoming.ru';
   const serverPort = launcherConfig?.server?.port || 25565;
   const serverName = launcherConfig?.server?.name || 'Sweet Home';
-  const fullAddress = serverPort === 25565 ? serverHost : `${serverHost}:${serverPort}`;
-  const endpoints = launcherConfig?.server?.endpoints?.length ? launcherConfig.server.endpoints : [{ id: 'primary', label: 'Основной', host: serverHost, port: serverPort, address: fullAddress }];
+  const primaryAddress = serverPort === 25565 ? serverHost : `${serverHost}:${serverPort}`;
+  const endpoints = launcherConfig?.server?.endpoints?.length ? launcherConfig.server.endpoints : [{ id: 'primary', label: 'Основной', host: serverHost, port: serverPort, address: primaryAddress }];
+  const selectedServer = settings.selectedServerId ? endpoints.find(e => e.id === settings.selectedServerId) : endpoints[0];
+  if (settings.autoConnect === true && !selectedServer) {
+    throw new Error('Выбранный адрес сервера больше недоступен. Выберите другой адрес рядом с «Играть» или отключите «Подключаться сразу».');
+  }
+  const fullAddress = selectedServer?.address || primaryAddress;
 
   await ensureSefiSkinMod(settings.gameDirectory);
   const customArgs: string[] = [`-Dsefi.skinApi=${skinApiOrigin()}`];
@@ -173,6 +183,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       customArgs.push(`-Dsefi.authPort=${broker.port}`, `-Dsefi.serverAddress=${fullAddress}`, `-Dsefi.serverAddresses=${endpoints.map(e => e.address).join(",")}`); // Port only, no credential in process arguments.
     } catch (error) {
       broker?.close();
+      presence?.close();
       onStateChange({ status: 'error', message: error instanceof Error ? error.message : 'Не удалось подготовить автовход.' });
       return;
     }
@@ -180,6 +191,16 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
 
   // Long modpack downloads may outlive the game token: renew again immediately before spawn.
   if(activeAccount.type==='microsoft')activeAccount=await ensureMicrosoftAccount(activeAccount.id,true);
+  let reportBroker: Awaited<ReturnType<typeof startReportBroker>>;
+  try {
+    await ensureReportMod(settings.gameDirectory);
+    reportBroker = await startReportBroker(activeAccount);
+  } catch (error) {
+    broker?.close();
+    onStateChange({ status: 'error', message: error instanceof Error ? error.message : 'Не удалось подготовить отчёты.' });
+    return;
+  }
+  customArgs.push('-Dsefi.reportPort=' + reportBroker.port, '-Dsefi.reportKey=' + reportBroker.key);
   const opts = {
     clientPackage: null,
     authorization: {
@@ -210,16 +231,23 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       height: settings.windowHeight,
       fullscreen: settings.fullscreen,
     },
-    quickPlay: { type: 'multiplayer', identifier: fullAddress },
+    ...(settings.autoConnect === true ? { quickPlay: { type: 'multiplayer', identifier: fullAddress } } : {}),
   };
 
   try {
     await ensureServersInServersDat(settings.gameDirectory, endpoints.map(e => ({ id: e.id, name: `${serverName} · ${e.label}`, ip: e.address })));
     await applyFullscreenSetting(settings.gameDirectory, settings.fullscreen);
+    if (onLocation) {
+      presence = await watchGamePresence(onLocation).catch(() => undefined);
+      if (presence) opts.customArgs = [...(opts.customArgs || []), `-Dsefi.presenceFile=${presence.file}`];
+    }
     const child = await launcher.launch(opts);
+    child?.once('close', () => reportBroker.close());
     child?.once('error', (error: Error) => {
+      reportBroker.close();
       gameRunning = false;
       broker?.close();
+      presence?.close();
       onStateChange({ status: 'error', message: error.message || 'Не удалось запустить Java.' });
     });
     if (!child || !child.pid) {
@@ -230,7 +258,9 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     onStateChange({ status: 'running', pid: child.pid });
     onStarted?.(settings.closeOnLaunch === true);
   } catch (err: any) {
+    reportBroker.close();
     broker?.close();
+    presence?.close();
     console.error('Launch failed:', err);
     onStateChange({ status: 'error', message: err.message || String(err) });
   }

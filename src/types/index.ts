@@ -7,6 +7,9 @@ export interface Settings {
   windowHeight: number;
   closeOnLaunch: boolean;
   fullscreen: boolean;
+  discordPresence?: boolean;
+  autoConnect?: boolean;
+  selectedServerId?: string;
 }
 
 export interface CommunityProfile {
@@ -152,4 +155,9 @@ export interface JavaStatus {
   architecture?: string;
   path?: string;
   message?: string;
+}
+
+export interface ControlRepairResult {
+  changed: number;
+  backupPath?: string;
 }

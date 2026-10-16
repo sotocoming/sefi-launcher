@@ -58,8 +58,8 @@ public final class CommunitySkins {
                 .timeout(Duration.ofSeconds(8)).GET().build();
             var response = HTTP.send(request, HttpResponse.BodyHandlers.ofInputStream());
             byte[] raw;
-            try (var input = response.body()) { raw = input.readNBytes(90001); }
-            if (response.statusCode() != 200 || raw.length > 90000) throw new Exception();
+            try (var input = response.body()) { raw = input.readNBytes(180001); }
+            if (response.statusCode() != 200 || raw.length > 180000) throw new Exception();
             JsonElement value = JsonParser.parseString(new String(raw, StandardCharsets.UTF_8)).getAsJsonObject().get("skin");
             if (value == null) throw new Exception();
             if (!value.isJsonNull()) {
@@ -67,12 +67,13 @@ public final class CommunitySkins {
                 model = object.get("model").getAsString(); hash = object.get("sha256").getAsString();
                 if (!(model.equals("classic") || model.equals("slim")) || !hash.matches("[a-f0-9]{64}")) throw new Exception();
                 byte[] png = Base64.getDecoder().decode(object.get("png").getAsString());
-                if (png.length > 65536 || png.length < 33 || !Arrays.equals(Arrays.copyOf(png, 8), new byte[]{(byte)137,80,78,71,13,10,26,10})) throw new Exception();
+                if (png.length > 131072 || png.length < 33 || !Arrays.equals(Arrays.copyOf(png, 8), new byte[]{(byte)137,80,78,71,13,10,26,10})) throw new Exception();
                 var header = java.nio.ByteBuffer.wrap(png);
-                if (header.getInt(16) != 64 || header.getInt(20) != 64) throw new Exception();
+                int size = header.getInt(16);
+                if ((size != 64 && size != 128) || header.getInt(20) != size) throw new Exception();
                 if (!HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(png)).equals(hash)) throw new Exception();
                 decoded = NativeImage.read(new ByteArrayInputStream(png));
-                if (decoded.getWidth() != 64 || decoded.getHeight() != 64) throw new Exception();
+                if (decoded.getWidth() != size || decoded.getHeight() != size) throw new Exception();
             }
             success = true;
         } catch (Exception ignored) { if (decoded != null) decoded.close(); decoded = null; }

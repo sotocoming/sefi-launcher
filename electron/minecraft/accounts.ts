@@ -149,7 +149,7 @@ export async function loginMicrosoft(): Promise<Account> {
   }
 }
 
-const linkGrants = new Map<string, string>();
+const linkGrants = new Map<string, { code: string; token: string; expiresAt: number }>();
 let linkingMinecraft = false;
 
 function offlineUuid(username: string): string {
@@ -186,7 +186,9 @@ export async function loginCommunity(fresh = false): Promise<Account> {
     });
     const resolved = newAccount.mcType === 'microsoft' ? await refreshCommunityProfile(data.token) : null;
     const result = resolved || newAccount;
-    if (data.minecraft_link_grant) linkGrants.set(result.id, data.minecraft_link_grant);
+    if (data.minecraft_link_grant) linkGrants.set(result.id, {
+      code: data.minecraft_link_grant, token: data.token, expiresAt: Date.now() + 8 * 60 * 1000,
+    });
     return result;
 }
 
@@ -276,12 +278,18 @@ export async function linkMinecraftAccount(accountId: string): Promise<Account |
       }
     }
     microsoft = await ensureMicrosoftAccount(microsoft.id);
-    community = await loginCommunity(true);
+    // Reuse the one-time grant from the just-completed Twitch login in either order.
+    // Old grants, other sessions and restarts still require browser authorization.
+    community = (await getAccounts()).find(account => {
+      const grant = linkGrants.get(account.id);
+      return account.communityToken && grant?.token === account.communityToken && grant.expiresAt > Date.now();
+    });
+    if (!community) community = await loginCommunity(true);
     const grant = linkGrants.get(community.id);
     linkGrants.delete(community.id);
     if (!grant) throw new Error('Сервер ещё не поддерживает привязку из лаунчера.');
     const post = (action:string,body:object)=>communityRequest('/api/public/community/launcher/minecraft/'+action,community!.communityToken,body,false,60000);
-    const preview = await post('preview', { code: grant, minecraft_access_token: microsoft.accessToken });
+    const preview = await post('preview', { code: grant.code, minecraft_access_token: microsoft.accessToken });
     const candidate = preview.candidate;
     if (!candidate || !/^[a-zA-Z0-9_]{3,16}$/.test(candidate.name) || typeof candidate.uuid !== 'string') {
       throw new Error('Сервер вернул некорректный игровой профиль.');

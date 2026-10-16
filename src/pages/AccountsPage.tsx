@@ -57,10 +57,15 @@ export const AccountsPage: React.FC = () => {
     } catch (err: any) {
       setErrorMsg(err?.message || 'Привязка не завершена.');
     } finally {
-      const updated = await window.electronAPI.getAccounts();
-      setAccounts(updated);
-      setActiveAccount(updated.find(a => a.active) || null);
-      setLinkingId(null);
+      try {
+        const updated = await window.electronAPI.getAccounts();
+        setAccounts(updated);
+        setActiveAccount(updated.find(a => a.active) || null);
+      } catch (err: any) {
+        setErrorMsg(previous => [previous, err?.message || 'Не удалось обновить аккаунты. Повторите попытку.'].filter(Boolean).join(' '));
+      } finally {
+        setLinkingId(null);
+      }
     }
   };
 
@@ -121,6 +126,11 @@ export const AccountsPage: React.FC = () => {
         </div>
       </div>
 
+      {linkingId && (
+        <p role="status" className="mt-4 text-sm text-fuchsia-200">
+          Подтвердите привязку в открывшемся окне. Если открылся браузер, завершите вход Twitch и вернитесь в лаунчер.
+        </p>
+      )}
       {successMsg && (
         <div role="status" className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-3.5 text-xs text-emerald-200">
           {successMsg}

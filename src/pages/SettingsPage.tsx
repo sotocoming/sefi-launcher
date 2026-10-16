@@ -25,6 +25,30 @@ export const SettingsPage: React.FC = () => {
     : updateInfo?.status === 'error' ? 'Не удалось проверить или скачать обновление. Повторите позже.'
     : updateInfo?.status === 'idle' ? 'Установлена актуальная версия.'
     : 'Проверяйте вручную или дождитесь автоматической проверки.';
+  const [repairingControls, setRepairingControls] = useState(false);
+  const [controlsMessage, setControlsMessage] = useState('');
+  const [controlsError, setControlsError] = useState(false);
+  const handleRepairControls = async () => {
+    if (playing || repairingControls || !settings) return;
+    setRepairingControls(true); setControlsMessage(''); setControlsError(false);
+    try {
+      const result = await window.electronAPI.repairClickBindings();
+      setControlsMessage(result.changed ? 'Готово. Конфликтующие сочетания JEI отключены, резервная копия сохранена. Можно запускать Minecraft.' : 'Исправление уже применено: конфликтующих назначений на ЛКМ нет.');
+    } catch (error) {
+      setControlsError(true);
+      setControlsMessage((error instanceof Error ? error.message : 'Не удалось исправить управление.').replace(/^Error invoking remote method '[^']+': (?:Error: )?/, ''));
+    } finally { setRepairingControls(false); }
+  };
+  const handleRepairResources = async () => {
+    if (playing || repairingControls || !settings) return;
+    setRepairingControls(true); setControlsMessage(''); setControlsError(false);
+    try {
+      const result = await window.electronAPI.repairResourcePacks();
+      setControlsMessage(result.changed ? 'Интерфейс Homestead включён. Другие ресурс-паки сохранены, резервная копия создана.' : 'Интерфейс Homestead уже включён.');
+    } catch (error) { setControlsError(true); setControlsMessage((error instanceof Error ? error.message : 'Не удалось восстановить интерфейс.').replace(/^Error invoking remote method '[^']+': (?:Error: )?/, '')); }
+    finally { setRepairingControls(false); }
+  };
+  useEffect(() => { setControlsMessage(''); setControlsError(false); }, [settings?.gameDirectory]);
   const [importing, setImporting] = useState(false);
   const [importMessage, setImportMessage] = useState('');
   const [importError, setImportError] = useState(false);
@@ -167,6 +191,22 @@ export const SettingsPage: React.FC = () => {
           {importMessage && <p role={importError ? 'alert' : 'status'} className={`mt-3 text-xs leading-relaxed select-text ${importError ? 'text-rose-300' : 'text-emerald-300'}`}>{importMessage}</p>}
         </GlassCard>
 
+        <GlassCard className="p-5">
+          <div className="text-sm font-semibold text-white">Управление в Minecraft</div>
+          <p className="mt-2 text-xs leading-relaxed text-white/60">
+            Если Shift или Ctrl блокируют ЛКМ либо ломание продолжается после отпускания кнопки,
+            отключите пять конфликтующих сочетаний JEI. Остальные настройки управления сохранятся.
+          </p>
+          <button type="button" disabled={playing || repairingControls || !settings} onClick={handleRepairControls}
+            className="mt-4 rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-4 py-2 text-sm text-fuchsia-200 disabled:opacity-50">
+            {repairingControls ? 'Исправляем управление…' : 'Исправить Shift/Ctrl + ЛКМ'}
+          </button>
+          <button type="button" disabled={playing || repairingControls || !settings} onClick={handleRepairResources}
+            className="ml-2 mt-4 rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-4 py-2 text-sm text-fuchsia-200 disabled:opacity-50">Вернуть интерфейс сборки</button>
+          <p className="mt-2 text-xs text-white/40">Перед исправлением закройте Minecraft. Сочетания можно назначить заново в игре.</p>
+          {controlsMessage && <p role={controlsError ? 'alert' : 'status'} className={`mt-3 text-xs leading-relaxed select-text ${controlsError ? 'text-rose-300' : 'text-emerald-300'}`}>{controlsMessage}</p>}
+        </GlassCard>
+
         {/* Memory & Performance */}
         <GlassCard className="p-5">
           <div className="flex items-center gap-2.5">
@@ -288,6 +328,21 @@ export const SettingsPage: React.FC = () => {
           </div>
           <p className="mt-3 text-xs text-white/40">При выборе целого диска создадим на нём папку SEFI Minecraft.</p>
           {directoryError && <p role="alert" className="mt-2 text-xs text-rose-300 whitespace-pre-wrap select-text">{directoryError}</p>}
+        </GlassCard>
+
+        <GlassCard className="p-5">
+          <h2 className="text-sm font-semibold text-white">Статус в Discord</h2>
+          <p className="mt-2 text-xs leading-5 text-white/50">Показывать Sweet Home, время игры и иконку сервера в профиле Discord. Статус меняется, когда вы выходите в меню или открываете одиночный мир.</p>
+          <button type="button" role="switch" aria-checked={settings?.discordPresence !== false}
+            aria-label="Показывать игру в Discord" disabled={!settings}
+            onClick={() => { if (settings) void updateSettings({ ...settings, discordPresence: settings.discordPresence === false }); }}
+            className="mt-4 flex w-full items-center justify-between py-1.5 text-sm disabled:opacity-40">
+            <span className="text-white/75">Показывать игру в Discord</span>
+            <span className={`flex h-6 w-11 items-center rounded-full p-0.5 transition ${settings?.discordPresence !== false ? 'bg-fuchsia-500' : 'bg-white/10'}`}>
+              <motion.span animate={{ x: settings?.discordPresence !== false ? 20 : 0 }} className="size-5 rounded-full bg-white shadow" />
+            </span>
+          </button>
+          <p className="mt-2 text-[11px] text-white/35">Нужен запущенный Discord для компьютера и разрешённое отображение игровой активности в его настройках.</p>
         </GlassCard>
 
         {/* Display & Launch Options */}

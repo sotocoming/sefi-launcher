@@ -37,7 +37,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   assert.deepEqual(fs.readFileSync(jar),fs.readFileSync(path.join(root,'resources/mods/sefi-skins-1.2.0.jar')));
   const asar=require('@electron/asar');
   const archive=path.join(root,'release-skins-preview/win-unpacked/resources/app.asar');
-  const discord=JSON.parse(asar.extractFile(archive,'dist-electron/electron/discord-presence-config.json').toString());
+  const discord=JSON.parse(asar.extractFile(archive,path.join('dist-electron','electron','discord-presence-config.json')).toString());
   assert.equal(discord.applicationId,'1560635017212854363');assert.equal(discord.imageKey,'sweet_home');
   assert.deepEqual(fs.readFileSync(path.join(root,'release-skins-preview/win-unpacked/resources/resources/discord/sweet-home.png')),
     fs.readFileSync(path.join(root,'resources/discord/sweet-home.png')));

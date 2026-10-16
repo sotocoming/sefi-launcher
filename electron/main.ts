@@ -16,6 +16,7 @@ import { getJavaStatus, getJavaPath, inspectJava } from './minecraft/java';
 import { prepareGameDirectory } from './minecraft/game-directory';
 import { publicAccount } from './minecraft/account-store';
 import { launchGame } from './minecraft/launcher';
+import { DiscordPresence } from './discord-presence';
 
 const isDev = !app.isPackaged;
 const profileDirectory = app.commandLine.getSwitchValue('user-data-dir');
@@ -33,6 +34,8 @@ let hiddenForGame = false;
 let gameBusy = false;
 let updateChecks: UpdateChecks | null = null;
 let integrationsReady = false;
+const discordPresence = new DiscordPresence();
+app.once('before-quit', () => discordPresence.close());
 const indexFile = path.join(app.getAppPath(), 'dist/index.html');
 const secureIpc = trustedIpc(ipcMain, () => mainWindow, indexFile, isDev);
 function sendToMain(channel: string, value: unknown) {
@@ -112,6 +115,10 @@ function createWindow() {
     integrationsReady = true;
     setupIpc();
     setupAutoUpdater();
+    void getSettings().then(settings => {
+      discordPresence.configure(settings.discordPresence !== false);
+      return getLauncherConfig();
+    }).then(config => getSettings().then(settings => discordPresence.configure(settings.discordPresence !== false, config))).catch(() => {});
   }
 }
 
@@ -127,7 +134,10 @@ function setupIpc() {
   secureIpc.on('window-close', () => mainWindow?.close());
 
   secureIpc.handle('get-settings', getSettings);
-  secureIpc.handle('save-settings', async (_, settings) => await saveSettings(settings));
+  secureIpc.handle('save-settings', async (_, settings) => {
+    await saveSettings(settings);
+    discordPresence.configure((await getSettings()).discordPresence !== false);
+  });
 
   function skinWindow(event: Electron.IpcMainInvokeEvent): BrowserWindow {
     if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== mainWindow.webContents.mainFrame) {
@@ -226,6 +236,7 @@ function setupIpc() {
 
   secureIpc.handle('launch-game', async () => {
     await launchGame((state) => {
+      discordPresence.gameState(state);
       gameBusy = !['idle', 'error'].includes(state.status);
       autoUpdater.autoInstallOnAppQuit = !gameBusy;
       if (!gameBusy) void updateChecks?.run();
@@ -242,7 +253,7 @@ function setupIpc() {
         hiddenForGame = true;
         mainWindow.hide();
       }
-    });
+    }, location => discordPresence.gameLocation(location));
   });
 
   secureIpc.handle('get-java-status', async () => getJavaStatus((await getSettings()).javaPath));

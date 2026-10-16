@@ -7,6 +7,7 @@ export interface Settings {
   windowHeight: number;
   closeOnLaunch: boolean;
   fullscreen: boolean;
+  discordPresence?: boolean;
 }
 
 export interface CommunityProfile {

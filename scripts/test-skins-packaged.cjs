@@ -33,8 +33,8 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   assert.equal(skin.model,'slim');
   await page.evaluate(()=>window.electronAPI.resetCommunitySkin('fixture'));
   assert.equal(await page.evaluate(()=>window.electronAPI.getCommunitySkin('fixture')),null);
-  const jar=path.join(root,'release-skins-preview/win-unpacked/resources/resources/mods/sefi-skins-1.1.0.jar');
-  assert.deepEqual(fs.readFileSync(jar),fs.readFileSync(path.join(root,'resources/mods/sefi-skins-1.1.0.jar')));
+  const jar=path.join(root,'release-skins-preview/win-unpacked/resources/resources/mods/sefi-skins-1.2.0.jar');
+  assert.deepEqual(fs.readFileSync(jar),fs.readFileSync(path.join(root,'resources/mods/sefi-skins-1.2.0.jar')));
   console.log('PASS: packaged Electron app; real preload/IPC, PNG decoding and normalization, save/reset with isolated fake API, bundled jar.');
  }finally{if(app){ await Promise.race([app.close(),new Promise(r=>setTimeout(r,3000))]); const child=app.process(); if(child.exitCode===null)child.kill(); }}
 })().then(()=>process.exit(0)).catch(e=>{console.error(e);process.exit(1);});

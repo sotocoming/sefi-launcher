@@ -48,6 +48,6 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   assert.deepEqual(fs.readFileSync(path.join(root,'release-skins-preview/win-unpacked/resources/resources/discord/sweet-home.png')),
     fs.readFileSync(path.join(root,'resources/discord/sweet-home.png')));
   console.log('PASS: packaged Electron app; real preload/IPC, HD PNG save/reset, bundled mod 1.3.0, Sweet Home application ID and original icon.');
- }finally{if(app){ await Promise.race([app.close(),new Promise(r=>setTimeout(r,3000))]); const child=app.process(); if(child.exitCode===null)child.kill(); }}
+ }finally{if(app){ const child=app.process(); await Promise.race([app.close(),new Promise(r=>setTimeout(r,3000))]); if(child?.exitCode===null)child.kill(); }}
  assert.equal(fs.existsSync(path.join(root,'design/packaged-skin-fixture.png.errors.json')),false,'No interface error should be shown during load or close');
 })().then(()=>process.exit(0)).catch(e=>{console.error(e);process.exit(1);});

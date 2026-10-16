@@ -24,6 +24,8 @@ export async function getSettings(): Promise<Settings> {
     closeOnLaunch: false,
     fullscreen: false,
     discordPresence: true,
+    autoConnect: false,
+    selectedServerId: '',
   };
 
   try {
@@ -38,6 +40,10 @@ export async function getSettings(): Promise<Settings> {
 export async function saveSettings(settings: Settings): Promise<void> {
   if (!settings || typeof settings.fullscreen !== 'boolean' || typeof settings.closeOnLaunch !== 'boolean') {
     throw new Error('Некорректные настройки экрана и запуска.');
+  }
+  if ((settings.autoConnect !== undefined && typeof settings.autoConnect !== 'boolean') ||
+      (settings.selectedServerId !== undefined && (typeof settings.selectedServerId !== 'string' || settings.selectedServerId.length > 160))) {
+    throw new Error('Некорректные настройки подключения к серверу.');
   }
   if (![settings.ramMin,settings.ramMax].every(v=>Number.isInteger(v)&&v>=512&&v<=32768) || settings.ramMin>settings.ramMax || typeof settings.javaPath!=='string' || typeof settings.gameDirectory!=='string' || ![settings.windowWidth,settings.windowHeight].every(v=>Number.isInteger(v)&&v>=240&&v<=16384)) throw new Error('Некорректные настройки памяти, Java или размера окна.');
   if (settings.discordPresence !== undefined && typeof settings.discordPresence !== 'boolean') throw new Error('Некорректная настройка статуса Discord.');

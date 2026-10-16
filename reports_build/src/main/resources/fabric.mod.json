@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "sefi-input-diagnostics",
+  "version": "0.2.0",
+  "name": "SEFI Reports",
+  "description": "Temporary input trace. Does not alter controls.",
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "ru.sotocoming.inputdiag.InputTrace",
+      "ru.sotocoming.inputdiag.ReportClient"
+    ]
+  },
+  "mixins": [
+    "sefi-input-diagnostics.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "minecraft": "1.20.1",
+    "fabric-api": "*",
+    "java": ">=17"
+  }
+}

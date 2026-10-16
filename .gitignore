@@ -23,3 +23,7 @@ hub.js
 public-sites.json
 test_mc_verifier.py
 
+
+/reports_build/.gradle/
+/reports_build/build/
+/release-report-fix/

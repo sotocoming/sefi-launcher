@@ -1,11 +1,11 @@
-# Client authentication regression checks
+# SEFI Auth 2.0.3 regression checks
 
 Run `node scripts/test-auth-client.cjs` with JDK 17+ available (JAVA_HOME or the standard JDK 21 installation).
 
-The checks cover deferred EasyAuth warnings during launcher authentication, restoring the warning on timeout, preserving genuine errors, and a single delayed voice reconnect after successful authentication. Disconnect cancels pending work. Connected or initializing voice chat is left intact by the optional adapter in SefiAuthClient.
+The checks cover three bounded attempts, wall-clock deadlines, retry backoff, permanent rejection, success/disconnect cancellation, trusted server addresses, deferred EasyAuth warnings, and delayed voice reconnect. Run `node scripts/test-ticket-broker.cjs` for actual local HTTP requests with signed challenges, temporary failure recovery, revoked sessions, replay rejection and secret-free diagnostics.
 
-Build the bundled mod with `.tools/gradle-8.12.1/bin/gradle.bat -p mod_build remapJar`. The server protocol and server-side authentication checks are unchanged in 2.0.1; the client remains compatible with the existing 2.0.0 server.
+Build the bundled mod with Gradle 8.12.1 and JDK 21: `gradle -p mod_build build`. Full retry support requires SEFI Auth 2.0.3 on the server and client. See `mod_build/AUTH-RETRY.md` for deadlines, validation limits, deployment and rollback.
 
 The client JAR contains no private server configuration. Authentication uses an account-authorized, short-lived, single-use ticket bound to the signed server challenge and the client's ephemeral key. Copying the JAR does not provide account credentials or server signing keys. A client binary is not a trust boundary: stolen account sessions or malware on the user's computer require separate protection.
 
-Server security checks were run against temporary SQLite databases: 32 tests including the ticket and community security suites passed. Client helper tests, remapped mod compilation, installer contents, TypeScript build, Markdown UI, and skin regression checks passed. Actual bidirectional audio still requires two connected game clients after restart.
+Server security checks use temporary SQLite databases. Live Minecraft login and actual bidirectional audio still require connected test players after installation.

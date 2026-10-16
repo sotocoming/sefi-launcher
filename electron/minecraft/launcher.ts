@@ -1,3 +1,5 @@
+import { startReportBroker } from './report-broker';
+import { ensureReportMod } from './report-mod';
 import { protectMinecraftHandler, trustedGameUrl } from './game-integrity';
 const { Client } = require('minecraft-launcher-core');
 import fs from 'fs/promises';
@@ -196,8 +198,13 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   const serverHost = launcherConfig?.server?.ip || 'minecraft.sotocoming.ru';
   const serverPort = launcherConfig?.server?.port || 25565;
   const serverName = launcherConfig?.server?.name || 'Sweet Home';
-  const fullAddress = serverPort === 25565 ? serverHost : `${serverHost}:${serverPort}`;
-  const endpoints = launcherConfig?.server?.endpoints?.length ? launcherConfig.server.endpoints : [{ id: 'primary', label: 'Основной', host: serverHost, port: serverPort, address: fullAddress }];
+  const primaryAddress = serverPort === 25565 ? serverHost : `${serverHost}:${serverPort}`;
+  const endpoints = launcherConfig?.server?.endpoints?.length ? launcherConfig.server.endpoints : [{ id: 'primary', label: 'Основной', host: serverHost, port: serverPort, address: primaryAddress }];
+  const selectedServer = settings.selectedServerId ? endpoints.find(e => e.id === settings.selectedServerId) : endpoints[0];
+  if (settings.autoConnect === true && !selectedServer) {
+    throw new Error('Выбранный адрес сервера больше недоступен. Выберите другой адрес рядом с «Играть» или отключите «Подключаться сразу».');
+  }
+  const fullAddress = selectedServer?.address || primaryAddress;
 
   await ensureSefiSkinMod(settings.gameDirectory);
   const customArgs: string[] = [`-Dsefi.skinApi=${skinApiOrigin()}`];
@@ -218,6 +225,16 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
 
   // Long modpack downloads may outlive the game token: renew again immediately before spawn.
   if(activeAccount.type==='microsoft')activeAccount=await ensureMicrosoftAccount(activeAccount.id,true);
+  let reportBroker: Awaited<ReturnType<typeof startReportBroker>>;
+  try {
+    await ensureReportMod(settings.gameDirectory);
+    reportBroker = await startReportBroker(activeAccount);
+  } catch (error) {
+    broker?.close();
+    onStateChange({ status: 'error', message: error instanceof Error ? error.message : 'Не удалось подготовить отчёты.' });
+    return;
+  }
+  customArgs.push('-Dsefi.reportPort=' + reportBroker.port, '-Dsefi.reportKey=' + reportBroker.key);
   const opts = {
     clientPackage: null,
     authorization: {
@@ -248,7 +265,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       height: settings.windowHeight,
       fullscreen: settings.fullscreen,
     },
-    quickPlay: { type: 'multiplayer', identifier: fullAddress },
+    ...(settings.autoConnect === true ? { quickPlay: { type: 'multiplayer', identifier: fullAddress } } : {}),
   };
 
   try {
@@ -259,7 +276,9 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       if (presence) opts.customArgs = [...(opts.customArgs || []), `-Dsefi.presenceFile=${presence.file}`];
     }
     const child = await launcher.launch(opts);
+    child?.once('close', () => reportBroker.close());
     child?.once('error', (error: Error) => {
+      reportBroker.close();
       gameRunning = false;
       broker?.close();
       presence?.close();
@@ -273,6 +292,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     onStateChange({ status: 'running', pid: child.pid });
     onStarted?.(settings.closeOnLaunch === true);
   } catch (err: any) {
+    reportBroker.close();
     broker?.close();
     presence?.close();
     console.error('Launch failed:', err);

@@ -26,12 +26,13 @@ import org.slf4j.LoggerFactory;
 public final class SefiAuthCommon implements ModInitializer {
     public static final Identifier HELLO = new Identifier("sefi", "hello_v2");
     public static final Identifier CHALLENGE = new Identifier("sefi", "challenge_v2");
+    public static final Identifier FAILURE = new Identifier("sefi", "failure_v2");
     public static final Identifier TICKET = new Identifier("sefi", "ticket_v2");
     private static final Gson JSON = new Gson();
     private static final Logger LOG = LoggerFactory.getLogger("SefiAuth");
     private static final Base64.Encoder B64 = Base64.getUrlEncoder().withoutPadding();
     private final ConcurrentMap<ServerPlayNetworkHandler, Pending> pending = new ConcurrentHashMap<>();
-    private final Set<ServerPlayNetworkHandler> seen = ConcurrentHashMap.newKeySet();
+    private final ConcurrentMap<ServerPlayNetworkHandler, Integer> seen = new ConcurrentHashMap<>();
     private final ThreadPoolExecutor pool = new ThreadPoolExecutor(2, 4, 30, TimeUnit.SECONDS,
         new ArrayBlockingQueue<>(16), r -> { Thread t = new Thread(r, "SefiAuth-Verify"); t.setDaemon(true); return t; },
         new ThreadPoolExecutor.AbortPolicy());
@@ -57,13 +58,18 @@ public final class SefiAuthCommon implements ModInitializer {
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> { pending.remove(handler); seen.remove(handler); });
         ServerLifecycleEvents.SERVER_STOPPED.register(server -> { pool.shutdownNow(); pending.clear(); seen.clear(); });
         ServerPlayNetworking.registerGlobalReceiver(HELLO, (server, player, handler, buf, sender) -> {
-            if (signingKey == null || buf.readableBytes() > 130 || seen.size() >= 64 || !seen.add(handler)) return;
+            if (signingKey == null || buf.readableBytes() > 130) return;
             final String encoded;
             try { encoded = buf.readString(128); if (buf.readableBytes() != 0) return; }
             catch (Exception error) { LOG.warn("SEFI hello rejected: {}", error.getClass().getSimpleName()); return; }
             server.execute(() -> {
-                if (player.networkHandler != handler || server.getPlayerManager().getPlayer(player.getUuid()) != player
-                        || authenticated(player)) return;
+                if (player.networkHandler != handler || server.getPlayerManager().getPlayer(player.getUuid()) != player) return;
+                if ((!seen.containsKey(handler) && seen.size() >= 64) || seen.getOrDefault(handler, 0) >= 3) return;
+                Pending previous = pending.get(handler);
+                if (previous != null && previous.expires() - 45 > System.currentTimeMillis() / 1000 - 1) return;
+                seen.merge(handler, 1, Integer::sum);
+                if (authenticated(player)) { player.sendMessage(Text.literal("§a[SEFI] Вход подтверждён лаунчером."), false); return; }
+                LOG.info("Launcher login player={} attempt={} stage=hello", player.getGameProfile().getName(), seen.get(handler));
                 try {
                     PublicKey clientKey = KeyFactory.getInstance("Ed25519").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(encoded)));
                     if (!Arrays.equals(clientKey.getEncoded(), Base64.getDecoder().decode(encoded))) return;
@@ -95,36 +101,46 @@ public final class SefiAuthCommon implements ModInitializer {
             } catch (Exception ignored) { return; }
             try {
                 pool.execute(() -> {
-                    boolean ok = verify(state, ticket, player.getGameProfile().getName(), player.getUuid().toString());
+                    int result = verify(state, ticket, player.getGameProfile().getName(), player.getUuid().toString());
                     server.execute(() -> {
-                        pending.remove(handler, state);
-                        if (!ok || state.expires() <= System.currentTimeMillis() / 1000 || player.networkHandler != handler
+                        if (!pending.remove(handler, state)) return;
+                        if (state.expires() <= System.currentTimeMillis() / 1000 || player.networkHandler != handler
                                 || server.getPlayerManager().getPlayer(player.getUuid()) != player || !handler.isConnectionOpen()) return;
+                        if (result != 200) { failure(player, state, result == 0 || result == 429 || result >= 500); return; }
                         if (authenticate(player)) player.sendMessage(Text.literal("§a[SEFI] Вход подтверждён лаунчером."), false);
+                        else failure(player, state, false);
                     });
                 });
-            } catch (RejectedExecutionException ignored) { pending.remove(handler, state); }
+            } catch (RejectedExecutionException ignored) { server.execute(() -> { if (pending.remove(handler, state) && handler.isConnectionOpen()) failure(player, state, true); }); }
         });
     }
-    private boolean verify(Pending state, String ticket, String name, String uuid) {
+    private int verify(Pending state, String ticket, String name, String uuid) {
         try {
             JsonObject data = new JsonObject(); data.addProperty("ticket", ticket); data.addProperty("challenge", state.challenge());
             data.addProperty("signature", state.signature()); data.addProperty("nickname", name); data.addProperty("uuid", uuid);
             HttpRequest request = HttpRequest.newBuilder(URI.create("https://mc.sotocoming.ru/api/public/community/launcher/ticket/verify"))
                 .timeout(Duration.ofSeconds(5)).header("Content-Type", "application/json").header("X-SEFI-Server", verifySecret)
                 .POST(HttpRequest.BodyPublishers.ofString(JSON.toJson(data))).build();
-            HttpResponse<java.io.InputStream> response = http.send(request, HttpResponse.BodyHandlers.ofInputStream());
-            try (var input = response.body()) {
-                byte[] raw = input.readNBytes(1025);
-                return response.statusCode() == 200 && raw.length <= 1024
-                    && JsonParser.parseString(new String(raw, StandardCharsets.UTF_8)).getAsJsonObject().get("ok").getAsBoolean();
+            HttpResponse<byte[]> response = http.send(request, HttpResponse.BodyHandlers.ofByteArray());
+            {
+                byte[] raw = response.body();
+                int status = response.statusCode();
+                LOG.info("Launcher login player={} stage=verify status={}", name, status);
+                if (status != 200) return status;
+                return raw.length <= 1024 && JsonParser.parseString(new String(raw, StandardCharsets.UTF_8)).getAsJsonObject().get("ok").getAsBoolean() ? 200 : 403;
             }
-        } catch (Exception ignored) { return false; }
+        } catch (Exception error) { LOG.warn("Launcher login player={} stage=verify_transport type={}", name, error.getClass().getSimpleName()); return error instanceof java.io.IOException ? 0 : 403; }
+    }
+    private void failure(ServerPlayerEntity player, Pending state, boolean temporary) {
+        if (!ServerPlayNetworking.canSend(player, FAILURE)) return;
+        PacketByteBuf out = PacketByteBufs.create();
+        out.writeString(Base64.getEncoder().encodeToString(state.clientKey().getEncoded())); out.writeBoolean(temporary);
+        ServerPlayNetworking.send(player, FAILURE, out);
     }
     private boolean authenticated(ServerPlayerEntity player) {
         try { return (boolean) Class.forName("xyz.nikitacartes.easyauth.interfaces.PlayerAuth")
             .getMethod("easyAuth$isAuthenticated").invoke(player); }
-        catch (Exception error) { LOG.warn("SEFI cannot read EasyAuth state: {}", error.getClass().getSimpleName()); return true; } // Never bypass an absent/incompatible EasyAuth.
+        catch (Exception error) { LOG.warn("SEFI cannot read EasyAuth state: {}", error.getClass().getSimpleName()); return false; } // Never bypass an absent/incompatible EasyAuth.
     }
     private boolean authenticate(ServerPlayerEntity player) {
         try {

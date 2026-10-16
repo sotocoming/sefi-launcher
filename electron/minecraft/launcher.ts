@@ -94,7 +94,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
 
   class VerifiedClient extends Client {
     preparationError?: Error;
-    printVersion() { super.printVersion(); protectMinecraftHandler(this.handler, (error) => { this.preparationError = error; }); }
+    printVersion() { super.printVersion(); protectMinecraftHandler(this.handler, (error) => { this.preparationError = error; }, activeAccount?.communityToken); }
     async startMinecraft(args: string[]) {
       if (activeAccount?.type === 'microsoft') {
         const current = await ensureMicrosoftAccount(activeAccount.id, true);

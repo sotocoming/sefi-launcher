@@ -1,0 +1,50 @@
+{
+  "https://maven.fabricmc.net/org/ow2/asm/asm/9.9/asm-9.9.jar": {
+    "name": "asm-9.9.jar",
+    "sha1": "c29635c8a7afa03d74b33c1884df8abb2b3f3dcc",
+    "sha256": "03d99a74ad1ee5c71334ef67437f4ef4fe3488caa7c96d8645abc73c8e2017d4",
+    "size": 126122
+  },
+  "https://maven.fabricmc.net/org/ow2/asm/asm-analysis/9.9/asm-analysis-9.9.jar": {
+    "name": "asm-analysis-9.9.jar",
+    "sha1": "0bf4fa6e66638851c1cd22c2caea0c3ee5d5f437",
+    "sha256": "6a15d28e8bd29ba4fd5bca4baf9b50e8fba2d7b51fbf78cfa0c875a7214c678b",
+    "size": 35149
+  },
+  "https://maven.fabricmc.net/org/ow2/asm/asm-commons/9.9/asm-commons-9.9.jar": {
+    "name": "asm-commons-9.9.jar",
+    "sha1": "db9165a3bf908ded6b08612d583a15d1d0c7bda0",
+    "sha256": "db2f6f26150bbe7c126606b4a1151836bcc22a1e05a423b3585698bece995ff8",
+    "size": 74348
+  },
+  "https://maven.fabricmc.net/org/ow2/asm/asm-tree/9.9/asm-tree-9.9.jar": {
+    "name": "asm-tree-9.9.jar",
+    "sha1": "f8de6eead6d24dd0f45bd065bbe112b2cda6ea21",
+    "sha256": "42178f3775c9c63f9e5e1446747d29b4eca4d91bd6e75e5c43cfa372a47d38c6",
+    "size": 51947
+  },
+  "https://maven.fabricmc.net/org/ow2/asm/asm-util/9.9/asm-util-9.9.jar": {
+    "name": "asm-util-9.9.jar",
+    "sha1": "42fdfc0508b43807c8078d6e82ecff2ce2112ae8",
+    "sha256": "3842e13cfe324ee9ab7cdc4914be9943541ead397c17e26daf0b8a755bede717",
+    "size": 94565
+  },
+  "https://maven.fabricmc.net/net/fabricmc/sponge-mixin/0.17.0+mixin.0.8.7/sponge-mixin-0.17.0+mixin.0.8.7.jar": {
+    "name": "sponge-mixin-0.17.0+mixin.0.8.7.jar",
+    "sha1": "cf31463202f72d03b0ef1e1e38e8ee71b7faaab6",
+    "sha256": "e7889fcd185e4199052dcbcf0fe2128581cbf8630aea7feb37429667b1ba49a9",
+    "size": 1505269
+  },
+  "https://maven.fabricmc.net/net/fabricmc/intermediary/1.20.1/intermediary-1.20.1.jar": {
+    "name": "intermediary-1.20.1.jar",
+    "sha1": "97d0bff94981e37bd7a4362deee53c9a84e3fb21",
+    "sha256": "caa3fd87dd353fc826a109a2d16f886d6519b47422e3a77cfa0ba8be5829a21e",
+    "size": 573365
+  },
+  "https://maven.fabricmc.net/net/fabricmc/fabric-loader/0.18.4/fabric-loader-0.18.4.jar": {
+    "name": "fabric-loader-0.18.4.jar",
+    "sha1": "dc4682125d5db647d6ce80a98b98945835adcd4b",
+    "sha256": "ea300b841949a290641db8c137e3da205462a089a7472d8f1657179fd23bcf4a",
+    "size": 1944518
+  }
+}

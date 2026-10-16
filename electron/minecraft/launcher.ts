@@ -20,6 +20,7 @@ import { startTicketBroker, redactLaunchLog } from './ticket-broker';
 import { getModpackStatus, installModpack, ensureSefiAuthMod } from './modpack';
 import { ensureServersInServersDat } from './servers-dat';
 import { applyFullscreenSetting } from './window-options';
+import { watchGamePresence, type GameLocation } from '../game-presence';
 
 async function ensureFabricProfile(gameDir: string, mcVersion: string, fabricVersion: string): Promise<string> {
   const customId = `fabric-loader-${fabricVersion}-${mcVersion}`;
@@ -58,16 +59,16 @@ async function ensureFabricProfile(gameDir: string, mcVersion: string, fabricVer
 let launchBusy = false;
 let gameRunning = false;
 
-export async function launchGame(onStateChange: (state: GameState) => void, onStarted?: (hideWindow: boolean) => void) {
+export async function launchGame(onStateChange: (state: GameState) => void, onStarted?: (hideWindow: boolean) => void, onLocation?: (location: GameLocation | null) => void) {
   if (launchBusy || gameRunning) return;
   launchBusy = true;
-  try { await performLaunch(onStateChange, onStarted); }
+  try { await performLaunch(onStateChange, onStarted, onLocation); }
   catch (error) {
     onStateChange({ status: 'error', message: error instanceof Error ? error.message : 'Не удалось подготовить игру.' });
   } finally { launchBusy = false; }
 }
 
-async function performLaunch(onStateChange: (state: GameState) => void, onStarted?: (hideWindow: boolean) => void) {
+async function performLaunch(onStateChange: (state: GameState) => void, onStarted?: (hideWindow: boolean) => void, onLocation?: (location: GameLocation | null) => void) {
   onStateChange({ status: 'checking' });
 
   const settings = await getSettings();
@@ -182,9 +183,11 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   });
 
   let broker: Awaited<ReturnType<typeof startTicketBroker>> | undefined;
+  let presence: Awaited<ReturnType<typeof watchGamePresence>> | undefined;
   launcher.on('close', (code: any) => {
     gameRunning = false;
     broker?.close();
+    presence?.close();
     console.log('[Minecraft Closed with code]:', code);
     onStateChange(code===0 ? {status:'idle'} : {status:'error',message:'Minecraft завершился с ошибкой (код '+code+').\n'+startupLog.join('\n').slice(-4000)});
   });
@@ -214,6 +217,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       customArgs.push(`-Dsefi.authPort=${broker.port}`, `-Dsefi.serverAddress=${fullAddress}`, `-Dsefi.serverAddresses=${endpoints.map(e => e.address).join(",")}`); // Port only, no credential in process arguments.
     } catch (error) {
       broker?.close();
+      presence?.close();
       onStateChange({ status: 'error', message: error instanceof Error ? error.message : 'Не удалось подготовить автовход.' });
       return;
     }
@@ -267,12 +271,17 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   try {
     await ensureServersInServersDat(settings.gameDirectory, endpoints.map(e => ({ id: e.id, name: `${serverName} · ${e.label}`, ip: e.address })));
     await applyFullscreenSetting(settings.gameDirectory, settings.fullscreen);
+    if (onLocation) {
+      presence = await watchGamePresence(onLocation).catch(() => undefined);
+      if (presence) opts.customArgs = [...(opts.customArgs || []), `-Dsefi.presenceFile=${presence.file}`];
+    }
     const child = await launcher.launch(opts);
     child?.once('close', () => reportBroker.close());
     child?.once('error', (error: Error) => {
       reportBroker.close();
       gameRunning = false;
       broker?.close();
+      presence?.close();
       onStateChange({ status: 'error', message: error.message || 'Не удалось запустить Java.' });
     });
     if (!child || !child.pid) {
@@ -285,6 +294,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   } catch (err: any) {
     reportBroker.close();
     broker?.close();
+    presence?.close();
     console.error('Launch failed:', err);
     onStateChange({ status: 'error', message: err.message || String(err) });
   }

@@ -16,6 +16,8 @@ import { getJavaStatus, getJavaPath, inspectJava } from './minecraft/java';
 import { prepareGameDirectory } from './minecraft/game-directory';
 import { publicAccount } from './minecraft/account-store';
 import { launchGame } from './minecraft/launcher';
+import { DiscordPresence } from './discord-presence';
+import { loadWindowInterface } from './window-loading';
 import { repairClickBindings, repairResourcePacks } from './minecraft/control-repair';
 
 const isDev = !app.isPackaged;
@@ -35,6 +37,8 @@ let gameBusy = false;
 let controlsRepairBusy = false;
 let updateChecks: UpdateChecks | null = null;
 let integrationsReady = false;
+const discordPresence = new DiscordPresence();
+app.once('before-quit', () => discordPresence.close());
 const indexFile = path.join(app.getAppPath(), 'dist/index.html');
 const secureIpc = trustedIpc(ipcMain, () => mainWindow, indexFile, isDev);
 function sendToMain(channel: string, value: unknown) {
@@ -105,7 +109,8 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(app.getAppPath(), 'dist/index.html')).catch(() => {
+    void loadWindowInterface(created, path.join(app.getAppPath(), 'dist/index.html'), error => {
+      console.error('[Window] Interface load failed:', (error as Error)?.message || 'unknown');
       dialog.showErrorBox('SEFI Launcher', 'Не удалось открыть интерфейс. Переустановите лаунчер из последнего релиза.');
     });
   }
@@ -114,6 +119,10 @@ function createWindow() {
     integrationsReady = true;
     setupIpc();
     setupAutoUpdater();
+    void getSettings().then(settings => {
+      discordPresence.configure(settings.discordPresence !== false);
+      return getLauncherConfig();
+    }).then(config => getSettings().then(settings => discordPresence.configure(settings.discordPresence !== false, config))).catch(() => {});
   }
 }
 
@@ -129,7 +138,10 @@ function setupIpc() {
   secureIpc.on('window-close', () => mainWindow?.close());
 
   secureIpc.handle('get-settings', getSettings);
-  secureIpc.handle('save-settings', async (_, settings) => await saveSettings(settings));
+  secureIpc.handle('save-settings', async (_, settings) => {
+    await saveSettings(settings);
+    discordPresence.configure((await getSettings()).discordPresence !== false);
+  });
 
   function skinWindow(event: Electron.IpcMainInvokeEvent): BrowserWindow {
     if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== mainWindow.webContents.mainFrame) {
@@ -229,6 +241,7 @@ function setupIpc() {
   secureIpc.handle('launch-game', async () => {
     if (controlsRepairBusy) throw new Error('Дождитесь завершения исправления управления.');
     await launchGame((state) => {
+      discordPresence.gameState(state);
       gameBusy = !['idle', 'error'].includes(state.status);
       autoUpdater.autoInstallOnAppQuit = !gameBusy;
       if (!gameBusy) void updateChecks?.run();
@@ -245,7 +258,7 @@ function setupIpc() {
         hiddenForGame = true;
         mainWindow.hide();
       }
-    });
+    }, location => discordPresence.gameLocation(location));
   });
 
   secureIpc.handle('repair-click-bindings', async () => {

@@ -6,7 +6,7 @@ let account = {id:'offline',type:'offline',communityToken:'secret-test-token'};
 let calls = 0, status = 200;
 const context = {exports:{},Buffer,URL,AbortSignal,process:{env:{}},
  require(id) {
-  if(id==='electron') return {app:{isPackaged:false}};
+  if(id==='electron') return {app:{isPackaged:false},net:{fetch:context.fetch}};
   if(id==='./accounts') return {getAccounts:async()=>[account]};
   return require(id);
  },
@@ -23,12 +23,13 @@ const api=context.exports;
 (async()=>{
  assert.equal(await api.getCommunitySkin('offline'),null);
  await api.saveCommunitySkin('offline','AAAA','slim');
+ await api.saveCommunitySkin('offline','A'.repeat(100000),'classic');
  await api.resetCommunitySkin('offline');
  for(const fields of [{type:'microsoft'},{mcType:'microsoft'},{mcVerifiedAt:1},{communityToken:undefined}]) {
   const original=account;account={...original,...fields};const before=calls;
   await assert.rejects(api.getCommunitySkin('offline'));assert.equal(calls,before);account=original;
  }
- assert.throws(()=>api.saveCommunitySkin('offline','A'.repeat(90000),'slim'));
+ assert.throws(()=>api.saveCommunitySkin('offline','A'.repeat(180000),'slim'));
  await assert.rejects(api.getCommunitySkin('missing'));
  status=404;await assert.rejects(api.getCommunitySkin('offline'),/Сервис скинов недоступен/);
  assert.equal(api.skinApiOrigin(),'https://mc.sotocoming.ru');

@@ -70,7 +70,7 @@ export function SkinEditor({ account }: { account: Account | null }) {
           {dirty && <button disabled={busy || loading} onClick={() => { setDraft(null); setModel(saved?.model || 'classic'); setError(''); setNotice(''); }} className="px-2 py-2 text-xs text-white/50 hover:text-white disabled:opacity-30">Отменить</button>}
           {saved && <button disabled={busy || loading} onClick={() => act('reset')} className="px-2 py-2 text-xs text-white/40 hover:text-red-300 disabled:opacity-30">Сбросить</button>}
         </div>
-        <p className="mt-3 truncate text-[11px] text-white/35">{draft ? draft.filename + ' · Предпросмотр, ещё не сохранён' : 'PNG 64 × 64 · до 64 КБ · два слоя'}</p>
+        <p className="mt-3 truncate text-[11px] text-white/35">{draft ? draft.filename + ' · Предпросмотр, ещё не сохранён' : 'PNG 64 × 64 или 128 × 128 · до 128 КБ · два слоя'}</p>
         {error && <p role="alert" className="mt-3 text-xs leading-5 text-red-200">{error.replace(/^Error: Error invoking remote method '[^']+': Error: /, '')}</p>}
         {notice && <p role="status" className="mt-3 text-xs leading-5 text-emerald-200">{notice}</p>}
       </div>

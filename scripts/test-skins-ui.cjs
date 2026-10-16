@@ -2,17 +2,20 @@ const {chromium}=require('C:/Users/Creep/.cache/codex-runtimes/codex-primary-run
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),zlib=require('node:zlib');
 function crc32(buf){let c=-1;for(const b of buf){c^=b;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0);}return (c^-1)>>>0;}
 function png(){
- const pixels=Buffer.alloc(64*(64*4+1));
- for(let y=0;y<64;y++)for(let x=0;x<64;x++){
+ const size=Number(process.env.SEFI_SKIN_SIZE||64),scale=size/64;
+ const pixels=Buffer.alloc(size*(size*4+1));
+ for(let py=0;py<size;py++)for(let px=0;px<size;px++){
+  const y=py/scale,x=px/scale;
   let color=y<16?[216,168,128,255]:y<32?[50,160,180,255]:[36,51,88,255];
   if(y>=32&&(x<16||y<48))color=[0,0,0,0];
   if(y<16&&x>=32)color=[0,0,0,0];
   if(y<8)color=[45,28,28,255];
   if(y>=10&&y<12&&((x>=9&&x<11)||(x>=13&&x<15)))color=[25,36,60,255];
-  const at=y*257+1+x*4;color.forEach((n,i)=>pixels[at+i]=n);
+  if(y>=8&&y<9&&x>=40&&x<41)color=[120,30,200,255];
+  const at=py*(size*4+1)+1+px*4;color.forEach((n,i)=>pixels[at+i]=n);
  }
  function chunk(type,data){let size=Buffer.alloc(4);size.writeUInt32BE(data.length);const kind=Buffer.from(type),crc=Buffer.alloc(4);crc.writeUInt32BE(crc32(Buffer.concat([kind,data])));return Buffer.concat([size,kind,data,crc]);}
- const head=Buffer.alloc(13);head.writeUInt32BE(64);head.writeUInt32BE(64,4);head[8]=8;head[9]=6;
+ const head=Buffer.alloc(13);head.writeUInt32BE(size);head.writeUInt32BE(size,4);head[8]=8;head[9]=6;
  return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',head),chunk('IDAT',zlib.deflateSync(pixels)),chunk('IEND',Buffer.alloc(0))]).toString('base64');
 }
 async function difference(page,a,b){
@@ -41,7 +44,7 @@ async function difference(page,a,b){
     await route.fulfill({body:fs.readFileSync(file),contentType:file.endsWith('.js')?'text/javascript':file.endsWith('.css')?'text/css':file.endsWith('.png')?'image/png':'text/html'});
    });
    await page.addInitScript(({mode,png})=>{
-    const account={id:'test',username:'SEFI_Player',type:mode==='microsoft'?'microsoft':'offline',mcType:mode==='bound'?'microsoft':'offline',mcVerifiedAt:mode==='bound'?1:0,uuid:'12345678123442348234123456789abc',active:true,...(mode==='offline'||mode==='saved'||mode==='no_webgl'||mode==='bound'||mode==='unavailable'?{communityToken:'fixture',twitchLogin:'sefi_player'}:{})};
+    const account={id:'test',username:'SEFI_Player',type:mode==='microsoft'?'microsoft':'offline',mcType:mode==='bound'?'microsoft':'offline',mcVerifiedAt:mode==='bound'?1:0,uuid:'12345678123442348234123456789abc',active:true,...(mode==='offline'||mode==='saved'||mode==='no_webgl'||mode==='bound'||mode==='unavailable'?{communityConnected:true,twitchLogin:'sefi_player'}:{})};
     let saved=mode==='saved'?{png,model:'classic',sha256:'a'.repeat(64)}:null;
     if(mode==='no_webgl'){const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(kind,...args){return kind==='webgl'||kind==='webgl2'||kind==='experimental-webgl'?null:original.call(this,kind,...args);};}
     window.skinCalls=[];
@@ -86,9 +89,9 @@ async function difference(page,a,b){
       const head=document.querySelector('aside canvas');
       return head && head.getContext('2d').getImageData(0,0,1,1).data[3]===255;
     });
-    assert.deepEqual(await head.evaluate(c=>Array.from(c.getContext('2d').getImageData(0,0,1,1).data)),[216,168,128,255]);
+    assert.deepEqual(await head.evaluate(c=>Array.from(c.getContext('2d').getImageData(0,0,1,1).data)),[120,30,200,255]);
     await section.scrollIntoViewIfNeeded();
-    await page.screenshot({path:path.join(__dirname,'../design/skins-community.png')});
+    await page.screenshot({path:path.join(__dirname,'../design/skins-community-'+(process.env.SEFI_SKIN_SIZE||64)+'.png')});
     await page.getByRole('button',{name:'Главная',exact:true}).click();
     await page.getByRole('button',{name:'Аккаунты',exact:true}).click();
     await page.getByRole('button',{name:'Сбросить'}).waitFor();

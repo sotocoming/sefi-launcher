@@ -20,9 +20,10 @@ export function PlayerAvatar({ account }: { account: Account | null }) {
     const image = new Image();
     image.onload = () => {
       if (!alive) return;
+      const scale = image.naturalWidth / 64;
       context.imageSmoothingEnabled = false;
-      context.drawImage(image, 8, 8, 8, 8, 0, 0, 64, 64);
-      context.drawImage(image, 40, 8, 8, 8, 0, 0, 64, 64);
+      context.drawImage(image, 8 * scale, 8 * scale, 8 * scale, 8 * scale, 0, 0, 64, 64);
+      context.drawImage(image, 40 * scale, 8 * scale, 8 * scale, 8 * scale, 0, 0, 64, 64);
     };
     image.src = 'data:image/png;base64,' + png;
     return () => { alive = false; };

@@ -2,13 +2,18 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 
-export type GameLocation = { mode: 'menu' | 'singleplayer' | 'multiplayer'; server?: string };
+export type GameLocation = { mode: 'menu' | 'singleplayer' | 'multiplayer'; server?: string; dimension?: string; players?: number };
 export function gameLocation(value: unknown): GameLocation | null {
   if (!value || typeof value !== 'object') return null;
   const input = value as Record<string, unknown>;
-  if (input.mode === 'menu' || input.mode === 'singleplayer') return { mode: input.mode };
+  const world: Pick<GameLocation, 'dimension' | 'players'> = {};
+  if (typeof input.dimension === 'string' && input.dimension.length <= 128
+    && /^[a-z0-9_.-]+:[a-z0-9_./-]+$/.test(input.dimension)) world.dimension = input.dimension;
+  if (Number.isInteger(input.players) && (input.players as number) > 0 && (input.players as number) <= 100000) world.players = input.players as number;
+  if (input.mode === 'menu') return { mode: 'menu' };
+  if (input.mode === 'singleplayer') return { mode: 'singleplayer', ...(world.dimension ? { dimension: world.dimension } : {}) };
   if (input.mode === 'multiplayer' && typeof input.server === 'string' && input.server.length <= 255
-    && /^[a-zA-Z0-9.\-:\[\]]+$/.test(input.server)) return { mode: 'multiplayer', server: input.server };
+    && /^[a-zA-Z0-9.\-:\[\]]+$/.test(input.server)) return { mode: 'multiplayer', server: input.server, ...world };
   return null;
 }
 

@@ -8,14 +8,14 @@ const context={exports:{},process:{resourcesPath:path.join(temp,'missing')},requ
 vm.runInNewContext(fs.readFileSync(path.join(project,'dist-electron/electron/minecraft/skin-mod.js'),'utf8'),context);
 (async()=>{
  await context.exports.ensureSefiSkinMod(temp);await context.exports.ensureSefiSkinMod(temp);
- const bundled=fs.readFileSync(path.join(project,'resources/mods/sefi-skins-1.2.0.jar'));
- assert.deepEqual(fs.readFileSync(path.join(mods,'sefi-skins-1.2.0.jar')),bundled);
+ const bundled=fs.readFileSync(path.join(project,'resources/mods/sefi-skins-1.3.0.jar'));
+ assert.deepEqual(fs.readFileSync(path.join(mods,'sefi-skins-1.3.0.jar')),bundled);
  assert.equal(fs.readFileSync(path.join(mods,'other-mod.jar'),'utf8'),'user');
  assert.equal(fs.existsSync(path.join(mods,'sefi-skins-1.0.0.jar')),false);
  const backups=fs.readdirSync(path.join(temp,'sefi-backups'));assert.equal(backups.length,1);
  assert.equal(fs.readFileSync(path.join(temp,'sefi-backups',backups[0],'sefi-skins-1.0.0.jar'),'utf8'),'old');
  const jar=new AdmZip(bundled);const meta=JSON.parse(jar.readAsText('fabric.mod.json'));
- assert.equal(meta.version,'1.2.0');assert.equal(meta.environment,'client');assert.equal(meta.id,'sefi-skins');
+ assert.equal(meta.version,'1.3.0');assert.equal(meta.environment,'client');assert.equal(meta.id,'sefi-skins');
  const mixin=JSON.parse(jar.readAsText('sefi-skins.mixins.json'));assert.deepEqual(mixin.client,['PlayerListEntryMixin','MinecraftClientPresenceMixin']);
  const mappings=JSON.parse(jar.readAsText('sefi-skins.refmap.json')).mappings;
  assert(Object.keys(mappings).some(n=>n.includes('PlayerListEntryMixin')));

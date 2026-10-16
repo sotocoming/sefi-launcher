@@ -1,9 +1,9 @@
 const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),vm=require('node:vm'),net=require('node:net'),os=require('node:os');
 const {rpcFrame,RpcFrames,discordPipe}=require('../dist-electron/electron/discord-rpc');
-const {activityFor}=require('../dist-electron/electron/discord-presence');
+const {activityFor,playerCount}=require('../dist-electron/electron/discord-presence');
 const {watchGamePresence,gameLocation}=require('../dist-electron/electron/game-presence');
 const discordConfig=require('../electron/discord-presence-config.json');
-const config={server:{name:'Sweet Home',ip:'mc.sotocoming.ru',port:25565,endpoints:[{address:'minecraft.sotocoming.ru'}]}};
+const config={server:{name:'Sweet Home',ip:'mc.sotocoming.ru',port:25565,endpoints:[{address:'mc.sotocoming.ru',label:'EURO'},{address:'minecraft.sotocoming.ru',label:'RU'}]}};
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(check){for(let i=0;i<100;i++){if(check())return;await wait(30);}throw Error('Timed out');}
 (async()=>{
@@ -15,9 +15,21 @@ async function until(check){for(let i=0;i<100;i++){if(check())return;await wait(
  if(process.platform==='win32')assert.equal(discordPipe(0),'\\\\?\\pipe\\discord-ipc-0');
  const active=(location)=>activityFor({status:'running',pid:10},location,config,123);
  for(const server of ['mc.sotocoming.ru','MC.SOTOCOMING.RU:25565','minecraft.sotocoming.ru']) {
-  const a=active({mode:'multiplayer',server});assert.equal(a.details,'Sweet Home');assert.equal(a.timestamps.start,123);
+  const a=active({mode:'multiplayer',server});assert.equal(a.details,'На сервере');assert.equal(a.timestamps.start,123);
   assert.equal(a.assets.large_image,discordConfig.imageUrl||'sweet_home');assert(!JSON.stringify({details:a.details,state:a.state}).includes(server));
  }
+ for(const [dimension,label] of [['minecraft:overworld','Обычный мир'],['minecraft:the_nether','Незер'],['minecraft:the_end','Энд']]) {
+  for(const [server,region] of [['mc.sotocoming.ru','EURO'],['minecraft.sotocoming.ru','RU']]) {
+   const a=active(gameLocation({mode:'multiplayer',server,dimension,players:12}));
+   assert.equal(a.details,'На сервере · 12 игроков');assert.equal(a.state,label+' · '+region);
+   assert(!a.details.includes('Sweet Home'));assert.equal(a.timestamps.start,123);
+  }
+  assert.equal(active({mode:'singleplayer',dimension}).state,label);
+ }
+ for(const [n,word] of [[1,'игрок'],[2,'игрока'],[4,'игрока'],[11,'игроков'],[12,'игроков'],[21,'игрок'],[25,'игроков']])assert.equal(playerCount(n),n+' '+word);
+ const invalidStats=gameLocation({mode:'multiplayer',server:'mc.sotocoming.ru',players:'12',dimension:'private world name'});
+ assert.equal(invalidStats.players,undefined);assert.equal(invalidStats.dimension,undefined);
+ assert.equal(active({mode:'multiplayer',server:'mc.sotocoming.ru',dimension:'mod:private_location'}).state,'Другой мир · EURO');
  assert.equal(active({mode:'singleplayer'}).details,'Одиночный мир');
  assert.equal(active({mode:'menu'}).details,'В главном меню');
  assert.equal(active(null).details,'Minecraft запущен');
@@ -44,7 +56,7 @@ async function until(check){for(let i=0;i<100;i++){if(check())return;await wait(
   rpc.setActivity(active({mode:'multiplayer',server:'mc.sotocoming.ru'}));rpc.setEnabled(true);
   await until(()=>received.some(f=>f.value.cmd==='SET_ACTIVITY'));
   assert.equal(attempts,2);assert.equal(connections,1);
-  const first=received.find(f=>f.value.cmd==='SET_ACTIVITY');assert.equal(first.value.args.pid,4321);assert.equal(first.value.args.activity.details,'Sweet Home');
+  const first=received.find(f=>f.value.cmd==='SET_ACTIVITY');assert.equal(first.value.args.pid,4321);assert.equal(first.value.args.activity.details,'На сервере');
   await until(()=>received.some(f=>f.opcode===4));
   rpc.setActivity(active({mode:'menu'}));rpc.setActivity(active({mode:'singleplayer'}));
   await wait(100);assert.equal(received.filter(f=>f.value.cmd==='SET_ACTIVITY').length,1,'Updates must be coalesced and rate-limited');

@@ -32,6 +32,11 @@ public final class PresenceTelemetry {
             if (server == null) state.addProperty("mode", "multiplayer");
             else { state.addProperty("mode", "multiplayer"); state.addProperty("server", server.address); }
         }
+        if (client.world != null) {
+            state.addProperty("dimension", client.world.getRegistryKey().getValue().toString());
+            var network = client.getNetworkHandler();
+            if (network != null && !client.isInSingleplayer()) state.addProperty("players", network.getPlayerList().size());
+        }
         String json = state.toString();
         pending = true;
         WRITER.execute(() -> {

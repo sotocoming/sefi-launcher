@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 import { installFile, renameFile } from './atomic-files';
 
 export async function ensureSefiSkinMod(gameDir: string): Promise<void> {
-  const name = 'sefi-skins-1.2.0.jar';
+  const name = 'sefi-skins-1.3.0.jar';
   const sources = [path.join(process.resourcesPath || '', 'resources', 'mods', name), path.join(app.getAppPath(), 'resources', 'mods', name)];
   const mods = path.join(gameDir, 'mods');
   await fs.mkdir(mods, { recursive: true });

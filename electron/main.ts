@@ -17,6 +17,7 @@ import { prepareGameDirectory } from './minecraft/game-directory';
 import { publicAccount } from './minecraft/account-store';
 import { launchGame } from './minecraft/launcher';
 import { DiscordPresence } from './discord-presence';
+import { loadWindowInterface } from './window-loading';
 import { repairClickBindings, repairResourcePacks } from './minecraft/control-repair';
 
 const isDev = !app.isPackaged;
@@ -108,7 +109,8 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(app.getAppPath(), 'dist/index.html')).catch(() => {
+    void loadWindowInterface(created, path.join(app.getAppPath(), 'dist/index.html'), error => {
+      console.error('[Window] Interface load failed:', (error as Error)?.message || 'unknown');
       dialog.showErrorBox('SEFI Launcher', 'Не удалось открыть интерфейс. Переустановите лаунчер из последнего релиза.');
     });
   }

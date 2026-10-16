@@ -5,6 +5,14 @@ import settings from './discord-presence-config.json';
 
 function clean(value: string): string { return value.replace(/§./g, '').replace(/[\x00-\x1f\x7f]/g, '').trim().slice(0, 120); }
 function address(value: string): string { return value.toLowerCase().replace(/:25565$/, ''); }
+function worldName(dimension?: string): string {
+  if (!dimension) return '';
+  return ({ 'minecraft:overworld': 'Обычный мир', 'minecraft:the_nether': 'Незер', 'minecraft:the_end': 'Энд' } as Record<string, string>)[dimension] || 'Другой мир';
+}
+export function playerCount(count: number): string {
+  const lastTwo = count % 100, last = count % 10;
+  return `${count} ${lastTwo >= 11 && lastTwo <= 14 ? 'игроков' : last === 1 ? 'игрок' : last >= 2 && last <= 4 ? 'игрока' : 'игроков'}`;
+}
 
 export function activityFor(state: GameState, location: GameLocation | null, config: LauncherConfig | undefined,
   started: number): DiscordActivity {
@@ -15,13 +23,15 @@ export function activityFor(state: GameState, location: GameLocation | null, con
   if (state.status === 'running') {
     details = 'Minecraft запущен'; description = 'Выбирает приключение';
     if (location?.mode === 'menu') { details = 'В главном меню'; description = 'Выбирает приключение'; }
-    if (location?.mode === 'singleplayer') { details = 'Одиночный мир'; description = 'Создаёт свою историю'; }
+    if (location?.mode === 'singleplayer') { details = 'Одиночный мир'; description = worldName(location.dimension) || 'Играет в Minecraft'; }
     if (location?.mode === 'multiplayer') {
       const known = [config ? `${config.server.ip}:${config.server.port}` : '',
         ...(config?.server.endpoints?.map(endpoint => endpoint.address) || [])].filter(Boolean);
       const ours = known.some(value => address(value) === address(location.server || ''));
-      details = ours ? name : 'Другой сервер';
-      description = ours ? 'Играет на сервере сообщества' : 'Играет в Minecraft';
+      const endpoint = config?.server.endpoints?.find(value => address(value.address) === address(location.server || ''));
+      const region = ours && endpoint?.label ? clean(endpoint.label).slice(0, 32) : '';
+      details = (ours ? 'На сервере' : 'Другой сервер') + (location.players ? ` · ${playerCount(location.players)}` : '');
+      description = [worldName(location.dimension), region].filter(Boolean).join(' · ') || 'Играет в Minecraft';
     }
   }
   return { type: 0, details, state: description,

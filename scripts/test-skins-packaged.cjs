@@ -2,12 +2,15 @@ const {_electron}=require('C:/Users/Creep/.cache/codex-runtimes/codex-primary-ru
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 (async()=>{
  const root=path.resolve(__dirname,'..'),profile=fs.mkdtempSync(path.join(root,'design','skins-app-'));
+ fs.writeFileSync(path.join(profile,'settings.json'),JSON.stringify({discordPresence:false}));
  fs.writeFileSync(path.join(profile,'accounts.json'),JSON.stringify([{id:'fixture',username:'SEFI_Player',uuid:'00000000-0000-3000-8000-000000000001',type:'offline',communityToken:'local-fixture',active:true}]));
  let app;
  try{
   app=await _electron.launch({executablePath:path.join(root,'release-skins-preview/win-unpacked/SEFI Launcher.exe'),args:['--user-data-dir='+profile],timeout:20000});
   console.log('Connected to packaged Electron');
   await app.evaluate(({dialog,shell,net},fixture)=>{
+   const errors=[];
+   dialog.showErrorBox=(title,message)=>{errors.push({title,message});process.getBuiltinModule('fs').writeFileSync(fixture+'.errors.json',JSON.stringify(errors));};
 
    dialog.showOpenDialog=async()=>({canceled:false,filePaths:[fixture]});
    let skin=null;
@@ -23,7 +26,9 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   },path.join(root,'design/packaged-skin-fixture.png'));
   console.log('Installed isolated API fixture');
   const page=await app.firstWindow();page.setDefaultTimeout(15000);
-  console.log('Renderer connected');
+  await page.waitForLoadState('load');
+  await page.locator('#root > *').first().waitFor();
+  console.log('Renderer loaded and rendered');
   const draft=await page.evaluate(()=>window.electronAPI.chooseSkin());
   assert.equal(draft.filename,'packaged-skin-fixture.png');assert(draft.png.startsWith('iVBORw0KGgo'));
   const skin=await page.evaluate(async png=>{
@@ -33,8 +38,8 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   assert.equal(skin.model,'slim');
   await page.evaluate(()=>window.electronAPI.resetCommunitySkin('fixture'));
   assert.equal(await page.evaluate(()=>window.electronAPI.getCommunitySkin('fixture')),null);
-  const jar=path.join(root,'release-skins-preview/win-unpacked/resources/resources/mods/sefi-skins-1.2.0.jar');
-  assert.deepEqual(fs.readFileSync(jar),fs.readFileSync(path.join(root,'resources/mods/sefi-skins-1.2.0.jar')));
+  const jar=path.join(root,'release-skins-preview/win-unpacked/resources/resources/mods/sefi-skins-1.3.0.jar');
+  assert.deepEqual(fs.readFileSync(jar),fs.readFileSync(path.join(root,'resources/mods/sefi-skins-1.3.0.jar')));
   const asar=require('@electron/asar');
   const archive=path.join(root,'release-skins-preview/win-unpacked/resources/app.asar');
   const discord=JSON.parse(asar.extractFile(archive,path.join('dist-electron','electron','discord-presence-config.json')).toString());
@@ -42,6 +47,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
   assert.equal(discord.imageUrl,require('../electron/discord-presence-config.json').imageUrl);
   assert.deepEqual(fs.readFileSync(path.join(root,'release-skins-preview/win-unpacked/resources/resources/discord/sweet-home.png')),
     fs.readFileSync(path.join(root,'resources/discord/sweet-home.png')));
-  console.log('PASS: packaged Electron app; real preload/IPC, HD PNG save/reset, bundled mod 1.2.0, Sweet Home application ID and original icon.');
+  console.log('PASS: packaged Electron app; real preload/IPC, HD PNG save/reset, bundled mod 1.3.0, Sweet Home application ID and original icon.');
  }finally{if(app){ await Promise.race([app.close(),new Promise(r=>setTimeout(r,3000))]); const child=app.process(); if(child.exitCode===null)child.kill(); }}
+ assert.equal(fs.existsSync(path.join(root,'design/packaged-skin-fixture.png.errors.json')),false,'No interface error should be shown during load or close');
 })().then(()=>process.exit(0)).catch(e=>{console.error(e);process.exit(1);});

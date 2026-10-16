@@ -2,6 +2,7 @@ import { DiscordRpc, type DiscordActivity } from './discord-rpc';
 import type { GameState, LauncherConfig } from '../src/types';
 import type { GameLocation } from './game-presence';
 import settings from './discord-presence-config.json';
+import { DiscordApplicationIcon } from './discord-application-icon';
 
 function clean(value: string): string { return value.replace(/§./g, '').replace(/[\x00-\x1f\x7f]/g, '').trim().slice(0, 120); }
 function address(value: string): string { return value.toLowerCase().replace(/:25565$/, ''); }
@@ -15,7 +16,7 @@ export function playerCount(count: number): string {
 }
 
 export function activityFor(state: GameState, location: GameLocation | null, config: LauncherConfig | undefined,
-  started: number): DiscordActivity {
+  started: number, icon?: string): DiscordActivity {
   const name = clean(config?.server.name || 'Sweet Home');
   let details = 'В лаунчере', description = 'Готовится к приключению';
   if (['checking', 'downloading', 'extracting'].includes(state.status)) { details = 'Готовит Minecraft'; description = 'Собирает всё для игры'; }
@@ -36,19 +37,30 @@ export function activityFor(state: GameState, location: GameLocation | null, con
   }
   return { type: 0, details, state: description,
     ...(state.status === 'running' ? { timestamps: { start: started } } : {}),
-    assets: { large_image: settings.imageUrl || settings.imageKey, large_text: name },
+    assets: { ...(icon ? { large_image: icon } : {}), large_text: name },
     buttons: [{ label: 'Сайт сервера', url: settings.website }] };
 }
 
 export class DiscordPresence {
   private rpc = new DiscordRpc(settings.applicationId);
+  private icon = new DiscordApplicationIcon(settings.applicationId);
+  private enabled = false;
+  private iconTimer?: NodeJS.Timeout;
   private state: GameState = { status: 'idle' };
   private location: GameLocation | null = null;
   private config?: LauncherConfig;
   private started = Math.floor(Date.now() / 1000);
   configure(enabled: boolean, config?: LauncherConfig): void {
     if (config) this.config = config;
+    this.enabled = enabled;
     this.publish(); this.rpc.setEnabled(enabled);
+    if (enabled) {
+      void this.refreshIcon();
+      if (!this.iconTimer) {
+        this.iconTimer = setInterval(() => { void this.refreshIcon(); }, 60000);
+        this.iconTimer.unref();
+      }
+    } else { clearInterval(this.iconTimer); this.iconTimer = undefined; }
   }
   gameState(state: GameState): void {
     if (state.status === 'running' && this.state.status !== 'running') this.started = Math.floor(Date.now() / 1000);
@@ -56,6 +68,7 @@ export class DiscordPresence {
     this.state = state; this.publish();
   }
   gameLocation(location: GameLocation | null): void { this.location = location; this.publish(); }
-  private publish(): void { this.rpc.setActivity(activityFor(this.state, this.location, this.config, this.started)); }
-  close(): void { this.rpc.close(); }
+  private async refreshIcon(): Promise<void> { await this.icon.refresh(); if (this.enabled) this.publish(); }
+  private publish(): void { this.rpc.setActivity(activityFor(this.state, this.location, this.config, this.started, this.icon.url)); }
+  close(): void { this.enabled = false; clearInterval(this.iconTimer); this.iconTimer = undefined; this.rpc.close(); }
 }

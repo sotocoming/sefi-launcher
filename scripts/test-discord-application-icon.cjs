@@ -1,0 +1,33 @@
+const assert=require('node:assert/strict');
+const {DiscordApplicationIcon}=require('../dist-electron/electron/discord-application-icon');
+const {activityFor}=require('../dist-electron/electron/discord-presence');
+const id='1560635017212854363',oldHash='a'.repeat(32),newHash='b'.repeat(32);
+(async()=>{
+ let now=1000,calls=0,reply={id,icon:oldHash},failure=false;
+ const request=async(url,options)=>{
+  calls++;assert.equal(url,`https://discord.com/api/v10/applications/${id}/rpc`);
+  assert.equal(options.redirect,'error');assert.equal(options.headers['Cache-Control'],'no-cache');
+  assert.equal(options.headers.Authorization,undefined);assert(options.signal);
+  if(failure)throw Error('offline');
+  return new Response(JSON.stringify(reply));
+ };
+ const icon=new DiscordApplicationIcon(id,request,()=>now);
+ assert.equal(icon.url,undefined);
+ await Promise.all([icon.refresh(),icon.refresh()]);assert.equal(calls,1);assert(icon.url.includes(oldHash));
+ await icon.refresh();assert.equal(calls,1,'Calls during TTL must reuse the verified result');
+ now+=60000;reply={id,icon:newHash};await icon.refresh();assert(icon.url.includes(newHash));
+ const state={status:'running',pid:1},location={mode:'multiplayer',server:'mc.sotocoming.ru',dimension:'minecraft:the_end',players:12};
+ const config={server:{name:'Sweet Home',ip:'mc.sotocoming.ru',port:25565}};
+ const before=activityFor(state,location,config,123,icon.url);
+ assert(before.assets.large_image.includes(newHash));assert.equal(before.timestamps.start,123);
+ now+=60000;failure=true;await icon.refresh();assert(icon.url.includes(newHash),'Network errors retain last verified icon');
+ now+=60000;failure=false;reply={id,icon:'https://untrusted/icon'};await icon.refresh();assert(icon.url.includes(newHash));
+ now+=60000;reply={id:'wrong',icon:oldHash};await icon.refresh();assert(icon.url.includes(newHash));
+ now+=60000;reply={id,icon:null};await icon.refresh();assert.equal(icon.url,undefined);
+ assert.equal(activityFor(state,location,config,123,icon.url).assets.large_image,undefined,'No fixed old artwork fallback');
+ let cancelled=false;
+ const oversized=new DiscordApplicationIcon(id,async()=>new Response(new ReadableStream({start(c){c.enqueue(new Uint8Array(40000));},cancel(){cancelled=true;}})),()=>now);
+ await oversized.refresh();assert.equal(oversized.url,undefined);assert.equal(cancelled,true);
+ const offline=new DiscordApplicationIcon(id,async()=>{throw Error('offline');},()=>now);await offline.refresh();assert.equal(offline.url,undefined);
+ console.log('PASS: coalesced metadata lookup, no authentication, minute refresh, icon replacement without timer reset, removal, bounded response, invalid metadata and outage handling.');
+})().catch(error=>{console.error(error);process.exitCode=1;});

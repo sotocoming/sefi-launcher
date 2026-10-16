@@ -1,9 +1,8 @@
-import { protectMinecraftHandler, trustedGameUrl } from './game-integrity';
+import { protectMinecraftHandler } from './game-integrity';
 const { Client } = require('minecraft-launcher-core');
 import fs from 'fs/promises';
 import { net } from 'electron';
-import { setTimeout as delay } from 'timers/promises';
-import { atomicWrite } from './atomic-files';
+import { ensureFabricProfile } from './fabric-profile';
 import path from 'path';
 import type { GameState, DownloadProgress } from '../../src/types';
 import { getSettings, getLauncherConfig } from '../config';
@@ -19,39 +18,6 @@ import { getModpackStatus, installModpack, ensureSefiAuthMod } from './modpack';
 import { ensureServersInServersDat } from './servers-dat';
 import { applyFullscreenSetting } from './window-options';
 
-async function ensureFabricProfile(gameDir: string, mcVersion: string, fabricVersion: string): Promise<string> {
-  const customId = `fabric-loader-${fabricVersion}-${mcVersion}`;
-  const versionDir = path.join(gameDir, 'versions', customId);
-  const jsonPath = path.join(versionDir, `${customId}.json`);
-
-  const valid=(data:any)=>{
-    try { return data?.id===customId && data.inheritsFrom===mcVersion
-      && data.mainClass==='net.fabricmc.loader.impl.launch.knot.KnotClient'
-      && Array.isArray(data.libraries) && data.libraries.length>0 && data.libraries.length<100
-      && data.libraries.every((lib:any)=>typeof lib?.name==='string'
-        && /^[a-zA-Z0-9_.+\-]+:[a-zA-Z0-9_.+\-]+:[a-zA-Z0-9_.+\-]+(?::[a-zA-Z0-9_.+\-]+)?$/.test(lib.name)
-        && typeof lib.url==='string' && !!trustedGameUrl(lib.url)); }
-    catch { return false; }
-  };
-  try { if(valid(JSON.parse(await fs.readFile(jsonPath,'utf8'))))return customId; }
-  catch(error:any) { if(error.code!=='ENOENT' && !(error instanceof SyntaxError))throw error; }
-  const url = 'https://meta.fabricmc.net/v2/versions/loader/'+encodeURIComponent(mcVersion)+'/'+encodeURIComponent(fabricVersion)+'/profile/json';
-  let data:any;
-  for(let attempt=0;;attempt++){
-    try {
-      const res = await net.fetch(url,{redirect:'error',signal:AbortSignal.timeout(30000)});
-      if(!res.ok){await res.body?.cancel();throw Object.assign(new Error('HTTP '+res.status),{permanent:res.status>=400 && res.status<500 && ![408,429].includes(res.status)});}
-      data=await res.json();break;
-    } catch(error:any){
-      if(attempt>=2 || error.permanent)throw new Error('Не удалось загрузить профиль Fabric (meta.fabricmc.net): '+(['TimeoutError','AbortError'].includes(error?.name)?'истекло время ожидания сети':error.message)+'. Повторите запуск.');
-      await delay(300*(attempt+1));
-    }
-  }
-  if(!valid(data))throw new Error('Источник вернул некорректный профиль Fabric. Повторите запуск позже.');
-  await atomicWrite(jsonPath,JSON.stringify(data,null,2));
-
-  return customId;
-}
 
 let launchBusy = false;
 let gameRunning = false;

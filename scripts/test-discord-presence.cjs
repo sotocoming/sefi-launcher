@@ -2,6 +2,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=r
 const {rpcFrame,RpcFrames,discordPipe}=require('../dist-electron/electron/discord-rpc');
 const {activityFor}=require('../dist-electron/electron/discord-presence');
 const {watchGamePresence,gameLocation}=require('../dist-electron/electron/game-presence');
+const discordConfig=require('../electron/discord-presence-config.json');
 const config={server:{name:'Sweet Home',ip:'mc.sotocoming.ru',port:25565,endpoints:[{address:'minecraft.sotocoming.ru'}]}};
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(check){for(let i=0;i<100;i++){if(check())return;await wait(30);}throw Error('Timed out');}
@@ -15,7 +16,7 @@ async function until(check){for(let i=0;i<100;i++){if(check())return;await wait(
  const active=(location)=>activityFor({status:'running',pid:10},location,config,123);
  for(const server of ['mc.sotocoming.ru','MC.SOTOCOMING.RU:25565','minecraft.sotocoming.ru']) {
   const a=active({mode:'multiplayer',server});assert.equal(a.details,'Sweet Home');assert.equal(a.timestamps.start,123);
-  assert.equal(a.assets.large_image,'sweet_home');assert(!JSON.stringify({details:a.details,state:a.state}).includes(server));
+  assert.equal(a.assets.large_image,discordConfig.imageUrl||'sweet_home');assert(!JSON.stringify({details:a.details,state:a.state}).includes(server));
  }
  assert.equal(active({mode:'singleplayer'}).details,'Одиночный мир');
  assert.equal(active({mode:'menu'}).details,'В главном меню');

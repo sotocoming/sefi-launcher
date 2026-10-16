@@ -26,7 +26,7 @@ export function activityFor(state: GameState, location: GameLocation | null, con
   }
   return { type: 0, details, state: description,
     ...(state.status === 'running' ? { timestamps: { start: started } } : {}),
-    assets: { large_image: settings.imageKey, large_text: name },
+    assets: { large_image: settings.imageUrl || settings.imageKey, large_text: name },
     buttons: [{ label: 'Сайт сервера', url: settings.website }] };
 }
 

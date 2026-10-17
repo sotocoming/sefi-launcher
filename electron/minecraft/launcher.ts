@@ -1,3 +1,4 @@
+import { ensureClaimsColorFix } from './claims-fix';
 import { startReportBroker } from './report-broker';
 import { ensureReportMod } from './report-mod';
 import { protectMinecraftHandler } from './game-integrity';
@@ -172,6 +173,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   }
   const fullAddress = selectedServer?.address || primaryAddress;
 
+  await ensureClaimsColorFix(settings.gameDirectory);
   await ensureSefiSkinMod(settings.gameDirectory);
   const customArgs: string[] = [`-Dsefi.skinApi=${skinApiOrigin()}`];
   // Remove legacy credential artifacts. The new protocol uses memory-only, connection-bound proofs.

@@ -27,10 +27,10 @@ export const MapPage: React.FC = () => {
   return (
     <motion.div
       key="map"
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -6 }}
-      className="relative flex h-full flex-col overflow-hidden bg-[#09090d] select-none pt-6 px-8 pb-6"
+      exit={{ opacity: 0 }}
+      className="page-view relative flex h-full flex-col overflow-hidden bg-[#09090d] select-none pt-6 px-8 pb-6"
     >
       {/* Top Header Bar */}
       <div className="flex items-center justify-between pb-4">

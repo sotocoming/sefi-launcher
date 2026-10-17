@@ -1,3 +1,4 @@
+import { AccountImage } from '../components/accounts/AccountImage';
 import { SkinEditor } from '../components/accounts/SkinEditor';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -106,10 +107,10 @@ export const AccountsPage: React.FC = () => {
   return (
     <motion.div
       key="accounts"
-      initial={{ opacity: 0, x: 8 }}
+      initial={{ opacity: 0 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -8 }}
-      className="h-full overflow-y-auto px-8 pb-10 pt-6 select-none"
+      exit={{ opacity: 0 }}
+      className="page-view h-full overflow-y-auto px-8 pb-10 pt-6 select-none"
     >
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -137,18 +138,18 @@ export const AccountsPage: React.FC = () => {
         </div>
       )}
       {errorMsg && (
-        <div className="mt-4 rounded-xl border border-red-500/25 bg-red-500/10 p-3.5 text-xs text-red-200 flex items-center gap-2 shadow-lg backdrop-blur-sm">
-          <span className="size-2 rounded-full bg-red-400 animate-ping" />
+        <div role="alert" className="mt-4 rounded-xl border border-red-500/25 bg-red-500/10 p-3.5 text-xs text-red-200 flex items-center gap-2 shadow-lg backdrop-blur-sm">
+          <span className="size-2 rounded-full bg-red-400" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {/* Main Two-Card Tandem with Chain in the Middle */}
-      <div className="mt-8 relative grid grid-cols-[1fr,auto,1fr] items-center gap-4">
+      <div className="account-pair mt-8 relative grid grid-cols-[1fr,auto,1fr] items-center gap-4">
         {/* Left Card: Twitch / SEFI Community */}
         <div className={`relative rounded-2xl border p-6 backdrop-blur-md transition-all duration-300 flex flex-col justify-between min-h-[260px] ${
           commAccount
-            ? 'border-purple-500/40 bg-[#160c24]/90 shadow-[0_4px_30px_rgba(168,85,247,0.12)]'
+            ? 'border-purple-500/40 bg-sefi-surface1'
             : 'border-white/[0.08] bg-[#0e111a]/70 hover:border-purple-500/30'
         }`}>
           <div>
@@ -166,11 +167,7 @@ export const AccountsPage: React.FC = () => {
             {commAccount ? (
               <div className="mt-5">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={commAccount.twitchAvatar || `https://mc-heads.net/avatar/${commAccount.username}/48`}
-                    alt={commAccount.twitchLogin || 'Twitch'}
-                    className="size-12 rounded-xl object-cover border border-purple-400/40 bg-purple-950/40 shadow-md"
-                  />
+                  <AccountImage src={commAccount.twitchAvatar || `https://mc-heads.net/avatar/${commAccount.username}/48`} alt={commAccount.twitchLogin || 'Twitch'} />
                   <div>
                     <div className="text-base font-bold text-white tracking-tight">
                       @{commAccount.twitchLogin || commAccount.username}
@@ -191,10 +188,10 @@ export const AccountsPage: React.FC = () => {
                   }`}>
                     <span className={`size-1.5 rounded-full ${
                       commAccount.whitelistStatus === 'approved'
-                        ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]'
+                        ? 'bg-emerald-400'
                         : commAccount.whitelistStatus === 'rejected'
-                        ? 'bg-rose-400 shadow-[0_0_6px_#f43f5e]'
-                        : 'bg-amber-400 shadow-[0_0_6px_#fbbf24]'
+                        ? 'bg-rose-400'
+                        : 'bg-amber-400'
                     }`} />
                     <span>
                       {commAccount.whitelistStatus === 'approved'
@@ -263,7 +260,7 @@ export const AccountsPage: React.FC = () => {
         <div className="flex flex-col items-center justify-center z-10 px-1">
           {isLinked ? (
             <div className="group relative flex flex-col items-center">
-              <div className="flex size-12 items-center justify-center rounded-2xl border border-emerald-400/40 bg-emerald-500/20 text-emerald-300 shadow-[0_0_25px_rgba(52,211,153,0.3)] backdrop-blur-md">
+              <div className="flex size-12 items-center justify-center rounded-2xl border border-emerald-400/40 bg-emerald-500/20 text-emerald-300 backdrop-blur-md">
                 <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
@@ -280,7 +277,7 @@ export const AccountsPage: React.FC = () => {
               className="group relative flex flex-col items-center cursor-pointer active:scale-95 transition"
               title="Нажмите, чтобы связать аккаунты"
             >
-              <div className="flex size-12 items-center justify-center rounded-2xl border border-fuchsia-400/40 bg-fuchsia-500/20 text-fuchsia-300 shadow-[0_0_20px_rgba(217,70,239,0.3)] animate-pulse hover:bg-fuchsia-500/30">
+              <div className="flex size-12 items-center justify-center rounded-2xl border border-fuchsia-400/40 bg-fuchsia-500/20 text-fuchsia-300 hover:bg-fuchsia-500/30">
                 <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
                   <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
@@ -305,9 +302,9 @@ export const AccountsPage: React.FC = () => {
         {/* Right Card: Minecraft Java Game Profile */}
         <div className={`relative rounded-2xl border p-6 backdrop-blur-md transition-all duration-300 flex flex-col justify-between min-h-[260px] ${
           msAccount
-            ? 'border-blue-500/40 bg-[#0c1424]/90 shadow-[0_4px_30px_rgba(59,130,246,0.12)]'
+            ? 'border-blue-500/40 bg-sefi-surface1'
             : isLicenseBoundOnBackend
-            ? 'border-amber-500/40 bg-[#1f170c]/90 shadow-[0_4px_30px_rgba(245,158,11,0.12)]'
+            ? 'border-amber-500/40 bg-[#1f170c]/90'
             : commAccount
             ? 'border-white/[0.1] bg-[#12141c]/80'
             : 'border-white/[0.08] bg-[#0e111a]/70 hover:border-blue-400/30'
@@ -332,11 +329,7 @@ export const AccountsPage: React.FC = () => {
             {msAccount ? (
               <div className="mt-5">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={`https://mc-heads.net/avatar/${encodeURIComponent(msAccount.username)}/48`}
-                    alt={msAccount.username}
-                    className="size-12 rounded-xl object-cover border border-blue-400/40 bg-black/40 shadow-md"
-                  />
+                  <AccountImage src={`https://mc-heads.net/avatar/${encodeURIComponent(msAccount.username)}/48`} alt={msAccount.username} />
                   <div>
                     <div className="text-base font-bold text-white tracking-tight">
                       {msAccount.username}
@@ -374,11 +367,7 @@ export const AccountsPage: React.FC = () => {
             ) : commAccount ? (
               <div className="mt-5">
                 <div className="flex items-center gap-3">
-                  <img
-                    src={`https://mc-heads.net/avatar/${encodeURIComponent(commAccount.username)}/48`}
-                    alt={commAccount.username}
-                    className="size-12 rounded-xl object-cover border border-white/15 bg-black/40 shadow-md"
-                  />
+                  <AccountImage src={`https://mc-heads.net/avatar/${encodeURIComponent(commAccount.username)}/48`} alt={commAccount.username} />
                   <div>
                     <div className="text-base font-bold text-white tracking-tight">
                       {commAccount.username}

@@ -1,8 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { UserRound } from 'lucide-react';
 import type { Account } from '../../types';
 import { useStore } from '../../store/store';
 
 export function PlayerAvatar({ account }: { account: Account | null }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  useEffect(() => setImageFailed(false), [account?.id, account?.skinUrl]);
   const ref = useRef<HTMLCanvasElement>(null);
   const skin = useStore(state => account ? state.communitySkins[account.id] : undefined);
   const load = useStore(state => state.loadCommunitySkin);
@@ -32,6 +35,7 @@ export function PlayerAvatar({ account }: { account: Account | null }) {
   const fallback = account?.skinUrl?.startsWith('https://mc-heads.net/') ? account.skinUrl
     : `https://mc-heads.net/avatar/${encodeURIComponent(identifier)}/64`;
   return png ? <canvas key={account?.id} ref={ref} width={64} height={64} role="img" aria-label={`Голова ${account?.username || 'игрока'} из скина`} className="size-10 shrink-0 rounded-[9px] bg-white/5 [image-rendering:pixelated]" />
+    : imageFailed ? <span role="img" aria-label={`Аватар ${account?.username || 'игрока'}`} className="flex size-10 shrink-0 items-center justify-center rounded-[9px] bg-sefi-surface2 text-sefi-purple"><UserRound size={22} aria-hidden="true" /></span>
     : <img src={fallback} alt="Голова игрока" className="size-10 shrink-0 rounded-[9px] bg-white/5 object-cover [image-rendering:pixelated]"
-      onError={event => { const image = event.currentTarget; image.onerror = null; if (!image.src.endsWith('/Alex/48')) image.src = 'https://mc-heads.net/avatar/Alex/48'; }} />;
+      onError={() => setImageFailed(true)} />;
 }

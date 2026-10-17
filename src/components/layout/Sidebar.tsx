@@ -31,26 +31,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
     catch { return false; }
   });
   return (
-    <aside className="flex w-[224px] shrink-0 flex-col border-r border-white/[0.06] bg-[#0c0c12] z-30 select-none">
+    <aside className="launcher-sidebar flex w-[224px] shrink-0 flex-col border-r border-white/[0.06] bg-[#14151c] z-30 select-none">
       {/* Brand Header with sefi-logo.png */}
       <div className="flex h-[74px] items-center px-4">
         <div className="flex items-center gap-3 w-full">
           <img
             src={sefiLogo}
             alt="SEFI Launcher"
-            className="h-10 w-auto max-w-[180px] object-contain filter drop-shadow-[0_0_12px_rgba(180,92,255,0.4)]"
+            className="h-10 w-auto max-w-[180px] object-contain "
           />
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="mt-3 space-y-1 px-3">
+      <nav aria-label="Основная навигация" className="mt-3 space-y-1 px-3">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = currentPage === item.id;
 
           return (
             <button
+              aria-current={active ? 'page' : undefined}
               key={item.id}
               onClick={() => onNavigate(item.id)}
               className={`group relative flex h-11 w-full items-center gap-3 rounded-[10px] px-3 text-sm font-medium transition ${
@@ -62,12 +63,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
               {active && (
                 <motion.div
                   layoutId="sidebar-active"
-                  className="absolute left-0 h-5 w-[3px] rounded-full bg-fuchsia-400 shadow-[0_0_14px_#d66cff]"
+                  className="absolute left-0 h-5 w-[3px] rounded-full bg-sefi-purple"
                 />
               )}
 
               <Icon
                 size={18}
+                aria-hidden="true"
                 className={active ? 'text-fuchsia-300' : 'text-white/50 group-hover:text-white/80'}
               />
               <span className="flex-1 text-left">{item.label}</span>
@@ -90,9 +92,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
 
       {/* Active Account Widget */}
       <div className="mt-auto p-3">
-        <div 
+        <button type="button" aria-label="Открыть аккаунты"
           onClick={() => onNavigate('accounts')}
-          className="group cursor-pointer rounded-[14px] border border-white/[0.07] bg-white/[0.035] p-3 transition hover:border-fuchsia-400/30 hover:bg-white/[0.06]"
+          className="w-full text-left group cursor-pointer rounded-[14px] border border-white/[0.07] bg-white/[0.035] p-3 transition hover:border-fuchsia-400/30 hover:bg-white/[0.06]"
         >
           <div className="flex items-center gap-3">
             <PlayerAvatar account={activeAccount} />
@@ -106,12 +108,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
                 <span className={`inline-block size-1.5 rounded-full ${
                   activeAccount?.communityConnected
                     ? activeAccount.whitelistStatus === 'approved'
-                      ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]'
+                      ? 'bg-emerald-400'
                       : activeAccount.whitelistStatus === 'rejected'
-                      ? 'bg-rose-400 shadow-[0_0_6px_#f43f5e]'
-                      : 'bg-amber-400 shadow-[0_0_6px_#fbbf24]'
+                      ? 'bg-rose-400'
+                      : 'bg-amber-400'
                     : activeAccount
-                    ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]'
+                    ? 'bg-emerald-400'
                     : 'bg-zinc-500'
                 }`} />
                 <span className={
@@ -149,10 +151,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
                 : 'Офлайн'}
             </span>
             <span className="text-[10px] text-white/30 group-hover:text-white/60 transition">
-              Сменить →
+              Управление
             </span>
           </div>
-        </div>
+        </button>
         <p className="mt-3 px-1 text-[11px] leading-none text-white/40 select-text" title="Версия лаунчера">
           SEFI Launcher v{launcherVersion}
         </p>

@@ -99,10 +99,10 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
   return (
     <motion.div
       key="news"
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -6 }}
-      className="relative flex h-full flex-col overflow-hidden bg-[#09090d] select-none pt-6 px-8 pb-6"
+      exit={{ opacity: 0 }}
+      className="page-view relative flex h-full flex-col overflow-hidden bg-[#09090d] select-none pt-6 px-8 pb-6"
     >
       {/* Header bar */}
       <div className="flex items-center justify-between pb-4">
@@ -137,6 +137,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
           return (
             <button
               key={filter}
+              aria-pressed={active}
               onClick={() => setActiveFilter(filter)}
               className={`rounded-lg px-3 py-1 text-xs font-medium transition ${
                 active
@@ -169,7 +170,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
             return (
               <GlassCard
                 key={item.id}
-                className="overflow-hidden p-0 border border-white/[0.08] hover:border-white/[0.15] transition"
+                className="news-entry overflow-hidden p-0"
               >
                 <div className="flex flex-col md:flex-row">
                   {item.image && (
@@ -182,10 +183,10 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
                     </div>
                   )}
 
-                  <div className="flex flex-1 flex-col justify-between p-5">
+                  <div className="min-w-0 flex flex-1 flex-col justify-between p-5">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className={`rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${tagInfo.border} ${tagInfo.color}`}>
+                        <span className={`rounded-md border px-2 py-0.5 text-xs font-semibold ${tagInfo.border} ${tagInfo.color}`}>
                           {tagInfo.label}
                         </span>
                         <div className="flex items-center gap-1 text-[11px] text-white/40">
@@ -195,10 +196,9 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
                       </div>
 
                       <h2
-                        onClick={() => handleOpenExternal(item.id)}
                         className="text-base font-bold text-white hover:text-fuchsia-300 transition cursor-pointer mb-2"
                       >
-                        {item.title}
+                        <button type="button" className="text-left" onClick={() => handleOpenExternal(item.id)}>{item.title}</button>
                       </h2>
 
                       <NewsMarkdown source={item.body} collapsed={!isExpanded && isLong} />
@@ -206,6 +206,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
                       {isLong && (
                         <button
                           type="button"
+                          aria-expanded={isExpanded}
                           onClick={() => toggleExpand(item.id)}
                           className="mt-2.5 inline-flex items-center gap-1 text-xs font-medium text-fuchsia-300/90 hover:text-fuchsia-200 transition cursor-pointer"
                         >
@@ -220,10 +221,12 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
                         <button
                           disabled={!authorized || busy}
                           onClick={() => handleReact(item.id, 'like')}
+                          aria-pressed={currentVote === 'like'}
+                          aria-label={currentVote === 'like' ? 'Снять лайк' : 'Поставить лайк'}
                           title={currentVote === 'like' ? 'Снять лайк' : 'Поставить лайк'}
                           className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
                             currentVote === 'like'
-                              ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400/40 shadow-[0_0_12px_rgba(52,211,153,0.25)]'
+                              ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400/40'
                               : 'bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white border border-white/[0.06]'
                           }`}
                         >

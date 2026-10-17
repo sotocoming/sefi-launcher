@@ -60,7 +60,7 @@ export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAcc
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="rounded-[18px] border border-fuchsia-300/25 bg-[#16101d]/90 p-4 shadow-[0_12px_40px_rgba(177,72,255,0.18)] backdrop-blur-xl"
+        role="status" aria-live="polite" className="sefi-panel p-4"
       >
         <div className="flex items-center">
           <div className="flex size-9 items-center justify-center rounded-xl bg-fuchsia-500/20 text-fuchsia-300">
@@ -83,10 +83,10 @@ export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAcc
 
         <div className="mt-3.5 h-2 overflow-hidden rounded-full bg-white/[0.08]">
           <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: isExtracting ? '100%' : `${percentage}%` }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: isExtracting ? 1 : Math.max(0, Math.min(1, percentage / 100)) }}
             transition={{ ease: 'linear', duration: 0.2 }}
-            className="h-full rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-400"
+            className="h-full origin-left rounded-full bg-sefi-purple"
           />
         </div>
       </motion.div>
@@ -114,34 +114,14 @@ export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAcc
         whileTap={!isDisabled ? { scale: 0.99 } : {}}
         onClick={handlePlay}
         disabled={isDisabled}
-        className={`group relative h-[86px] w-full overflow-hidden rounded-[18px] border transition-all duration-300 ${
-          isDisabled
-            ? 'border-white/[0.06] bg-[#1a1722]/60 cursor-not-allowed opacity-75'
-            : isError
-            ? 'border-red-500/40 bg-gradient-to-r from-rose-900 to-red-600 shadow-[0_12px_40px_rgba(255,80,80,0.25)]'
-            : 'border-white/20 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-purple-500 shadow-[0_18px_50px_rgba(178,73,255,0.32)] hover:shadow-[0_20px_60px_rgba(178,73,255,0.45)]'
-        }`}
+        className={`launch-button ${isError ? 'launch-button-error' : ''}`}
       >
-        {/* Soft gloss overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/15 to-transparent opacity-60" />
-
-        {/* Shimmer light sweep on hover */}
-        {!isDisabled && (
-          <div className="absolute -left-32 top-0 h-full w-48 rotate-12 bg-white/20 blur-3xl transition duration-700 group-hover:translate-x-[750px]" />
-        )}
-
         <div className="relative flex items-center justify-start gap-4 px-6 h-full">
           <div
-            className={`flex size-11 shrink-0 items-center justify-center rounded-full shadow-lg ${
-              isDisabled
-                ? 'bg-white/10 text-white/40'
-                : isError
-                ? 'bg-white text-red-600'
-                : 'bg-white text-fuchsia-600 shadow-fuchsia-900/40'
-            }`}
+            className="launch-icon flex size-11 shrink-0 items-center justify-center"
           >
             {isLaunching ? (
-              <Loader2 size={20} className="animate-spin text-fuchsia-600" />
+              <Loader2 size={20} className="animate-spin" />
             ) : isError ? (
               <AlertCircle size={22} />
             ) : (
@@ -150,7 +130,7 @@ export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAcc
           </div>
 
           <div className="text-left min-w-0 flex-1">
-            <div className="text-[22px] font-black tracking-[0.06em] text-white leading-tight">
+            <div className="launch-title leading-tight">
               {isLaunching
                 ? 'ЗАПУСК...'
                 : isRunning
@@ -163,7 +143,7 @@ export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAcc
                 ? 'НУЖНА ЛИЦЕНЗИЯ'
                 : 'ИГРАТЬ'}
             </div>
-            <div className="mt-0.5 text-[12px] font-medium text-white/70 tracking-wide truncate">
+            <div className="launch-detail mt-0.5 font-medium truncate">
               {getSubtext()}
             </div>
           </div>

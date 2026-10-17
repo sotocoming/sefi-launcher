@@ -6,11 +6,14 @@ interface WindowButtonProps {
   icon: typeof Minus;
   onClick: () => void;
   danger?: boolean;
+  label: string;
 }
 
-const WindowButton: React.FC<WindowButtonProps> = ({ icon: Icon, onClick, danger }) => {
+const WindowButton: React.FC<WindowButtonProps> = ({ icon: Icon, onClick, danger, label }) => {
   return (
     <button
+      aria-label={label}
+      title={label}
       onClick={onClick}
       className={`titlebar-no-drag flex size-8 items-center justify-center rounded-lg text-white/40 transition ${
         danger
@@ -46,7 +49,7 @@ export const TitleBar: React.FC = () => {
 
   return (
     <header className="titlebar-drag relative z-50 flex h-11 w-full shrink-0 items-center justify-between border-b border-white/[0.04] bg-[#09090d]/80 backdrop-blur-md px-3 select-none">
-      <div className="flex-1 pointer-events-none" />
+      <span className="flex-1 pointer-events-none pl-3 text-xs text-sefi-textSecondary">SEFI Launcher</span>
 
       {/* Right controls area: Update status + window action buttons */}
       <div className="flex items-center gap-3 titlebar-no-drag">
@@ -63,18 +66,18 @@ export const TitleBar: React.FC = () => {
             onClick={installLauncherUpdate}
             disabled={!['idle','error'].includes(gameState.status)}
             title={!['idle','error'].includes(gameState.status) ? 'Установите обновление после выхода из игры' : 'Установить обновление'}
-            className="flex items-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-500/20 px-3.5 py-1 text-xs font-semibold text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)] transition hover:bg-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            className="flex items-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-500/20 px-3.5 py-1 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
-            <Sparkles size={13} className="text-emerald-300 animate-pulse" />
+            <Sparkles size={13} className="text-emerald-300" />
             <span>Обновление готово! <b>Перезапустить</b></span>
           </button>
         )}
 
         {/* Window Controls */}
         <div className="flex items-center gap-1">
-          <WindowButton icon={Minus} onClick={handleMinimize} />
-          <WindowButton icon={Square} onClick={handleMaximize} />
-          <WindowButton icon={X} onClick={handleClose} danger />
+          <WindowButton label="Свернуть окно" icon={Minus} onClick={handleMinimize} />
+          <WindowButton label="Развернуть или восстановить" icon={Square} onClick={handleMaximize} />
+          <WindowButton label="Закрыть окно" icon={X} onClick={handleClose} danger />
         </div>
       </div>
     </header>

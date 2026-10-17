@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Server, Users, Activity, Wifi, Copy, Check } from 'lucide-react';
+import { Server, Users, Wifi, Copy, Check } from 'lucide-react';
 import { GlassCard } from '../ui/GlassCard';
 import { useStore } from '../../store/store';
 
 export const ServerStatusCard: React.FC = () => {
   const { serverStatus, launcherConfig, settings, updateSettings, gameState } = useStore();
 
-  const isOnline = serverStatus?.online ?? true;
+  const isOnline = serverStatus?.online === true;
+  const checking = !serverStatus;
   const playersOnline = serverStatus?.players ?? 0;
   const playersMax = serverStatus?.maxPlayers ?? 20;
   const ip = launcherConfig?.server?.ip || 'minecraft.sotocoming.ru';
@@ -21,39 +22,36 @@ export const ServerStatusCard: React.FC = () => {
   useEffect(() => { if (!copied) return; const timer = setTimeout(() => setCopied(null), 1800); return () => clearTimeout(timer); }, [copied]);
 
   return (
-    <GlassCard className="p-3.5 flex flex-col justify-between gap-1 h-[192px]">
+    <GlassCard className="connection-panel">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_12px_rgba(52,211,153,0.1)]">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <Server size={17} />
           </div>
 
           <div className="min-w-0">
-            <div className="text-[10px] text-white/40 uppercase tracking-wider font-medium">Сервер сообщества</div>
-            <div className="text-xs font-bold text-white tracking-wide truncate max-w-[150px]" title={name}>
+            <div className="text-xs text-sefi-textSecondary font-medium">Сервер сообщества</div>
+            <div className="text-base font-semibold text-white truncate max-w-[220px]" title={name}>
               {name}
             </div>
           </div>
         </div>
 
-        <div className={`flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold shrink-0 ${isOnline ? 'bg-emerald-400/10 border-emerald-400/20 text-emerald-300' : 'bg-rose-400/10 border-rose-400/20 text-rose-300'}`}>
+        <div className={`flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold shrink-0 ${checking ? 'bg-white/5 border-white/20 text-sefi-textSecondary' : isOnline ? 'bg-emerald-400/10 border-emerald-400/20 text-emerald-300' : 'bg-rose-400/10 border-rose-400/20 text-rose-300'}`}>
           <span className="relative flex size-1.5">
-            {isOnline && (
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-            )}
             <span
               className={`relative inline-flex size-1.5 rounded-full ${
                 isOnline ? 'bg-emerald-400' : 'bg-rose-400'
               }`}
             />
           </span>
-          {isOnline ? 'Онлайн' : 'Оффлайн'}
+          {checking ? 'Проверка…' : isOnline ? 'Онлайн' : 'Оффлайн'}
         </div>
       </div>
 
       <div className="space-y-1 shrink-0" role="radiogroup" aria-label="Адрес сервера для подключения">
         {endpoints.map(endpoint => <div key={endpoint.id}
-          className={`group flex h-[22px] min-w-0 items-center rounded-md border transition-colors ${autoConnect && selectedId === endpoint.id ? 'border-fuchsia-400/20 bg-fuchsia-400/[0.07]' : 'border-transparent bg-white/[0.025] hover:bg-white/[0.06]'}`}>
+          className={`server-endpoint group flex h-8 min-w-0 items-center rounded-md border transition-colors ${autoConnect && selectedId === endpoint.id ? 'border-fuchsia-400/20 bg-fuchsia-400/[0.07]' : 'border-transparent bg-white/[0.025] hover:bg-white/[0.06]'}`}>
           <button type="button" role="radio" aria-checked={autoConnect && selectedId === endpoint.id}
             disabled={busy || !autoConnect} title={`Подключение через ${endpoint.label}: ${endpoint.address}`}
             aria-label={`${endpoint.label}: ${endpoint.address}`}
@@ -62,18 +60,18 @@ export const ServerStatusCard: React.FC = () => {
             <span aria-hidden="true" className={`${autoConnect ? 'visible' : 'invisible'} flex size-2.5 shrink-0 items-center justify-center rounded-full border ${selectedId === endpoint.id ? 'border-fuchsia-300/70' : 'border-white/20'}`}>
               {selectedId === endpoint.id && <span className="size-1 rounded-full bg-fuchsia-300" />}
             </span>
-            <span className="w-7 shrink-0 truncate text-[8px] font-semibold uppercase text-fuchsia-300/80">{endpoint.label}</span>
-            <code className="min-w-0 flex-1 truncate text-[9px] leading-4 text-white/75">{copied === endpoint.id ? 'Скопировано' : endpoint.address}</code>
+            <span className="w-12 shrink-0 truncate text-xs font-semibold text-fuchsia-300/80">{endpoint.label}</span>
+            <code className="min-w-0 flex-1 truncate text-xs leading-4 text-white/75">{copied === endpoint.id ? 'Скопировано' : endpoint.address}</code>
           </button>
           <button type="button" title="Скопировать адрес" aria-label={`Скопировать ${endpoint.label}: ${endpoint.address}`}
-            className="flex h-full w-6 shrink-0 items-center justify-center rounded-md text-white/30 hover:text-white/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-fuchsia-300"
+            className="flex h-full w-8 shrink-0 items-center justify-center rounded-md text-white/30 hover:text-white/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-fuchsia-300"
             onClick={async () => { try { await navigator.clipboard.writeText(endpoint.address); setCopied(endpoint.id); } catch { setCopied(null); } }}>
             {copied === endpoint.id ? <Check size={10} className="text-emerald-300" /> : <Copy size={10} />}
           </button>
         </div>)}
       </div>
 
-      <label className="flex h-4 shrink-0 cursor-pointer items-center justify-between gap-2 text-[9px] text-white/50" title="После запуска Minecraft подключаться к выбранному адресу">
+      <label className="flex min-h-8 shrink-0 cursor-pointer items-center justify-between gap-2 text-xs text-sefi-textSecondary" title="После запуска Minecraft подключаться к выбранному адресу">
         <span>Подключаться сразу</span>
         <input type="checkbox" checked={autoConnect} disabled={busy}
           className="peer sr-only"
@@ -83,33 +81,14 @@ export const ServerStatusCard: React.FC = () => {
         </span>
       </label>
 
-      <div className="grid grid-cols-3 gap-2 pt-1.5 border-t border-white/[0.05]">
-        <div className="rounded-lg bg-black/30 border border-white/[0.04] px-2 py-1 text-center">
-          <div className="flex items-center justify-center gap-1 text-[9px] text-white/40 font-medium">
-            <Users size={10} />
-            <span>Игроки</span>
-          </div>
-          <div className="mt-0.5 text-[11px] font-bold text-white/90">
-            {playersOnline} / {playersMax}
-          </div>
-        </div>
-
-        <div className="rounded-lg bg-black/30 border border-white/[0.04] px-2 py-1 text-center">
-          <div className="flex items-center justify-center gap-1 text-[9px] text-white/40 font-medium">
-            <Activity size={10} />
-            <span>Пинг</span>
-          </div>
-          <div className="mt-0.5 text-[11px] font-bold text-emerald-300">
-            ~35 ms
-          </div>
-        </div>
-
-        <div className="rounded-lg bg-black/30 border border-white/[0.04] px-2 py-1 text-center">
-          <div className="flex items-center justify-center gap-1 text-[9px] text-white/40 font-medium">
+      <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-white/[0.05]">
+        <div className="flex items-center gap-2 text-sm text-sefi-textSecondary"><Users size={16} aria-hidden="true" /><span>Игроки <strong className="text-white tabular-nums">{checking || !isOnline ? '—' : `${playersOnline} / ${playersMax}`}</strong></span></div>
+        <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center gap-1 text-xs text-sefi-textSecondary font-medium">
             <Wifi size={10} />
             <span>Порт</span>
           </div>
-          <div className="mt-0.5 text-[11px] font-bold text-white/90">
+          <div className="text-sm font-semibold text-white/90">
             {port}
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, MotionConfig } from 'framer-motion';
 import { useStore } from './store/store';
 import { Sidebar } from './components/layout/Sidebar';
 import { TitleBar } from './components/layout/TitleBar';
@@ -49,13 +49,15 @@ export default function App() {
   }, [initStore, refreshServerStatus, setGameState, setDownloadProgress, setUpdateInfo]);
 
   return (
-    <div className="h-screen w-screen bg-[#060608] flex items-center justify-center p-0 overflow-hidden text-sefi-textPrimary font-sans">
-      <div className="relative flex h-full w-full overflow-hidden border border-white/[0.07] bg-[#09090d] shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
+    <MotionConfig reducedMotion="user" transition={{ duration: 0.18 }}>
+    <div className="launcher-shell h-screen w-screen bg-sefi-bg flex items-center justify-center p-0 overflow-hidden text-sefi-textPrimary font-sans">
+      <div className="relative flex h-full w-full overflow-hidden border border-white/[0.07] bg-sefi-bg shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
+        <a href="#main-content" className="skip-link">К содержимому</a>
         {/* Navigation Sidebar */}
         <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
 
         {/* Content View with Frameless TitleBar */}
-        <main className="relative min-w-0 flex-1 overflow-hidden flex flex-col bg-[#09090d]">
+        <main id="main-content" tabIndex={-1} className="relative min-w-0 flex-1 overflow-hidden flex flex-col bg-sefi-bg">
           <TitleBar />
 
           <div className="relative flex-1 overflow-hidden">
@@ -70,5 +72,6 @@ export default function App() {
         </main>
       </div>
     </div>
+    </MotionConfig>
   );
 }

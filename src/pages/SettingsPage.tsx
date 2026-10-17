@@ -164,10 +164,10 @@ export const SettingsPage: React.FC = () => {
   return (
     <motion.div
       key="settings"
-      initial={{ opacity: 0, x: 8 }}
+      initial={{ opacity: 0 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -8 }}
-      className="h-full overflow-y-auto px-8 pb-10 pt-6 select-none"
+      exit={{ opacity: 0 }}
+      className="page-view h-full overflow-y-auto px-8 pb-10 pt-6 select-none"
     >
       <div>
         <h1 className="text-2xl font-bold text-white tracking-tight">Настройки</h1>
@@ -176,10 +176,10 @@ export const SettingsPage: React.FC = () => {
         </p>
       </div>
 
-      <div className="mt-6 space-y-4 max-w-[800px]">
+      <div className="settings-sections mt-6">
         <GlassCard className="p-5">
-          <div className="text-sm font-semibold text-white">Сборка и загрузка</div>
-          <p className="mt-2 text-xs leading-relaxed text-white/60">
+          <div className="text-base font-semibold text-white">Сборка и загрузка</div>
+          <p className="mt-2 text-sm leading-relaxed text-white/60">
             Моды загружаются с Modrinth, затем с CurseForge и доступного зеркала SEFI.
             Если архив уже скачан, выберите официальный ZIP Homestead 1.3.7: проверим версию и состав.
             ZIP CurseForge содержит настройки и часть модов; остальные загрузятся при запуске.
@@ -188,12 +188,12 @@ export const SettingsPage: React.FC = () => {
             className="mt-4 rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-4 py-2 text-sm text-fuchsia-200 disabled:opacity-50">
             {importing ? 'Проверяем архив…' : 'Импортировать ZIP сборки'}
           </button>
-          {importMessage && <p role={importError ? 'alert' : 'status'} className={`mt-3 text-xs leading-relaxed select-text ${importError ? 'text-rose-300' : 'text-emerald-300'}`}>{importMessage}</p>}
+          {importMessage && <p role={importError ? 'alert' : 'status'} className={`mt-3 text-sm leading-relaxed select-text ${importError ? 'text-rose-300' : 'text-emerald-300'}`}>{importMessage}</p>}
         </GlassCard>
 
         <GlassCard className="p-5">
-          <div className="text-sm font-semibold text-white">Управление в Minecraft</div>
-          <p className="mt-2 text-xs leading-relaxed text-white/60">
+          <div className="text-base font-semibold text-white">Управление в Minecraft</div>
+          <p className="mt-2 text-sm leading-relaxed text-white/60">
             Если Shift или Ctrl блокируют ЛКМ либо ломание продолжается после отпускания кнопки,
             отключите пять конфликтующих сочетаний JEI. Остальные настройки управления сохранятся.
           </p>
@@ -203,21 +203,21 @@ export const SettingsPage: React.FC = () => {
           </button>
           <button type="button" disabled={playing || repairingControls || !settings} onClick={handleRepairResources}
             className="ml-2 mt-4 rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-4 py-2 text-sm text-fuchsia-200 disabled:opacity-50">Вернуть интерфейс сборки</button>
-          <p className="mt-2 text-xs text-white/40">Перед исправлением закройте Minecraft. Сочетания можно назначить заново в игре.</p>
-          {controlsMessage && <p role={controlsError ? 'alert' : 'status'} className={`mt-3 text-xs leading-relaxed select-text ${controlsError ? 'text-rose-300' : 'text-emerald-300'}`}>{controlsMessage}</p>}
+          <p className="mt-2 text-sm text-white/40">Перед исправлением закройте Minecraft. Сочетания можно назначить заново в игре.</p>
+          {controlsMessage && <p role={controlsError ? 'alert' : 'status'} className={`mt-3 text-sm leading-relaxed select-text ${controlsError ? 'text-rose-300' : 'text-emerald-300'}`}>{controlsMessage}</p>}
         </GlassCard>
 
         {/* Memory & Performance */}
         <GlassCard className="p-5">
           <div className="flex items-center gap-2.5">
             <MemoryStick size={18} className="text-fuchsia-300" />
-            <div className="text-sm font-semibold text-white">Память и производительность</div>
+            <div className="text-base font-semibold text-white">Память и производительность</div>
           </div>
 
           <div className="mt-5 flex items-center justify-between">
             <div>
               <div className="text-sm font-medium text-white/90">Выделенная оперативная память</div>
-              <div className="mt-0.5 text-xs text-white/40">
+              <div className="mt-0.5 text-sm text-white/40">
                 Для модпака Homestead Cozy рекомендуется 4–8 ГБ
               </div>
             </div>
@@ -228,6 +228,8 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           <input
+            aria-label="Выделенная оперативная память"
+            aria-valuetext={`${ram} ГБ`}
             type="range"
             min={2}
             max={16}
@@ -248,7 +250,7 @@ export const SettingsPage: React.FC = () => {
         <GlassCard className="p-5">
           <div className="flex items-center gap-2.5">
             <Coffee size={18} className="text-fuchsia-300" />
-            <div className="text-sm font-semibold text-white">Java и пути</div>
+            <div className="text-base font-semibold text-white">Java и пути</div>
           </div>
 
           <div className="mt-4 space-y-4 divide-y divide-white/[0.05]">
@@ -260,7 +262,7 @@ export const SettingsPage: React.FC = () => {
                     {javaBusy ? 'Подготовка…' : !javaStatus ? 'Проверяем…' : javaStatus.status === 'ready' ? 'Java ' + javaStatus.version + ' · 64 бит' : javaStatus.status === 'missing' ? 'Установится при запуске' : 'Нужна проверка'}
                   </span>
                 </div>
-                <div className="mt-1 text-xs text-white/35 font-mono truncate max-w-[400px]">
+                <div className="mt-1 text-sm text-white/35 font-mono truncate max-w-[400px]">
                   {javaPath}
                 </div>
               </div>
@@ -271,7 +273,7 @@ export const SettingsPage: React.FC = () => {
                     onClick={handleResetJava}
                     disabled={playing || javaBusy || !settings}
                     title="Использовать отдельную Java SEFI"
-                    className="h-8 rounded-[8px] border border-white/[0.08] bg-white/[0.04] px-2.5 text-xs text-white/50 transition hover:bg-white/[0.08] hover:text-white cursor-pointer"
+                    className="h-8 rounded-[8px] border border-white/[0.08] bg-white/[0.04] px-2.5 text-sm text-white/50 transition hover:bg-white/[0.08] hover:text-white cursor-pointer"
                   >
                     Java SEFI
                   </button>
@@ -279,7 +281,7 @@ export const SettingsPage: React.FC = () => {
                 <button
                   disabled={playing || javaBusy || !settings}
                   onClick={handleSelectJava}
-                  className="h-8 rounded-[8px] border border-white/[0.08] bg-white/[0.04] px-3 text-xs text-white/80 transition hover:bg-white/[0.08] hover:text-white cursor-pointer"
+                  className="h-8 rounded-[8px] border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-white/80 transition hover:bg-white/[0.08] hover:text-white cursor-pointer"
                 >
                   Обзор...
                 </button>
@@ -287,12 +289,12 @@ export const SettingsPage: React.FC = () => {
             </div>
 
             <div className="pt-4 space-y-2">
-              <p className="text-xs text-white/60 leading-relaxed">{settings?.javaPath ? 'Выбрана своя Java. Проверяем версию, разрядность и запуск с выделенной памятью. Чтобы перейти на автоматическую установку, нажмите «Java SEFI».' : 'SEFI скачает отдельную Java 21 для этой сборки. Она хранится в папке лаунчера и проверяется перед запуском игры.'}</p>
+              <p className="text-sm text-white/60 leading-relaxed">{settings?.javaPath ? 'Выбрана своя Java. Проверяем версию, разрядность и запуск с выделенной памятью. Чтобы перейти на автоматическую установку, нажмите «Java SEFI».' : 'SEFI скачает отдельную Java 21 для этой сборки. Она хранится в папке лаунчера и проверяется перед запуском игры.'}</p>
               {javaStatus?.path && <p className="text-[11px] font-mono text-white/40 break-all select-text">{javaStatus.path}</p>}
-              <p role="status" className="text-xs text-white/60">{javaTask || javaStatus?.message}</p>
-              {javaError && <p role="alert" className="text-xs text-rose-300 whitespace-pre-wrap select-text">{javaError}</p>}
+              <p role="status" className="text-sm text-white/60">{javaTask || javaStatus?.message}</p>
+              {javaError && <p role="alert" className="text-sm text-rose-300 whitespace-pre-wrap select-text">{javaError}</p>}
               {!settings?.javaPath && <button disabled={playing || javaBusy || !settings} onClick={handlePrepareJava}
-                className="rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-3 py-2 text-xs text-fuchsia-200 disabled:opacity-50">
+                className="rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-3 py-2 text-sm text-fuchsia-200 disabled:opacity-50">
                 {javaBusy ? 'Подготовка Java…' : javaStatus?.status === 'ready' ? 'Проверить Java SEFI' : 'Скачать Java SEFI'}
               </button>}
             </div>
@@ -300,7 +302,7 @@ export const SettingsPage: React.FC = () => {
             <div className="pt-4 flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium text-white/90">Папка установки клиента</div>
-                <div className="mt-1 text-xs text-white/35 font-mono truncate max-w-[400px]">
+                <div className="mt-1 text-sm text-white/35 font-mono truncate max-w-[400px]">
                   {gameDir}
                 </div>
               </div>
@@ -310,7 +312,7 @@ export const SettingsPage: React.FC = () => {
                   disabled={playing || javaBusy || !settings}
                   onClick={handleSelectGameDir}
                   title="Выбрать другую папку для установки игры"
-                  className="h-8 rounded-[8px] border border-white/[0.08] bg-white/[0.04] px-3 text-xs text-white/80 transition hover:bg-white/[0.08] hover:text-white cursor-pointer"
+                  className="h-8 rounded-[8px] border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-white/80 transition hover:bg-white/[0.08] hover:text-white cursor-pointer"
                 >
                   Изменить...
                 </button>
@@ -318,7 +320,7 @@ export const SettingsPage: React.FC = () => {
                   disabled={!settings}
                   onClick={handleOpenGameDir}
                   title="Открыть папку в проводнике Windows"
-                  className="flex h-8 items-center gap-1.5 rounded-[8px] border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 text-xs text-fuchsia-200 transition hover:bg-fuchsia-500/20 hover:text-white cursor-pointer"
+                  className="flex h-8 items-center gap-1.5 rounded-[8px] border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 text-sm text-fuchsia-200 transition hover:bg-fuchsia-500/20 hover:text-white cursor-pointer"
                 >
                   <FolderOpen size={13} />
                   <span>Открыть папку</span>
@@ -326,13 +328,13 @@ export const SettingsPage: React.FC = () => {
               </div>
             </div>
           </div>
-          <p className="mt-3 text-xs text-white/40">При выборе целого диска создадим на нём папку SEFI Minecraft.</p>
-          {directoryError && <p role="alert" className="mt-2 text-xs text-rose-300 whitespace-pre-wrap select-text">{directoryError}</p>}
+          <p className="mt-3 text-sm text-white/40">При выборе целого диска создадим на нём папку SEFI Minecraft.</p>
+          {directoryError && <p role="alert" className="mt-2 text-sm text-rose-300 whitespace-pre-wrap select-text">{directoryError}</p>}
         </GlassCard>
 
         <GlassCard className="p-5">
-          <h2 className="text-sm font-semibold text-white">Статус в Discord</h2>
-          <p className="mt-2 text-xs leading-5 text-white/50">Показывать Sweet Home, время игры и иконку сервера в профиле Discord. Статус меняется, когда вы выходите в меню или открываете одиночный мир.</p>
+          <h2 className="text-base font-semibold text-white">Статус в Discord</h2>
+          <p className="mt-2 text-sm leading-5 text-white/50">Показывать Sweet Home, время игры и иконку сервера в профиле Discord. Статус меняется, когда вы выходите в меню или открываете одиночный мир.</p>
           <button type="button" role="switch" aria-checked={settings?.discordPresence !== false}
             aria-label="Показывать игру в Discord" disabled={!settings}
             onClick={() => { if (settings) void updateSettings({ ...settings, discordPresence: settings.discordPresence === false }); }}
@@ -349,11 +351,12 @@ export const SettingsPage: React.FC = () => {
         <GlassCard className="p-5">
           <div className="flex items-center gap-2.5">
             <Monitor size={18} className="text-fuchsia-300" />
-            <div className="text-sm font-semibold text-white">Экран и запуск</div>
+            <div className="text-base font-semibold text-white">Экран и запуск</div>
           </div>
 
           <div className="mt-4 space-y-3">
             <button
+              role="switch" aria-checked={fullscreen}
               onClick={handleToggleFullscreen}
               className="flex w-full items-center justify-between py-1.5 text-sm cursor-pointer"
             >
@@ -371,6 +374,7 @@ export const SettingsPage: React.FC = () => {
             </button>
 
             <button
+              role="switch" aria-checked={closeAfterLaunch}
               onClick={handleToggleClose}
               className="flex w-full items-center justify-between py-1.5 text-sm cursor-pointer"
             >
@@ -390,12 +394,12 @@ export const SettingsPage: React.FC = () => {
         </GlassCard>
 
         <GlassCard className="p-5">
-          <div className="flex items-center gap-2.5"><RotateCcw size={18} className="text-fuchsia-300" /><h2 className="text-sm font-semibold text-white">Обновления лаунчера</h2></div>
-          <p className="mt-2 text-xs text-white/50">Автоматически раз в 2 часа. Во время игры проверки приостановлены.</p>
-          <p role="status" className="mt-3 text-xs text-white/70">{updateText}</p>
+          <div className="flex items-center gap-2.5"><RotateCcw size={18} className="text-fuchsia-300" /><h2 className="text-base font-semibold text-white">Обновления лаунчера</h2></div>
+          <p className="mt-2 text-sm text-white/50">Автоматически раз в 2 часа. Во время игры проверки приостановлены.</p>
+          <p role="status" className="mt-3 text-sm text-white/70">{updateText}</p>
           <div className="mt-4 flex flex-wrap gap-3">
-            <button type="button" onClick={checkUpdates} disabled={playing || checkingUpdate || ['checking','available','downloading'].includes(updateInfo?.status || '')} className="rounded-lg border border-fuchsia-400/30 bg-fuchsia-500/10 px-4 py-2 text-xs text-fuchsia-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-fuchsia-500/20">{checkingUpdate ? 'Проверяем…' : 'Проверить обновления'}</button>
-            {updateInfo?.status === 'ready' && <button type="button" onClick={installLauncherUpdate} disabled={playing} className="rounded-lg bg-emerald-500/20 px-4 py-2 text-xs text-emerald-200 disabled:opacity-40">Установить и перезапустить</button>}
+            <button type="button" onClick={checkUpdates} disabled={playing || checkingUpdate || ['checking','available','downloading'].includes(updateInfo?.status || '')} className="rounded-lg border border-fuchsia-400/30 bg-fuchsia-500/10 px-4 py-2 text-sm text-fuchsia-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-fuchsia-500/20">{checkingUpdate ? 'Проверяем…' : 'Проверить обновления'}</button>
+            {updateInfo?.status === 'ready' && <button type="button" onClick={installLauncherUpdate} disabled={playing} className="rounded-lg bg-emerald-500/20 px-4 py-2 text-sm text-emerald-200 disabled:opacity-40">Установить и перезапустить</button>}
           </div>
         </GlassCard>
 
@@ -406,8 +410,8 @@ export const SettingsPage: React.FC = () => {
               <div className="flex items-center gap-2.5">
                 <Sparkles size={18} className="text-emerald-400" />
                 <div>
-                  <div className="text-sm font-semibold text-white">Автообновление лаунчера (Dev Mode)</div>
-                  <div className="text-xs text-white/50">Проверка релизов и тихая установка через GitHub Releases</div>
+                  <div className="text-base font-semibold text-white">Автообновление лаунчера (Dev Mode)</div>
+                  <div className="text-sm text-white/50">Проверка релизов и тихая установка через GitHub Releases</div>
                 </div>
               </div>
               <div className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-[11px] text-emerald-400 font-medium">
@@ -416,18 +420,18 @@ export const SettingsPage: React.FC = () => {
             </div>
 
             <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between">
-              <span className="text-xs text-white/60">Тестовый просмотр внешнего вида в шапке:</span>
+              <span className="text-sm text-white/60">Тестовый просмотр внешнего вида в шапке:</span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setUpdateInfo({ status: 'downloading', version: '1.0.1', percent: 45 })}
-                  className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-xs text-white/80 transition hover:bg-white/[0.1] cursor-pointer"
+                  className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-sm text-white/80 transition hover:bg-white/[0.1] cursor-pointer"
                 >
                   <DownloadCloud size={12} className="text-emerald-400" />
                   <span>Имитировать скачивание (45%)</span>
                 </button>
                 <button
                   onClick={() => setUpdateInfo({ status: 'ready', version: '1.0.1' })}
-                  className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/20 px-2.5 py-1 text-xs text-emerald-300 transition hover:bg-emerald-500/30 cursor-pointer font-medium"
+                  className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/20 px-2.5 py-1 text-sm text-emerald-300 transition hover:bg-emerald-500/30 cursor-pointer font-medium"
                 >
                   <Sparkles size={12} />
                   <span>Имитировать готовность</span>

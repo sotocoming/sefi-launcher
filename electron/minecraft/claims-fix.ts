@@ -5,7 +5,7 @@ import { randomUUID } from 'crypto';
 import { installFile, renameFile } from './atomic-files';
 
 export async function ensureClaimsColorFix(gameDir: string): Promise<void> {
-  const name = 'sefi-claims-color-fix-1.0.0.jar';
+  const name = 'sefi-claims-color-fix-1.0.1.jar';
   const candidates = [path.join(process.resourcesPath || '', 'resources/mods', name), path.join(app.getAppPath(), 'resources/mods', name)];
   let source: string | undefined;
   for (const candidate of candidates) if (await fs.access(candidate).then(() => true, () => false)) { source = candidate; break; }

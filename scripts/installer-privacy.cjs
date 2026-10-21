@@ -5,7 +5,8 @@ const path = require('node:path');
 
 function inline(text) {
   return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g,
-    (_match, label, target) => /^https?:/.test(target) ? label + ' (' + target + ')' : label);
+    (_match, label, target) => /^https?:/.test(target) ? label + ' (' + target + ')'
+      : /^mailto:/.test(target) ? target.slice('mailto:'.length) : label);
 }
 function escapeRtf(text) {
   let result = '';

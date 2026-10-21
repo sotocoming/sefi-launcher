@@ -97,10 +97,10 @@ Removing local files does not delete profiles, uploaded skins, reactions,
 submitted reports, support tickets, server logs or backups already held by SEFI
 or an external provider. The client does not set a universal deletion deadline
 for those server-side records. For access, correction, retention or deletion
-questions, contact the administrator through the [SEFI community website](https://sotocoming.ru/profile).
-You may also [open a public issue](https://github.com/sotocoming/sefi-launcher/issues)
-to request a private contact channel; do not publish tokens, personal reports
-or other private information in GitHub issues.
+questions, contact the administrator at [sotocoming@proton.me](mailto:sotocoming@proton.me).
+Do not include passwords, access tokens or other credentials in your message.
+If identification is needed to handle your request, the administrator will
+explain which information is required.
 
 ## External service policies
 

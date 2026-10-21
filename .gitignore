@@ -6,6 +6,9 @@ release
 /build/*
 !/build/icon.ico
 !/build/icon.png
+!/build/installer.nsh
+!/build/license_en.rtf
+!/build/license_ru.rtf
 .env
 .env.local
 .DS_Store

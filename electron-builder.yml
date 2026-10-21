@@ -1,6 +1,7 @@
 appId: com.sefi.launcher
 productName: SEFI Launcher
 artifactName: SEFI-Launcher-Setup.${ext}
+beforePack: scripts/installer-privacy.cjs
 afterPack: scripts/windows-resources.cjs
 directories:
   output: release
@@ -14,6 +15,14 @@ extraResources:
     to: resources
   - from: build/icon.ico
     to: brand/icon.ico
+  - from: PRIVACY.md
+    to: docs/PRIVACY.md
+  - from: PRIVACY.ru.md
+    to: docs/PRIVACY.ru.md
+  - from: LICENSE
+    to: docs/LICENSE
+  - from: CODE_SIGNING.md
+    to: docs/CODE_SIGNING.md
 win:
   target:
     - target: nsis
@@ -24,6 +33,11 @@ win:
   signAndEditExecutable: false
 nsis:
   oneClick: true
+  # English fallback; Russian Windows selects the Russian UI and privacy notice.
+  installerLanguages:
+    - en_US
+    - ru_RU
+  include: build/installer.nsh
   perMachine: false
   allowElevation: true
   deleteAppDataOnUninstall: false

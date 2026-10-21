@@ -2,15 +2,22 @@
 
 Last updated: October 21, 2026.
 
+[Русская версия](PRIVACY.ru.md).
+
 This policy describes the SEFI Launcher desktop application and the SEFI client
 mods shipped with it. The project is maintained by SEFI Team, with repository
 owner [sotocoming](https://github.com/sotocoming) as the project contact.
 It describes the current implementation; it does not introduce new consent
 controls or change how an already installed release behaves.
 
-The [SEFI Server Backups policy](https://sotocoming.ru/static/server-backups-privacy.html)
-is about the administrator's Google Drive backup integration. It is a separate
-service and is not the launcher's privacy policy.
+## Automatic launcher updates
+
+Installed releases automatically check GitHub for new versions and download
+available updates in the background. A downloaded update can be installed when
+the launcher exits while no game is running. The interface also offers a manual
+check and an install/restart action. There is currently no separate setting to
+disable automatic update checks or downloads. These requests disclose connection
+information to GitHub and its download infrastructure.
 
 ## Connections and data
 

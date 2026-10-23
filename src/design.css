@@ -22,3 +22,28 @@ body{margin:0;background:#140f1c;color:var(--ui-text);font-family:Onest,sans-ser
 
 /* Shared baselines and one continuous footer divider. Artwork fades before it. */
 .status-panels{position:relative}.status-panels:after{content:"";position:absolute;left:16px;right:16px;bottom:58px;height:1px;background:var(--launcher-line);pointer-events:none}.server-title strong{display:flex}.status-panels .server-metrics dd{display:flex;align-items:baseline;height:18px;font-size:13px;line-height:18px}.status-panels .server-metrics dd span{line-height:14px}.pack-ready>div{position:relative;z-index:2}@media(max-width:1160px){.status-panels:after{left:14px;right:14px;bottom:56px}}
+
+/* Connection choices are one control group; the footer is a status strip. */
+.server-panel .connection-body{padding-top:5px}
+.server-panel .endpoint-list{padding:4px;border-radius:8px;background:#241a2e;gap:2px}
+.server-panel .endpoint{height:29px;min-height:29px;border-radius:5px;grid-template-columns:minmax(0,1fr) 25px}
+.server-panel .endpoint-select{grid-template-columns:10px 34px minmax(0,1fr);gap:6px;padding:0 4px;position:relative}
+.server-panel .endpoint-select:has(.endpoint-radio.invisible){grid-template-columns:34px minmax(0,1fr)}
+.server-panel .endpoint-radio.invisible{display:none}
+.server-panel .endpoint-select b{display:grid;place-items:center;height:19px;width:34px;border-radius:4px;background:#392746;font-size:9px;line-height:19px;letter-spacing:.02em}
+.server-panel .endpoint-select>span:last-child{font-size:10px;line-height:17px}
+.server-panel .endpoint.selected{background:#493054}
+.server-panel .endpoint.selected .endpoint-select b{background:#654077;color:#f3e3ff}
+.server-panel .endpoint:hover{background:#34233f}
+.server-panel .copy-address{align-self:stretch;opacity:.8}
+.server-panel .auto-row{margin:9px 0 0;min-height:20px;font-size:10px;line-height:20px}
+.server-panel .server-readouts{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding:0 0 1px;border:0}
+.server-panel .server-readouts>div{display:flex;align-items:baseline;gap:5px;padding:0;border:0;min-width:0}
+.server-panel .server-readouts dd{display:flex;align-items:baseline;gap:3px;height:18px;line-height:18px;font-size:13px;white-space:nowrap}
+.server-panel .server-readouts dd svg{align-self:center;color:#c9a8dc;margin-right:2px;stroke-width:1.7}
+.server-panel .server-readouts .metric-value{font-size:13px;line-height:18px;font-weight:600;color:inherit}
+.server-panel .server-readouts .metric-unit{font-size:10px;line-height:14px;color:var(--ui-muted)}
+.server-panel .server-readouts .ping svg,.server-panel .server-readouts .ping .metric-unit{color:var(--ui-green)}
+.server-panel .port-readout dt{height:auto;line-height:18px;margin:0;font-size:9px;color:var(--ui-muted)}
+.server-panel .port-readout dd{font-size:11px;font-weight:500;color:#d9c7e5}
+@media(max-width:1160px){.server-panel .endpoint-select{grid-template-columns:10px 30px minmax(0,1fr);gap:4px;padding:0 3px}.server-panel .endpoint-select:has(.endpoint-radio.invisible){grid-template-columns:30px minmax(0,1fr)}.server-panel .endpoint-select b{width:30px;font-size:8px}.server-panel .endpoint-select>span:last-child{font-size:9px}.server-panel .server-readouts{gap:7px}}

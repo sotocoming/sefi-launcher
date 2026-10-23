@@ -17,3 +17,5 @@ Local preview launches with --ui-preview and a separate --user-data-dir. This di
 Home overview refinement: server, modpack and news share one bordered surface. Endpoint choices are flat rows with a subtle selected wash; internal structure uses whitespace and thin dividers. News dates use Russian day/month formatting.
 
 Home alignment refinement: both panel titles use a shared 13/20 type treatment at every supported width. Footer labels use 9/13 and values 13/18, within a 42 px footer track. A continuous separator spans both columns. The rotated artwork fades on an unrotated layer before the footer; no inset shadow rectangle.
+
+Connection grouping refinement: endpoint routes form one soft control group with region tags, aligned addresses and copy actions. Auto-connect remains a separate full-width setting row. Server metrics use an inline icon/readout strip instead of equal table columns; port is secondary metadata. All values and accessible labels remain available.

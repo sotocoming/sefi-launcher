@@ -1,23 +1,18 @@
 # SEFI Launcher visual system
 
-The native React UI follows the approved original composition: left navigation, full-height Minecraft world, SEFI mascot and a compact launch console. Assets are in src/assets/interface; the pack watermark uses the existing modpack icon.
+Approved direction: Product Design option 1, lighter revision. Reference and visual evidence remain local in artifacts/launcher-ui-preview/product-design and approved-comparison.png.
 
-- Onest for Cyrillic and controls; Cabinet Grotesk for supported display glyphs with Onest fallback.
-- Dark plum canvas #140f1c, panels #191121, shared borders #594064, lilac text accents #d9b6ed, launch button #803aa5, positive status #88ddbb.
-- 194 px navigation (180 px at 1100 px); 32 px native draggable title bar. Minimum window remains 1100 × 680.
-- Main server and modpack panels share header, body and footer tracks. News date follows its title.
-- Pack artwork is enlarged, rotated, clipped and softly faded behind text. Keep the mascot and original logo. No decorative status checkmark.
-- News uses article + selection list, account uses identity + real skin editor, settings use functional sections. Map iframe starts loading as soon as its page opens.
-- Motion uses existing Framer Motion transitions and respects reduced motion. No animated layout scaling on the play button; the arrow is centered against the entire button.
+- Preserve the original SEFI cat logo, Minecraft background, anime mascot and existing modpack artwork.
+- Onest for Cyrillic and controls; Cabinet Grotesk where supported. Compact body text uses normal weight; main headings use semibold.
+- Dark plum panels #18111f, shared borders #49374f, lilac accents, solid muted purple play button #803f9d, mint readiness text.
+- Navigation 194 px, native title bar 32 px; minimum supported window 1100 × 680.
+- Home console 612 px at 1280 × 720, 548 px at minimum width. Server and modpack share an outer surface and equal vertical tracks; news is a separate bordered strip beneath it.
+- EURO/RU form a segmented route selector above one address and copy button. Ping and port sit beneath the address. Players are separate from the online badge. Auto-connect remains an independent opt-in footer.
+- Route selection and copying work with auto-connect off. Arrow/Home/End keys and roving focus remain available.
+- Pack artwork uses a large tilted, softly masked background. Readiness is text without a checkmark.
+- News title precedes its Russian date; matching thin Lucide chevrons use equal button geometry.
+- Play is 60 px high, with a thin arrow centered against the complete button. Native authentication, installation and progress states govern its behavior.
+- News, account and settings retain their real functionality; the map loads immediately on entry.
+- Preview uses --ui-preview and a separate user-data directory. Updater suppression applies only to this explicit local preview.
 
-All server status, authentication, skin editing, launch progress and settings remain native. Unavailable ping displays an em dash rather than fabricated latency.
-
-Local preview launches with --ui-preview and a separate --user-data-dir. This disables updater installation only for that explicit preview switch; normal production behavior is retained.
-
-Home overview refinement: server, modpack and news share one bordered surface. Endpoint choices are flat rows with a subtle selected wash; internal structure uses whitespace and thin dividers. News dates use Russian day/month formatting.
-
-Home alignment refinement: both panel titles use a shared 13/20 type treatment at every supported width. Footer labels use 9/13 and values 13/18, within a 42 px footer track. A continuous separator spans both columns. The rotated artwork fades on an unrotated layer before the footer; no inset shadow rectangle.
-
-Connection grouping refinement: endpoint routes form one soft control group with region tags, aligned addresses and copy actions. Auto-connect remains a separate full-width setting row. Server metrics use an inline icon/readout strip instead of equal table columns; port is secondary metadata. All values and accessible labels remain available.
-
-Connection selector refinement: EURO/RU are mutually exclusive route tabs above a single readable address with copy action. Port and measured latency belong to the address metadata; player count sits in the online badge. Auto-connect occupies the footer as a separate opt-in. Route selection/copy is available while auto-connect is off and does not enable it. Tabs support arrow/Home/End keys and roving focus.
+Mode: Operate. Favor restraint, readable grouping and consistent alignment. All status values come from native services; unavailable ping remains an em dash.

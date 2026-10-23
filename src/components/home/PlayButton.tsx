@@ -110,7 +110,7 @@ export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAcc
   return (
     <div className="relative">
       <motion.button
-        whileHover={!isDisabled ? { backgroundColor: '#8d42b4' } : {}}
+        whileHover={!isDisabled ? { backgroundColor: '#8748a6' } : {}}
         whileTap={!isDisabled ? { opacity: 0.9 } : {}}
         onClick={handlePlay}
         disabled={isDisabled}
@@ -125,7 +125,7 @@ export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAcc
             ) : isError ? (
               <AlertCircle size={22} />
             ) : (
-              <Play size={20} fill="currentColor" className="ml-0.5" />
+              <Play size={17} fill="currentColor" className="ml-0.5" />
             )}
           </div>
 
@@ -147,7 +147,7 @@ export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAcc
               {getSubtext()}
             </div>
           </div>
-          <span className="play-arrow" aria-hidden="true"><ArrowRight size={24} strokeWidth={2}/></span>
+          <span className="play-arrow" aria-hidden="true"><ArrowRight size={22} strokeWidth={1.5}/></span>
         </div>
       </motion.button>
       <dialog ref={warningDialog} onCancel={() => setWarningAccountId(null)} onClose={() => setWarningAccountId(null)}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Copy, Check, Wifi } from 'lucide-react';
+import { Copy, Check, Wifi, Users, Server } from 'lucide-react';
 
 import { useStore } from '../../store/store';
 
@@ -27,10 +27,11 @@ export const ServerStatusCard: React.FC = () => {
 
   return <section className="server-panel server-connect" aria-label="Сервер сообщества">
     <div className="server-heading">
-      <div className="server-title"><strong title={name}>{name}</strong><p>Сервер сообщества</p></div>
-      <span className={`online ${checking ? 'checking' : !isOnline ? 'offline' : ''}`} aria-label={checking ? 'Проверяем сервер' : isOnline ? 'Онлайн, игроков '+playersOnline+' из '+playersMax : 'Сервер оффлайн'}>
-        <i aria-hidden="true"/><span>{checking ? 'Проверка…' : isOnline ? <>Онлайн <span className="online-players">{playersOnline} / {playersMax}</span></> : 'Оффлайн'}</span>
+      <div className="server-title"><strong title={name}>{name}</strong></div>
+      <span className={`online ${checking ? 'checking' : !isOnline ? 'offline' : ''}`}>
+        <i aria-hidden="true"/><span>{checking ? 'Проверка…' : isOnline ? 'Онлайн' : 'Оффлайн'}</span>
       </span>
+      <span className="player-count" aria-label={isOnline ? 'Игроки: '+playersOnline+' из '+playersMax : 'Игроки недоступны'}><Users size={15} strokeWidth={1.5} aria-hidden="true"/><span>{isOnline ? playersOnline : '—'}<small>{isOnline ? ' / '+playersMax : ''}</small></span></span>
     </div>
     <div className="connection-body">
       <div className="route-picker">
@@ -51,14 +52,14 @@ export const ServerStatusCard: React.FC = () => {
           </button>)}
         </div>
         <div className="route-address">
-          <div className="route-address-main"><span title={selectedEndpoint?.address}>{selectedEndpoint?.address || 'Выберите маршрут'}</span>
+          <div className="route-address-main"><Server size={15} strokeWidth={1.5} aria-hidden="true"/><span title={selectedEndpoint?.address}>{selectedEndpoint?.address || 'Выберите маршрут'}</span>
             <button className="copy-address" type="button" disabled={!selectedEndpoint}
               aria-label={selectedEndpoint ? 'Скопировать '+selectedEndpoint.label+': '+selectedEndpoint.address : 'Скопировать адрес'}
               onClick={async () => { if (!selectedEndpoint) return; try { await navigator.clipboard.writeText(selectedEndpoint.address); setCopied(selectedEndpoint.id); } catch { setCopied(null); } }}>
               {copied === selectedEndpoint?.id ? <Check size={13}/> : <Copy size={13}/>}
             </button>
           </div>
-          <div className="route-address-meta"><span>Порт <b>{selectedPort}</b></span><span className="route-latency" aria-label={ping === null ? 'Пинг недоступен' : 'Пинг '+ping+' мс'}><Wifi size={12} aria-hidden="true"/>{ping === null ? '—' : ping+' мс'}</span></div>
+          <div className="route-address-meta"><span className="route-latency" aria-label={ping === null ? 'Пинг недоступен' : 'Пинг '+ping+' мс'}><Wifi size={15} strokeWidth={1.5} aria-hidden="true"/>{ping === null ? '—' : ping+' мс'}</span><span className="route-port"><Server size={14} strokeWidth={1.5} aria-hidden="true"/>Порт <b>{selectedPort}</b></span></div>
         </div>
       </div>
     </div>

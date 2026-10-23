@@ -18,3 +18,5 @@ Approved direction: Product Design option 1, lighter revision. Reference and vis
 Mode: Operate. Favor restraint, readable grouping and consistent alignment. All status values come from native services; unavailable ping remains an em dash.
 
 Settings refinement: content-sized groups replace the stretched enclosing card. Memory/display belong to Game, Java and paths to Files, imports/repairs to Pack, Discord/window behavior/updates to Launcher. Shared 12/20 body text and 34px actions. Collapsed news uses natural card height; only expanded articles scroll when required. Scroll thumbs are inset with transparent gutters. Window controls have contiguous 44×31 hit areas with matching 12px thin icons.
+
+Settings readability: flat #15111d page, content-sized opaque #211a29 surface, off-white labels, 13px descriptions, 16px section headings and brighter slider/switch boundaries. Functional groups remain separated by spacing and single dividers; no background artwork beneath settings text.

@@ -178,7 +178,7 @@ export const SettingsPage: React.FC = () => {
         <section data-setting="game" className="setting-group">
           <h2>Память</h2><p>Для Homestead Cozy рекомендуем 4–8 ГБ оперативной памяти.</p>
           <div className="memory-control"><label htmlFor="game-memory">Выделено для Minecraft</label><output htmlFor="game-memory">{ram} ГБ</output></div>
-          <input id="game-memory" aria-label="Выделенная оперативная память" aria-valuetext={ram+' ГБ'} type="range" min={2} max={16} step={1} value={ram} disabled={!settings}
+          <input id="game-memory" aria-label="Выделенная оперативная память" aria-valuetext={ram+' ГБ'} type="range" style={{'--memory-fill': ((ram-2)/14*100)+'%'} as React.CSSProperties} min={2} max={16} step={1} value={ram} disabled={!settings}
             onChange={e=>handleRamChange(Number(e.target.value))}/>
           <div className="memory-scale"><span>2 ГБ</span><span>16 ГБ</span></div>
         </section>

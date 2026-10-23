@@ -14,3 +14,6 @@ Validation: renderer TypeScript and production build passed. Quick-play opt-in, 
 
 ## Settings/news/chrome refinement
 Visual checks at 1280×720 and regression at 1100×680 passed. Collapsed news has equal scrollHeight/clientHeight; settings show only the active group with no unnecessary scroll at the checked desktop size. Real overflow remains scrollable. Discord missing-value default remains enabled; explicit false is preserved. Discord persistence, repair states, Markdown expansion and all-screen regressions passed. Evidence: settings-polish-java.png, settings-polish-launcher.png, news-polish.png.
+
+## Settings contrast pass
+Opaque settings surface and flat page background verified in settings-contrast-game.png. Body contrast against #211a29 is 10.3:1; secondary copy is 9.1:1. Range track and switch boundaries were brightened. Renderer typecheck, production build, all-screen/minimum-window regression and Discord persistence passed. Existing open preview was not restarted.

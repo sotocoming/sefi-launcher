@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { MemoryStick, Coffee, Monitor, FolderOpen, Sparkles, DownloadCloud, RotateCcw } from 'lucide-react';
-import { GlassCard } from '../components/ui/GlassCard';
+import { FolderOpen } from 'lucide-react';
+import './SettingsPage.css';
 import { useStore } from '../store/store';
 import type { JavaStatus } from '../types';
 
@@ -162,293 +162,82 @@ export const SettingsPage: React.FC = () => {
   };
 
   const [activeTab,setActiveTab]=useState('game');
-  return (
-    <motion.div
-      key="settings"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0 }}
-      className="workspace-page settings-page"
-    >
-      <div className="page-head">
-        <h1 className="text-2xl font-bold text-white tracking-tight">Настройки</h1>
-        <p className="mt-1 text-sm text-white/40">
-          Параметры производительности, Java и поведения лаунчера
-        </p>
-      </div>
-
-      <div className="settings-layout"><nav className="settings-menu" aria-label="Разделы настроек">{[['game','Игра'],['java','Java и файлы'],['pack','Сборка'],['launcher','Лаунчер']].map(([id,label])=><button key={id} aria-pressed={activeTab===id} onClick={()=>setActiveTab(id)}>{label}</button>)}</nav><div className="settings-sections" data-tab={activeTab}>
-        <GlassCard data-setting="pack" className="p-5">
-          <div className="text-base font-semibold text-white">Сборка и загрузка</div>
-          <p className="mt-2 text-sm leading-relaxed text-white/60">
-            Моды загружаются с Modrinth, затем с CurseForge и доступного зеркала SEFI.
-            Если архив уже скачан, выберите официальный ZIP Homestead 1.3.7: проверим версию и состав.
-            ZIP CurseForge содержит настройки и часть модов; остальные загрузятся при запуске.
-          </p>
-          <button disabled={importing} onClick={handleImport}
-            className="mt-4 rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-4 py-2 text-sm text-fuchsia-200 disabled:opacity-50">
-            {importing ? 'Проверяем архив…' : 'Импортировать ZIP сборки'}
-          </button>
-          {importMessage && <p role={importError ? 'alert' : 'status'} className={`mt-3 text-sm leading-relaxed select-text ${importError ? 'text-rose-300' : 'text-emerald-300'}`}>{importMessage}</p>}
-        </GlassCard>
-
-        <GlassCard data-setting="pack" className="p-5">
-          <div className="text-base font-semibold text-white">Управление в Minecraft</div>
-          <p className="mt-2 text-sm leading-relaxed text-white/60">
-            Если Shift или Ctrl блокируют ЛКМ либо ломание продолжается после отпускания кнопки,
-            отключите пять конфликтующих сочетаний JEI. Остальные настройки управления сохранятся.
-          </p>
-          <button type="button" disabled={playing || repairingControls || !settings} onClick={handleRepairControls}
-            className="mt-4 rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-4 py-2 text-sm text-fuchsia-200 disabled:opacity-50">
-            {repairingControls ? 'Исправляем управление…' : 'Исправить Shift/Ctrl + ЛКМ'}
-          </button>
-          <button type="button" disabled={playing || repairingControls || !settings} onClick={handleRepairResources}
-            className="ml-2 mt-4 rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-4 py-2 text-sm text-fuchsia-200 disabled:opacity-50">Вернуть интерфейс сборки</button>
-          <p className="mt-2 text-sm text-white/40">Перед исправлением закройте Minecraft. Сочетания можно назначить заново в игре.</p>
-          {controlsMessage && <p role={controlsError ? 'alert' : 'status'} className={`mt-3 text-sm leading-relaxed select-text ${controlsError ? 'text-rose-300' : 'text-emerald-300'}`}>{controlsMessage}</p>}
-        </GlassCard>
-
-        {/* Memory & Performance */}
-        <GlassCard data-setting="game" className="p-5">
-          <div className="flex items-center gap-2.5">
-            <MemoryStick size={18} className="text-fuchsia-300" />
-            <div className="text-base font-semibold text-white">Память и производительность</div>
-          </div>
-
-          <div className="mt-5 flex items-center justify-between">
-            <div>
-              <div className="text-sm font-medium text-white/90">Выделенная оперативная память</div>
-              <div className="mt-0.5 text-sm text-white/40">
-                Для модпака Homestead Cozy рекомендуется 4–8 ГБ
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-fuchsia-400/10 border border-fuchsia-400/20 px-3 py-1 text-sm font-bold text-fuchsia-200">
-              {ram} ГБ
-            </div>
-          </div>
-
-          <input
-            aria-label="Выделенная оперативная память"
-            aria-valuetext={`${ram} ГБ`}
-            type="range"
-            min={2}
-            max={16}
-            step={1}
-            value={ram}
-            onChange={(e) => handleRamChange(Number(e.target.value))}
-            className="mt-5 w-full accent-fuchsia-500 cursor-pointer"
-          />
-
-          <div className="mt-2 flex justify-between text-[11px] text-white/30 font-mono">
-            <span>2 ГБ</span>
-            <span className="text-emerald-400/80">Рекомендуемая зона: 4 – 8 ГБ</span>
-            <span>16 ГБ</span>
-          </div>
-        </GlassCard>
-
-        {/* Java & Directories */}
-        <GlassCard data-setting="java" className="p-5">
-          <div className="flex items-center gap-2.5">
-            <Coffee size={18} className="text-fuchsia-300" />
-            <div className="text-base font-semibold text-white">Java и пути</div>
-          </div>
-
-          <div className="mt-4 space-y-4 divide-y divide-white/[0.05]">
-            <div className="pt-2 flex items-center justify-between first:pt-0">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-white/90">Среда выполнения Java</span>
-                  <span className={"rounded-md px-2 py-0.5 text-[10px] font-medium border " + (javaStatus?.status === 'ready' ? 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20' : javaStatus?.status === 'error' ? 'bg-rose-400/10 text-rose-300 border-rose-400/20' : 'bg-white/5 text-white/60 border-white/10')}>
-                    {javaBusy ? 'Подготовка…' : !javaStatus ? 'Проверяем…' : javaStatus.status === 'ready' ? 'Java ' + javaStatus.version + ' · 64 бит' : javaStatus.status === 'missing' ? 'Установится при запуске' : 'Нужна проверка'}
-                  </span>
-                </div>
-                <div className="mt-1 text-sm text-white/35 font-mono truncate max-w-[400px]">
-                  {javaPath}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {settings?.javaPath && (
-                  <button
-                    onClick={handleResetJava}
-                    disabled={playing || javaBusy || !settings}
-                    title="Использовать отдельную Java SEFI"
-                    className="h-8 rounded-[8px] border border-white/[0.08] bg-white/[0.04] px-2.5 text-sm text-white/50 transition hover:bg-white/[0.08] hover:text-white cursor-pointer"
-                  >
-                    Java SEFI
-                  </button>
-                )}
-                <button
-                  disabled={playing || javaBusy || !settings}
-                  onClick={handleSelectJava}
-                  className="h-8 rounded-[8px] border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-white/80 transition hover:bg-white/[0.08] hover:text-white cursor-pointer"
-                >
-                  Обзор...
-                </button>
-              </div>
-            </div>
-
-            <div className="pt-4 space-y-2">
-              <p className="text-sm text-white/60 leading-relaxed">{settings?.javaPath ? 'Выбрана своя Java. Проверяем версию, разрядность и запуск с выделенной памятью. Чтобы перейти на автоматическую установку, нажмите «Java SEFI».' : 'SEFI скачает отдельную Java 21 для этой сборки. Она хранится в папке лаунчера и проверяется перед запуском игры.'}</p>
-              {javaStatus?.path && <p className="text-[11px] font-mono text-white/40 break-all select-text">{javaStatus.path}</p>}
-              <p role="status" className="text-sm text-white/60">{javaTask || javaStatus?.message}</p>
-              {javaError && <p role="alert" className="text-sm text-rose-300 whitespace-pre-wrap select-text">{javaError}</p>}
-              {!settings?.javaPath && <button disabled={playing || javaBusy || !settings} onClick={handlePrepareJava}
-                className="rounded-lg border border-fuchsia-400/25 bg-fuchsia-400/10 px-3 py-2 text-sm text-fuchsia-200 disabled:opacity-50">
-                {javaBusy ? 'Подготовка Java…' : javaStatus?.status === 'ready' ? 'Проверить Java SEFI' : 'Скачать Java SEFI'}
-              </button>}
-            </div>
-
-            <div className="pt-4 flex items-center justify-between">
-              <div>
-                <div className="text-sm font-medium text-white/90">Папка установки клиента</div>
-                <div className="mt-1 text-sm text-white/35 font-mono truncate max-w-[400px]">
-                  {gameDir}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  disabled={playing || javaBusy || !settings}
-                  onClick={handleSelectGameDir}
-                  title="Выбрать другую папку для установки игры"
-                  className="h-8 rounded-[8px] border border-white/[0.08] bg-white/[0.04] px-3 text-sm text-white/80 transition hover:bg-white/[0.08] hover:text-white cursor-pointer"
-                >
-                  Изменить...
-                </button>
-                <button
-                  disabled={!settings}
-                  onClick={handleOpenGameDir}
-                  title="Открыть папку в проводнике Windows"
-                  className="flex h-8 items-center gap-1.5 rounded-[8px] border border-fuchsia-400/20 bg-fuchsia-500/10 px-3 text-sm text-fuchsia-200 transition hover:bg-fuchsia-500/20 hover:text-white cursor-pointer"
-                >
-                  <FolderOpen size={13} />
-                  <span>Открыть папку</span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <p className="mt-3 text-sm text-white/40">При выборе целого диска создадим на нём папку SEFI Minecraft.</p>
-          {directoryError && <p role="alert" className="mt-2 text-sm text-rose-300 whitespace-pre-wrap select-text">{directoryError}</p>}
-        </GlassCard>
-
-        <GlassCard data-setting="game" className="p-5">
-          <h2 className="text-base font-semibold text-white">Статус в Discord</h2>
-          <p className="mt-2 text-sm leading-5 text-white/50">Показывать Sweet Home, время игры и иконку сервера в профиле Discord. Статус меняется, когда вы выходите в меню или открываете одиночный мир.</p>
-          <button type="button" role="switch" aria-checked={settings?.discordPresence !== false}
-            aria-label="Показывать игру в Discord" disabled={!settings}
-            onClick={() => { if (settings) void updateSettings({ ...settings, discordPresence: settings.discordPresence === false }); }}
-            className="mt-4 flex w-full items-center justify-between py-1.5 text-sm disabled:opacity-40">
-            <span className="text-white/75">Показывать игру в Discord</span>
-            <span className={`flex h-6 w-11 items-center rounded-full p-0.5 transition ${settings?.discordPresence !== false ? 'bg-fuchsia-500' : 'bg-white/10'}`}>
-              <motion.span animate={{ x: settings?.discordPresence !== false ? 20 : 0 }} className="size-5 rounded-full bg-white shadow" />
-            </span>
-          </button>
-          <p className="mt-2 text-[11px] text-white/35">Нужен запущенный Discord для компьютера и разрешённое отображение игровой активности в его настройках.</p>
-        </GlassCard>
-
-        {/* Display & Launch Options */}
-        <GlassCard data-setting="game" className="p-5">
-          <div className="flex items-center gap-2.5">
-            <Monitor size={18} className="text-fuchsia-300" />
-            <div className="text-base font-semibold text-white">Экран и запуск</div>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            <button
-              role="switch" aria-checked={fullscreen}
-              onClick={handleToggleFullscreen}
-              className="flex w-full items-center justify-between py-1.5 text-sm cursor-pointer"
-            >
-              <span className="text-white/75">Полноэкранный режим по умолчанию</span>
-              <div
-                className={`flex h-6 w-11 items-center rounded-full p-0.5 transition ${
-                  fullscreen ? 'bg-fuchsia-500' : 'bg-white/10'
-                }`}
-              >
-                <motion.div
-                  animate={{ x: fullscreen ? 20 : 0 }}
-                  className="size-5 rounded-full bg-white shadow"
-                />
-              </div>
-            </button>
-
-            <button
-              role="switch" aria-checked={closeAfterLaunch}
-              onClick={handleToggleClose}
-              className="flex w-full items-center justify-between py-1.5 text-sm cursor-pointer"
-            >
-              <span className="text-white/75">Скрывать лаунчер на время игры</span>
-              <div
-                className={`flex h-6 w-11 items-center rounded-full p-0.5 transition ${
-                  closeAfterLaunch ? 'bg-fuchsia-500' : 'bg-white/10'
-                }`}
-              >
-                <motion.div
-                  animate={{ x: closeAfterLaunch ? 20 : 0 }}
-                  className="size-5 rounded-full bg-white shadow"
-                />
-              </div>
-            </button>
-          </div>
-        </GlassCard>
-
-        <GlassCard data-setting="launcher" className="p-5">
-          <div className="flex items-center gap-2.5"><RotateCcw size={18} className="text-fuchsia-300" /><h2 className="text-base font-semibold text-white">Обновления лаунчера</h2></div>
-          <p className="mt-2 text-sm text-white/50">Автоматически раз в 2 часа. Во время игры проверки приостановлены.</p>
-          <p role="status" className="mt-3 text-sm text-white/70">{updateText}</p>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <button type="button" onClick={checkUpdates} disabled={playing || checkingUpdate || ['checking','available','downloading'].includes(updateInfo?.status || '')} className="rounded-lg border border-fuchsia-400/30 bg-fuchsia-500/10 px-4 py-2 text-sm text-fuchsia-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-fuchsia-500/20">{checkingUpdate ? 'Проверяем…' : 'Проверить обновления'}</button>
-            {updateInfo?.status === 'ready' && <button type="button" onClick={installLauncherUpdate} disabled={playing} className="rounded-lg bg-emerald-500/20 px-4 py-2 text-sm text-emerald-200 disabled:opacity-40">Установить и перезапустить</button>}
-          </div>
-        </GlassCard>
-
-        {/* Update System & Test Mode (strictly visible during dev / npm run dev) */}
-        {import.meta.env.DEV && (
-          <GlassCard data-setting="launcher" className="p-5 border-emerald-500/20 bg-emerald-950/10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <Sparkles size={18} className="text-emerald-400" />
-                <div>
-                  <div className="text-base font-semibold text-white">Автообновление лаунчера (Dev Mode)</div>
-                  <div className="text-sm text-white/50">Проверка релизов и тихая установка через GitHub Releases</div>
-                </div>
-              </div>
-              <div className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-[11px] text-emerald-400 font-medium">
-                Бесшовный режим (Silent)
-              </div>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between">
-              <span className="text-sm text-white/60">Тестовый просмотр внешнего вида в шапке:</span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setUpdateInfo({ status: 'downloading', version: '1.0.1', percent: 45 })}
-                  className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-sm text-white/80 transition hover:bg-white/[0.1] cursor-pointer"
-                >
-                  <DownloadCloud size={12} className="text-emerald-400" />
-                  <span>Имитировать скачивание (45%)</span>
-                </button>
-                <button
-                  onClick={() => setUpdateInfo({ status: 'ready', version: '1.0.1' })}
-                  className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/20 px-2.5 py-1 text-sm text-emerald-300 transition hover:bg-emerald-500/30 cursor-pointer font-medium"
-                >
-                  <Sparkles size={12} />
-                  <span>Имитировать готовность</span>
-                </button>
-                <button
-                  onClick={() => setUpdateInfo(null)}
-                  title="Сбросить тестовый вид"
-                  className="flex size-7 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.04] text-white/50 transition hover:text-white hover:bg-white/[0.08] cursor-pointer"
-                >
-                  <RotateCcw size={12} />
-                </button>
-              </div>
-            </div>
-          </GlassCard>
-        )}
-      </div></div>
-    </motion.div>
+  const sections = [['game','Игра'],['java','Java и файлы'],['pack','Сборка'],['launcher','Лаунчер']];
+  const toggle = (label: string, checked: boolean, onClick: () => void) => (
+    <button type="button" className="setting-switch-row" role="switch" aria-label={label}
+      aria-checked={checked} disabled={!settings} onClick={onClick}>
+      <span>{label}</span><span className="setting-switch" aria-hidden="true"><i /></span>
+    </button>
   );
+  return <motion.div key="settings" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="workspace-page settings-page">
+    <header className="page-head"><h1>Настройки</h1><p>Игра, файлы и поведение лаунчера</p></header>
+    <div className="settings-layout">
+      <nav className="settings-menu" aria-label="Разделы настроек">{sections.map(([id,label]) =>
+        <button key={id} aria-pressed={activeTab===id} onClick={()=>setActiveTab(id)}>{label}</button>)}</nav>
+      <div className="settings-sections" data-tab={activeTab} key={activeTab}>
+        <section data-setting="game" className="setting-group">
+          <h2>Память</h2><p>Для Homestead Cozy рекомендуем 4–8 ГБ оперативной памяти.</p>
+          <div className="memory-control"><label htmlFor="game-memory">Выделено для Minecraft</label><output htmlFor="game-memory">{ram} ГБ</output></div>
+          <input id="game-memory" aria-label="Выделенная оперативная память" aria-valuetext={ram+' ГБ'} type="range" min={2} max={16} step={1} value={ram} disabled={!settings}
+            onChange={e=>handleRamChange(Number(e.target.value))}/>
+          <div className="memory-scale"><span>2 ГБ</span><span>16 ГБ</span></div>
+        </section>
+        <section data-setting="game" className="setting-group">
+          <h2>Экран</h2>
+          {toggle('Полноэкранный режим по умолчанию',fullscreen,handleToggleFullscreen)}
+        </section>
+        <section data-setting="java" className="setting-group">
+          <div className="setting-heading"><h2>Java</h2><span className={'setting-status '+(javaStatus?.status==='ready'?'is-ready':'')}>
+            {javaBusy?'Подготовка…':!javaStatus?'Проверяем…':javaStatus.status==='ready'?'Java '+javaStatus.version+' · 64 бит':javaStatus.status==='missing'?'Установится при запуске':'Нужна проверка'}</span></div>
+          <p>{settings?.javaPath?'Используем выбранную вами Java. Версию и разрядность проверяем перед запуском.':'Java 21 устанавливается автоматически при первом запуске игры.'}</p>
+          <div className="setting-path">{javaPath}</div>
+          <div className="setting-actions">
+            <button className="s-button" disabled={playing||javaBusy||!settings} onClick={handleSelectJava}>Выбрать свою Java</button>
+            {settings?.javaPath?<button className="s-button" disabled={playing||javaBusy||!settings} onClick={handleResetJava}>Использовать Java SEFI</button>:
+            <button className="s-button" disabled={playing||javaBusy||!settings} onClick={handlePrepareJava}>{javaBusy?'Подготовка Java…':javaStatus?.status==='ready'?'Проверить Java SEFI':'Скачать Java SEFI'}</button>}
+          </div>
+          {javaStatus?.path&&<p className="setting-detail setting-path">{javaStatus.path}</p>}
+          {(javaTask||javaStatus?.message)&&<p className="setting-detail" role="status">{javaTask||javaStatus?.message}</p>}
+          {javaError&&<p className="setting-feedback" role="alert">{javaError}</p>}
+        </section>
+        <section data-setting="java" className="setting-group">
+          <h2>Папка игры</h2><p>Здесь хранятся сборка, миры и скриншоты.</p>
+          <div className="setting-path">{gameDir}</div>
+          <div className="setting-actions">
+            <button className="s-button" disabled={playing||javaBusy||!settings} onClick={handleSelectGameDir}>Изменить папку</button>
+            <button className="s-button" disabled={!settings} onClick={handleOpenGameDir}><FolderOpen size={14} strokeWidth={1.5}/>Открыть папку</button>
+          </div>
+          <p className="setting-detail">При выборе диска создадим на нём папку SEFI Minecraft.</p>
+          {directoryError&&<p className="setting-feedback" role="alert">{directoryError}</p>}
+        </section>
+        <section data-setting="pack" className="setting-group">
+          <h2>Установка сборки</h2><p>Моды и настройки загружаются автоматически при запуске. Если официальный ZIP Homestead 1.3.7 уже скачан, можно импортировать его.</p>
+          <div className="setting-actions"><button className="s-button" disabled={importing||playing||!settings} onClick={handleImport}>{importing?'Проверяем архив…':'Импортировать ZIP сборки'}</button></div>
+          <p className="setting-detail">Проверим версию и состав архива. Недостающие моды скачаем отдельно.</p>
+          {importMessage&&<p role={importError?'alert':'status'} className="setting-feedback">{importMessage}</p>}
+        </section>
+        <section data-setting="pack" className="setting-group">
+          <h2>Восстановление</h2><p>Исправления сохраняют остальные настройки и создают резервную копию. Перед применением закройте Minecraft.</p>
+          <div className="setting-repair-row"><div><h3>Сочетания Shift / Ctrl + ЛКМ</h3><p>Отключить конфликтующие назначения JEI.</p></div>
+            <button className="s-button" disabled={playing||repairingControls||!settings} onClick={handleRepairControls}>{repairingControls?'Исправляем…':'Исправить управление'}</button></div>
+          <div className="setting-repair-row"><div><h3>Интерфейс Homestead</h3><p>Включить ресурс-пак сборки.</p></div><button className="s-button" disabled={playing||repairingControls||!settings} onClick={handleRepairResources}>Вернуть интерфейс сборки</button></div>
+          {controlsMessage&&<p role={controlsError?'alert':'status'} className="setting-feedback">{controlsMessage}</p>}
+        </section>
+        <section data-setting="launcher" className="setting-group">
+          <h2>Во время игры</h2>{toggle('Скрывать лаунчер на время игры',closeAfterLaunch,handleToggleClose)}
+        </section>
+        <section data-setting="launcher" className="setting-group">
+          <h2>Discord</h2><p>Показывать Sweet Home и время игры в профиле.</p>
+          {toggle('Показывать игру в Discord',settings?.discordPresence!==false,()=>{if(settings)void updateSettings({...settings,discordPresence:settings.discordPresence===false});})}
+          <p className="setting-detail">Включено по умолчанию. Нужен запущенный Discord с разрешённой игровой активностью.</p>
+        </section>
+        <section data-setting="launcher" className="setting-group">
+          <h2>Обновления</h2><p>Проверяем автоматически раз в 2 часа и приостанавливаем на время игры.</p>
+          <p className="setting-detail" role="status">{updateText}</p>
+          <div className="setting-actions"><button className="s-button" onClick={checkUpdates} disabled={playing||checkingUpdate||['checking','available','downloading'].includes(updateInfo?.status||'')}>{checkingUpdate?'Проверяем…':'Проверить обновления'}</button>
+            {updateInfo?.status==='ready'&&<button className="s-button" onClick={installLauncherUpdate} disabled={playing}>Установить и перезапустить</button>}</div>
+        </section>
+      </div>
+    </div>
+  </motion.div>;
 };

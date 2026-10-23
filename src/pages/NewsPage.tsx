@@ -104,7 +104,7 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
    <header className="page-head"><div><h1>Жизнь Sweet Home</h1><p>Обновления, события и истории нашего мира</p></div><button className="s-button" onClick={()=>handleOpenExternal()}>Читать на сайте <ExternalLink size={13}/></button></header>
    <div className="page-tabs">{(['all','event','update','news'] as const).map(f=><button key={f} aria-pressed={activeFilter===f} onClick={()=>setActiveFilter(f)}>{{all:'Все',event:'Ивенты',update:'Обновления',news:'Новости'}[f]}</button>)}</div>
    {reactionError&&<p role="status" className="feedback">{reactionError}</p>}
-   {!selected?<div className="empty-panel">В этой категории пока нет новостей.</div>:<div className="news-workspace"><article className="news-feature">
+   {!selected?<div className="empty-panel">В этой категории пока нет новостей.</div>:<div className="news-workspace"><article key={selected.id} className={`news-feature ${expanded ? 'is-expanded' : 'is-preview'} ${selected.image ? 'has-cover' : ''}`}>
     {selected.image&&<img className="feature-cover" src={selected.image} alt=""/>}
     <div className="feature-meta"><span>{tagLabels[selected.tag]?.label||'Новость'}</span><time>{selected.date} {selected.time}</time></div>
     <div className={selected.image?'feature-copy':'feature-copy no-cover'}><h2>{selected.title}</h2><NewsMarkdown source={selected.body} collapsed={!expanded&&long}/>

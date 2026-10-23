@@ -15,13 +15,9 @@ const WindowButton: React.FC<WindowButtonProps> = ({ icon: Icon, onClick, danger
       aria-label={label}
       title={label}
       onClick={onClick}
-      className={`titlebar-no-drag flex size-8 items-center justify-center rounded-lg text-white/40 transition ${
-        danger
-          ? 'hover:bg-red-500/80 hover:text-white'
-          : 'hover:bg-white/[0.08] hover:text-white'
-      }`}
+      className={`window-action titlebar-no-drag ${danger ? 'is-close' : ''}`}
     >
-      <Icon size={14} />
+      <Icon size={12} strokeWidth={1.5} />
     </button>
   );
 };
@@ -74,7 +70,7 @@ export const TitleBar: React.FC = () => {
         )}
 
         {/* Window Controls */}
-        <div className="flex items-center gap-1">
+        <div className="window-actions">
           <WindowButton label="Свернуть окно" icon={Minus} onClick={handleMinimize} />
           <WindowButton label="Развернуть или восстановить" icon={Square} onClick={handleMaximize} />
           <WindowButton label="Закрыть окно" icon={X} onClick={handleClose} danger />

@@ -24,13 +24,14 @@ const {chromium}=require(process.env.PLAYWRIGHT_PATH || 'C:/Users/Creep/.cache/c
    },{get:(object,key)=>key in object?object[key]:()=>()=>{}});
   });
   await page.goto('http://sefi.test/');await page.getByRole('button',{name:'Настройки',exact:true}).click();
-  const button=page.getByRole('button',{name:'Исправить Shift/Ctrl + ЛКМ',exact:true});await button.scrollIntoViewIfNeeded();
+  await page.getByRole('button',{name:'Сборка',exact:true}).click();
+  const button=page.getByRole('button',{name:'Исправить управление',exact:true});await button.scrollIntoViewIfNeeded();
   assert.equal(await button.isEnabled(),true);await button.click();await page.getByRole('status').filter({hasText:'Конфликтующие сочетания JEI отключены'}).waitFor();
   await page.screenshot({path:path.join(__dirname,'../../settings-click-fix.png')});
   await page.getByRole('button',{name:'Вернуть интерфейс сборки',exact:true}).click();await page.getByRole('status').filter({hasText:'Интерфейс Homestead включён'}).waitFor();assert.equal(await page.evaluate(()=>window.resourceRepairCalls),1);
   await page.evaluate(()=>window.repairMode='fixed');await button.click();await page.getByRole('status').filter({hasText:'Исправление уже применено'}).waitFor();
   await page.evaluate(()=>window.repairMode='error');await button.click();await page.getByRole('alert').filter({hasText:'Закройте Minecraft'}).waitFor();
-  await page.evaluate(()=>window.gameListeners.forEach(callback=>callback({status:'running',pid:123})));await page.waitForFunction(()=>Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='Исправить Shift/Ctrl + ЛКМ')?.disabled);
+  await page.evaluate(()=>window.gameListeners.forEach(callback=>callback({status:'running',pid:123})));await page.waitForFunction(()=>Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='Исправить управление')?.disabled);
   assert.equal(await page.getByRole('button',{name:'Вернуть интерфейс сборки',exact:true}).isDisabled(),true);
   assert.equal(await page.evaluate(()=>window.repairCalls),3);assert.deepEqual(errors,[]);
   console.log('PASS: settings button, success, already fixed, error and disabled during Minecraft');

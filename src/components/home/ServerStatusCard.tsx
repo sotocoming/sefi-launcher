@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Copy, Check, Users, Wifi } from 'lucide-react';
+import { Copy, Check, Wifi } from 'lucide-react';
 
 import { useStore } from '../../store/store';
 
@@ -21,16 +21,48 @@ export const ServerStatusCard: React.FC = () => {
   const [copied, setCopied] = useState<string | null>(null);
   useEffect(() => { if (!copied) return; const timer = setTimeout(() => setCopied(null), 1800); return () => clearTimeout(timer); }, [copied]);
 
-  return <section className="server-panel" aria-label="Сервер сообщества">
-   <div className="server-heading"><div className="server-title"><strong>{name}</strong><p>Сервер сообщества</p></div><span className={`online ${checking?'checking':!isOnline?'offline':''}`}><i aria-hidden="true"/><span>{checking?'Проверка…':isOnline?'Онлайн':'Оффлайн'}</span></span></div>
-   <div className="connection-body"><div className="endpoint-list" role="radiogroup" aria-label="Адрес сервера для подключения">{endpoints.map(e=><div className={`endpoint ${autoConnect&&selectedId===e.id?'selected':''}`} key={e.id}>
-   <button className="endpoint-select" role="radio" aria-checked={autoConnect&&selectedId===e.id} disabled={busy||!autoConnect} aria-label={e.label+': '+e.address} onClick={()=>{if(settings)void updateSettings({...settings,selectedServerId:e.id});}}><span className={`endpoint-radio ${!autoConnect?'invisible':''}`} aria-hidden="true">{selectedId===e.id&&<i/>}</span><b>{e.label}</b><span>{e.address}</span></button>
-   <button className="copy-address" aria-label={'Скопировать '+e.label+': '+e.address} onClick={async()=>{try{await navigator.clipboard.writeText(e.address);setCopied(e.id);}catch{setCopied(null);}}}>{copied===e.id?<Check size={12}/>:<Copy size={12}/>}</button></div>)}</div>
-   <label className="auto-row"><span>Подключаться сразу</span><input type="checkbox" checked={autoConnect} disabled={busy} onChange={event=>{if(settings)void updateSettings({...settings,autoConnect:event.target.checked});}}/></label></div>
-   <dl className="server-metrics server-readouts">
-     <div><dt className="sr-only">Игроки</dt><dd><Users size={13} aria-hidden="true"/><span className="metric-value">{checking||!isOnline?'—':playersOnline}</span>{isOnline&&<span className="metric-unit">/ {playersMax}</span>}</dd></div>
-     <div><dt className="sr-only">Пинг</dt><dd className="ping"><Wifi size={13} aria-hidden="true"/><span className="metric-value">{isOnline&&typeof serverStatus?.pingMs==='number'?serverStatus.pingMs:'—'}</span>{isOnline&&typeof serverStatus?.pingMs==='number'&&<span className="metric-unit">мс</span>}</dd></div>
-     <div className="port-readout"><dt>Порт</dt><dd>{port}</dd></div>
-   </dl>
+  const selectedEndpoint = endpoints.find(endpoint => endpoint.id === selectedId);
+  const selectedPort = selectedEndpoint && 'port' in selectedEndpoint && typeof selectedEndpoint.port === 'number' ? selectedEndpoint.port : port;
+  const ping = isOnline && typeof serverStatus?.pingMs === 'number' ? serverStatus.pingMs : null;
+
+  return <section className="server-panel server-connect" aria-label="Сервер сообщества">
+    <div className="server-heading">
+      <div className="server-title"><strong title={name}>{name}</strong><p>Сервер сообщества</p></div>
+      <span className={`online ${checking ? 'checking' : !isOnline ? 'offline' : ''}`} aria-label={checking ? 'Проверяем сервер' : isOnline ? 'Онлайн, игроков '+playersOnline+' из '+playersMax : 'Сервер оффлайн'}>
+        <i aria-hidden="true"/><span>{checking ? 'Проверка…' : isOnline ? <>Онлайн <span className="online-players">{playersOnline} / {playersMax}</span></> : 'Оффлайн'}</span>
+      </span>
+    </div>
+    <div className="connection-body">
+      <div className="route-picker">
+        <div className="route-tabs" role="radiogroup" aria-label="Адрес сервера для подключения">
+          {endpoints.map(endpoint => <button key={endpoint.id} type="button" role="radio" aria-checked={selectedId === endpoint.id}
+            disabled={busy} aria-label={endpoint.label+': '+endpoint.address}
+            tabIndex={selectedEndpoint ? selectedId === endpoint.id ? 0 : -1 : endpoint.id === endpoints[0].id ? 0 : -1}
+            onKeyDown={event => {
+              if (busy || !settings || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+              event.preventDefault();
+              const index = endpoints.findIndex(item => item.id === endpoint.id);
+              const next = event.key === 'Home' ? 0 : event.key === 'End' ? endpoints.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + endpoints.length) % endpoints.length;
+              void updateSettings({ ...settings, selectedServerId: endpoints[next].id });
+              event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]?.focus();
+            }}
+            onClick={() => { if (settings) void updateSettings({ ...settings, selectedServerId: endpoint.id }); }}>
+            {endpoint.label}
+          </button>)}
+        </div>
+        <div className="route-address">
+          <div className="route-address-main"><span title={selectedEndpoint?.address}>{selectedEndpoint?.address || 'Выберите маршрут'}</span>
+            <button className="copy-address" type="button" disabled={!selectedEndpoint}
+              aria-label={selectedEndpoint ? 'Скопировать '+selectedEndpoint.label+': '+selectedEndpoint.address : 'Скопировать адрес'}
+              onClick={async () => { if (!selectedEndpoint) return; try { await navigator.clipboard.writeText(selectedEndpoint.address); setCopied(selectedEndpoint.id); } catch { setCopied(null); } }}>
+              {copied === selectedEndpoint?.id ? <Check size={13}/> : <Copy size={13}/>}
+            </button>
+          </div>
+          <div className="route-address-meta"><span>Порт <b>{selectedPort}</b></span><span className="route-latency" aria-label={ping === null ? 'Пинг недоступен' : 'Пинг '+ping+' мс'}><Wifi size={12} aria-hidden="true"/>{ping === null ? '—' : ping+' мс'}</span></div>
+        </div>
+      </div>
+    </div>
+    <label className="auto-row server-auto"><span>Подключаться сразу</span><input type="checkbox" checked={autoConnect} disabled={busy}
+      onChange={event => { if (settings) void updateSettings({ ...settings, autoConnect: event.target.checked }); }}/></label>
   </section>;
 };

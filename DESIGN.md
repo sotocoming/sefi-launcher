@@ -19,3 +19,5 @@ Home overview refinement: server, modpack and news share one bordered surface. E
 Home alignment refinement: both panel titles use a shared 13/20 type treatment at every supported width. Footer labels use 9/13 and values 13/18, within a 42 px footer track. A continuous separator spans both columns. The rotated artwork fades on an unrotated layer before the footer; no inset shadow rectangle.
 
 Connection grouping refinement: endpoint routes form one soft control group with region tags, aligned addresses and copy actions. Auto-connect remains a separate full-width setting row. Server metrics use an inline icon/readout strip instead of equal table columns; port is secondary metadata. All values and accessible labels remain available.
+
+Connection selector refinement: EURO/RU are mutually exclusive route tabs above a single readable address with copy action. Port and measured latency belong to the address metadata; player count sits in the online badge. Auto-connect occupies the footer as a separate opt-in. Route selection/copy is available while auto-connect is off and does not enable it. Tabs support arrow/Home/End keys and roving focus.

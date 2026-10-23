@@ -23,27 +23,31 @@ body{margin:0;background:#140f1c;color:var(--ui-text);font-family:Onest,sans-ser
 /* Shared baselines and one continuous footer divider. Artwork fades before it. */
 .status-panels{position:relative}.status-panels:after{content:"";position:absolute;left:16px;right:16px;bottom:58px;height:1px;background:var(--launcher-line);pointer-events:none}.server-title strong{display:flex}.status-panels .server-metrics dd{display:flex;align-items:baseline;height:18px;font-size:13px;line-height:18px}.status-panels .server-metrics dd span{line-height:14px}.pack-ready>div{position:relative;z-index:2}@media(max-width:1160px){.status-panels:after{left:14px;right:14px;bottom:56px}}
 
-/* Connection choices are one control group; the footer is a status strip. */
-.server-panel .connection-body{padding-top:5px}
-.server-panel .endpoint-list{padding:4px;border-radius:8px;background:#241a2e;gap:2px}
-.server-panel .endpoint{height:29px;min-height:29px;border-radius:5px;grid-template-columns:minmax(0,1fr) 25px}
-.server-panel .endpoint-select{grid-template-columns:10px 34px minmax(0,1fr);gap:6px;padding:0 4px;position:relative}
-.server-panel .endpoint-select:has(.endpoint-radio.invisible){grid-template-columns:34px minmax(0,1fr)}
-.server-panel .endpoint-radio.invisible{display:none}
-.server-panel .endpoint-select b{display:grid;place-items:center;height:19px;width:34px;border-radius:4px;background:#392746;font-size:9px;line-height:19px;letter-spacing:.02em}
-.server-panel .endpoint-select>span:last-child{font-size:10px;line-height:17px}
-.server-panel .endpoint.selected{background:#493054}
-.server-panel .endpoint.selected .endpoint-select b{background:#654077;color:#f3e3ff}
-.server-panel .endpoint:hover{background:#34233f}
-.server-panel .copy-address{align-self:stretch;opacity:.8}
-.server-panel .auto-row{margin:9px 0 0;min-height:20px;font-size:10px;line-height:20px}
-.server-panel .server-readouts{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding:0 0 1px;border:0}
-.server-panel .server-readouts>div{display:flex;align-items:baseline;gap:5px;padding:0;border:0;min-width:0}
-.server-panel .server-readouts dd{display:flex;align-items:baseline;gap:3px;height:18px;line-height:18px;font-size:13px;white-space:nowrap}
-.server-panel .server-readouts dd svg{align-self:center;color:#c9a8dc;margin-right:2px;stroke-width:1.7}
-.server-panel .server-readouts .metric-value{font-size:13px;line-height:18px;font-weight:600;color:inherit}
-.server-panel .server-readouts .metric-unit{font-size:10px;line-height:14px;color:var(--ui-muted)}
-.server-panel .server-readouts .ping svg,.server-panel .server-readouts .ping .metric-unit{color:var(--ui-green)}
-.server-panel .port-readout dt{height:auto;line-height:18px;margin:0;font-size:9px;color:var(--ui-muted)}
-.server-panel .port-readout dd{font-size:11px;font-weight:500;color:#d9c7e5}
-@media(max-width:1160px){.server-panel .endpoint-select{grid-template-columns:10px 30px minmax(0,1fr);gap:4px;padding:0 3px}.server-panel .endpoint-select:has(.endpoint-radio.invisible){grid-template-columns:30px minmax(0,1fr)}.server-panel .endpoint-select b{width:30px;font-size:8px}.server-panel .endpoint-select>span:last-child{font-size:9px}.server-panel .server-readouts{gap:7px}}
+/* Route selection, address and latency form one deliberate connection control. */
+.server-connect .server-title{min-width:0}
+.server-connect .server-title strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.server-connect .online{height:20px;padding:0 7px;font-size:9px;gap:4px}
+.online-players{margin-left:5px;padding-left:5px;border-left:1px solid #8fdfc24d;font-variant-numeric:tabular-nums;font-weight:600}
+.server-connect .connection-body{padding-top:6px}
+.route-picker{border-radius:9px;background:#24192e;overflow:hidden}
+.route-tabs{display:flex;gap:4px;padding:4px;border-bottom:1px solid #59406480}
+.route-tabs button{flex:1;min-width:0;min-height:26px;padding:3px 8px;border-radius:5px;background:none;color:#bdabc9;font-size:11px;font-weight:500;line-height:20px;text-align:center}
+.route-tabs button[aria-checked=true]{background:#51315f;color:#f4e6fc}
+.route-tabs button:hover:enabled{background:#3b2647;color:#fff}
+.route-tabs button[aria-checked=true]:hover:enabled{background:#613e72}
+.route-tabs button:disabled{opacity:.5}
+.route-tabs button:focus-visible{outline-offset:-2px}
+.route-address{padding:6px 10px 9px}
+.route-address-main{display:flex;align-items:center;gap:7px;min-width:0;min-height:24px}
+.route-address-main>span{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;line-height:20px;font-weight:500;color:#f1e6f7}
+.route-address-main .copy-address{width:23px;height:24px;flex:none;color:#c7aed5;border-radius:4px}
+.route-address-main .copy-address:hover{background:#493054;color:#fff}
+.route-address-main .copy-address:disabled{opacity:.35}
+.route-address-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;line-height:16px;color:#bda7ca}
+.route-address-meta b{font-weight:400;color:inherit;font-variant-numeric:tabular-nums}
+.route-latency{display:inline-flex;align-items:center;gap:5px;color:var(--ui-green);font-variant-numeric:tabular-nums}
+.server-connect .server-auto{display:flex;align-items:center;justify-content:space-between;align-self:stretch;min-height:0;margin:0;padding:7px 0 0;font-size:11px;line-height:18px;color:#ead9f3}
+.server-connect .server-auto input{flex:none}
+@media(max-width:1160px){.route-address{padding-left:9px;padding-right:7px}.route-address-main>span{font-size:11px}.server-connect .online{font-size:8px;padding:0 6px}.online-players{margin-left:4px;padding-left:4px}}
+
+.route-tabs button{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

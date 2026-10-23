@@ -36,8 +36,11 @@ const fs = require('node:fs'), path = require('node:path'), assert = require('no
     await page.waitForTimeout(500); // Let the home entrance animation finish before measuring layout.
     assert.equal(await toggle.isChecked(), false);
     const initialBounds = await play.boundingBox();
-    assert.equal(await euro.getAttribute('aria-checked'), 'false');
-    assert.equal(await euro.locator('span').first().evaluate(el => getComputedStyle(el).visibility), 'hidden');
+    assert.equal(await euro.getAttribute('aria-checked'), 'true');
+    assert.equal(await euro.isEnabled(), true);
+    await ru.click();
+    assert.equal(await ru.getAttribute('aria-checked'), 'true');
+    assert.equal(await toggle.isChecked(), false, 'Changing the inspected route must not enable auto-connect');
     await play.click();
     await page.waitForFunction(() => window.launches.length === 1);
     assert.equal(await page.evaluate(() => window.launches[0].autoConnect === true), false);

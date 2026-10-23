@@ -51,16 +51,16 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user" transition={{ duration: 0.18 }}>
     <div className="launcher-shell h-screen w-screen bg-sefi-bg flex items-center justify-center p-0 overflow-hidden text-sefi-textPrimary font-sans">
-      <div className="relative flex h-full w-full overflow-hidden border border-white/[0.07] bg-sefi-bg shadow-[0_40px_120px_rgba(0,0,0,0.65)]">
+      <div className="original-app">
         <a href="#main-content" className="skip-link">К содержимому</a>
         {/* Navigation Sidebar */}
         <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
 
         {/* Content View with Frameless TitleBar */}
-        <main id="main-content" tabIndex={-1} className="relative min-w-0 flex-1 overflow-hidden flex flex-col bg-sefi-bg">
+        <main id="main-content" tabIndex={-1} className="original-main app-main">
           <TitleBar />
 
-          <div className="relative flex-1 overflow-hidden">
+          <div className="app-page">
             <AnimatePresence mode="wait">
               {currentPage === 'home' && <HomePage key="home" onNavigate={setCurrentPage} />}
               {currentPage === 'map' && <MapPage key="map" />}

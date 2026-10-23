@@ -48,7 +48,7 @@ export const TitleBar: React.FC = () => {
   };
 
   return (
-    <header className="titlebar-drag relative z-50 flex h-11 w-full shrink-0 items-center justify-between border-b border-white/[0.04] bg-[#09090d]/80 backdrop-blur-md px-3 select-none">
+    <header className="window-chrome titlebar-drag relative z-50 flex h-11 w-full shrink-0 items-center justify-between border-b border-white/[0.04] bg-[#09090d]/80 backdrop-blur-md px-3 select-none">
       <span className="flex-1 pointer-events-none pl-3 text-xs text-sefi-textSecondary">SEFI Launcher</span>
 
       {/* Right controls area: Update status + window action buttons */}

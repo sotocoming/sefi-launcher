@@ -59,7 +59,7 @@ async function difference(page,a,b){
     },{get:(object,key)=>key in object?object[key]:()=>()=>{}});
    },{mode,png:png()});
    await page.goto('http://sefi.test/');
-   await page.getByRole('button',{name:'Аккаунты',exact:true}).click();
+   await page.getByRole('button',{name:'Аккаунт',exact:true}).click();
    const section=page.locator('section').filter({hasText:'Внешний вид'});
    await section.scrollIntoViewIfNeeded();
    if(mode==='offline'){
@@ -93,7 +93,7 @@ async function difference(page,a,b){
     await section.scrollIntoViewIfNeeded();
     await page.screenshot({path:path.join(__dirname,'../design/skins-community-'+(process.env.SEFI_SKIN_SIZE||64)+'.png')});
     await page.getByRole('button',{name:'Главная',exact:true}).click();
-    await page.getByRole('button',{name:'Аккаунты',exact:true}).click();
+    await page.getByRole('button',{name:'Аккаунт',exact:true}).click();
     await page.getByRole('button',{name:'Сбросить'}).waitFor();
     await page.getByRole('button',{name:'Сбросить'}).click();
     await page.getByRole('status').filter({hasText:'Скин сброшен'}).waitFor();

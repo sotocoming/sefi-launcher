@@ -125,6 +125,8 @@ export type GameState =
   | { status: 'error'; message: string };
 
 export interface ServerStatus {
+  /** Measured status ping round-trip time. Absent when the server does not answer ping. */
+  pingMs?: number;
   online: boolean;
   players: number;
   maxPlayers: number;

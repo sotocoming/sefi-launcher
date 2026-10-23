@@ -137,7 +137,13 @@ export const useStore = create<StoreState>((set, get) => ({
     set({ settings });
     const task = settingsSaveQueue.then(() => window.electronAPI.saveSettings(settings));
     settingsSaveQueue = task.catch(() => {});
-    try { await task; }
+    try {
+      await task;
+      if (previous?.selectedServerId !== settings.selectedServerId && get().settings === settings) {
+        set({ serverStatus: null });
+        await get().refreshServerStatus();
+      }
+    }
     catch (e) {
       if (get().settings === settings) set({ settings: previous });
       console.error('Failed to save settings', e);

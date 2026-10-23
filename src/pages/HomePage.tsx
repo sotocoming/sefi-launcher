@@ -5,32 +5,14 @@ import { ModpackStatusCard } from '../components/home/ModpackStatusCard';
 import { PlayButton } from '../components/home/PlayButton';
 import { NewsBanner } from '../components/home/NewsBanner';
 import { useStore } from '../store/store';
-import bgImage from '../assets/backgrounds/sefi-home-background.png';
-
-interface HomePageProps {
-  onNavigate: (page: 'home' | 'map' | 'news' | 'accounts' | 'settings') => void;
-}
-export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
-  const serverName = useStore(state => state.launcherConfig?.server?.name?.trim() || 'Sweet Home');
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="home-view">
-      <header className="home-hero">
-        <img src={bgImage} alt="" className="home-hero-image" />
-        <div className="home-hero-shade" />
-        <div className="home-heading">
-          <p className="text-sm font-medium text-sefi-purple">Твой уютный мир</p>
-          <h1>{serverName}</h1>
-          <p className="max-w-md text-sm leading-6 text-sefi-textSecondary">Возвращайся к своим постройкам, открытиям и друзьям.</p>
-        </div>
-      </header>
-      <div className="home-content">
-        <div className="home-status">
-          <ServerStatusCard />
-          <ModpackStatusCard />
-        </div>
-        <NewsBanner onOpenNews={() => onNavigate('news')} />
-        <PlayButton onOpenAccounts={() => onNavigate('accounts')} />
-      </div>
-    </motion.div>
-  );
+import world from '../assets/interface/world.png';
+import mascot from '../assets/interface/mascot.png';
+export const HomePage: React.FC<{onNavigate:(page:'home'|'map'|'news'|'accounts'|'settings')=>void}> = ({onNavigate}) => {
+ const name=useStore(s=>s.launcherConfig?.server?.name || 'Sweet Home');
+ return <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="home-scene">
+  <img className="original-world" src={world} alt=""/>
+  <div className="original-intro"><h1>Твой уютный мир<br/><span>Всегда рядом</span></h1><p><b>{name}</b> · Minecraft 1.20.1 · Fabric</p></div>
+  <img className="original-mascot" src={mascot} alt="Маскот SEFI с чёрным котом"/>
+  <div className="original-console"><div className="status-panels"><ServerStatusCard/><ModpackStatusCard/></div><NewsBanner onOpenNews={()=>onNavigate('news')}/><PlayButton onOpenAccounts={()=>onNavigate('accounts')}/></div>
+ </motion.div>;
 };

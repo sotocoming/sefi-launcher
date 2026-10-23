@@ -161,23 +161,24 @@ export const SettingsPage: React.FC = () => {
     } finally { setImporting(false); }
   };
 
+  const [activeTab,setActiveTab]=useState('game');
   return (
     <motion.div
       key="settings"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0 }}
-      className="page-view h-full overflow-y-auto px-8 pb-10 pt-6 select-none"
+      className="workspace-page settings-page"
     >
-      <div>
+      <div className="page-head">
         <h1 className="text-2xl font-bold text-white tracking-tight">Настройки</h1>
         <p className="mt-1 text-sm text-white/40">
           Параметры производительности, Java и поведения лаунчера
         </p>
       </div>
 
-      <div className="settings-sections mt-6">
-        <GlassCard className="p-5">
+      <div className="settings-layout"><nav className="settings-menu" aria-label="Разделы настроек">{[['game','Игра'],['java','Java и файлы'],['pack','Сборка'],['launcher','Лаунчер']].map(([id,label])=><button key={id} aria-pressed={activeTab===id} onClick={()=>setActiveTab(id)}>{label}</button>)}</nav><div className="settings-sections" data-tab={activeTab}>
+        <GlassCard data-setting="pack" className="p-5">
           <div className="text-base font-semibold text-white">Сборка и загрузка</div>
           <p className="mt-2 text-sm leading-relaxed text-white/60">
             Моды загружаются с Modrinth, затем с CurseForge и доступного зеркала SEFI.
@@ -191,7 +192,7 @@ export const SettingsPage: React.FC = () => {
           {importMessage && <p role={importError ? 'alert' : 'status'} className={`mt-3 text-sm leading-relaxed select-text ${importError ? 'text-rose-300' : 'text-emerald-300'}`}>{importMessage}</p>}
         </GlassCard>
 
-        <GlassCard className="p-5">
+        <GlassCard data-setting="pack" className="p-5">
           <div className="text-base font-semibold text-white">Управление в Minecraft</div>
           <p className="mt-2 text-sm leading-relaxed text-white/60">
             Если Shift или Ctrl блокируют ЛКМ либо ломание продолжается после отпускания кнопки,
@@ -208,7 +209,7 @@ export const SettingsPage: React.FC = () => {
         </GlassCard>
 
         {/* Memory & Performance */}
-        <GlassCard className="p-5">
+        <GlassCard data-setting="game" className="p-5">
           <div className="flex items-center gap-2.5">
             <MemoryStick size={18} className="text-fuchsia-300" />
             <div className="text-base font-semibold text-white">Память и производительность</div>
@@ -247,7 +248,7 @@ export const SettingsPage: React.FC = () => {
         </GlassCard>
 
         {/* Java & Directories */}
-        <GlassCard className="p-5">
+        <GlassCard data-setting="java" className="p-5">
           <div className="flex items-center gap-2.5">
             <Coffee size={18} className="text-fuchsia-300" />
             <div className="text-base font-semibold text-white">Java и пути</div>
@@ -332,7 +333,7 @@ export const SettingsPage: React.FC = () => {
           {directoryError && <p role="alert" className="mt-2 text-sm text-rose-300 whitespace-pre-wrap select-text">{directoryError}</p>}
         </GlassCard>
 
-        <GlassCard className="p-5">
+        <GlassCard data-setting="game" className="p-5">
           <h2 className="text-base font-semibold text-white">Статус в Discord</h2>
           <p className="mt-2 text-sm leading-5 text-white/50">Показывать Sweet Home, время игры и иконку сервера в профиле Discord. Статус меняется, когда вы выходите в меню или открываете одиночный мир.</p>
           <button type="button" role="switch" aria-checked={settings?.discordPresence !== false}
@@ -348,7 +349,7 @@ export const SettingsPage: React.FC = () => {
         </GlassCard>
 
         {/* Display & Launch Options */}
-        <GlassCard className="p-5">
+        <GlassCard data-setting="game" className="p-5">
           <div className="flex items-center gap-2.5">
             <Monitor size={18} className="text-fuchsia-300" />
             <div className="text-base font-semibold text-white">Экран и запуск</div>
@@ -393,7 +394,7 @@ export const SettingsPage: React.FC = () => {
           </div>
         </GlassCard>
 
-        <GlassCard className="p-5">
+        <GlassCard data-setting="launcher" className="p-5">
           <div className="flex items-center gap-2.5"><RotateCcw size={18} className="text-fuchsia-300" /><h2 className="text-base font-semibold text-white">Обновления лаунчера</h2></div>
           <p className="mt-2 text-sm text-white/50">Автоматически раз в 2 часа. Во время игры проверки приостановлены.</p>
           <p role="status" className="mt-3 text-sm text-white/70">{updateText}</p>
@@ -405,7 +406,7 @@ export const SettingsPage: React.FC = () => {
 
         {/* Update System & Test Mode (strictly visible during dev / npm run dev) */}
         {import.meta.env.DEV && (
-          <GlassCard className="p-5 border-emerald-500/20 bg-emerald-950/10">
+          <GlassCard data-setting="launcher" className="p-5 border-emerald-500/20 bg-emerald-950/10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <Sparkles size={18} className="text-emerald-400" />
@@ -447,7 +448,7 @@ export const SettingsPage: React.FC = () => {
             </div>
           </GlassCard>
         )}
-      </div>
+      </div></div>
     </motion.div>
   );
 };

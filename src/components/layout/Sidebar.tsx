@@ -1,9 +1,9 @@
 import { PlayerAvatar } from '../accounts/PlayerAvatar';
 import React from 'react';
-import { Home, Map, Newspaper, Users, Settings, Heart, ExternalLink } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Home, Map, Newspaper, UserRound, Settings, Heart, ChevronRight } from 'lucide-react';
+
 import { useStore } from '../../store/store';
-import sefiLogo from '../../assets/branding/sefi-logo.png';
+import sefiLogo from '../../assets/interface/logo-cat.png';
 import { version as launcherVersion } from '../../../package.json';
 
 interface SidebarProps {
@@ -22,7 +22,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
     { id: 'home' as const, label: 'Главная', icon: Home },
     { id: 'map' as const, label: 'Карта сервера', icon: Map },
     { id: 'news' as const, label: 'Новости', icon: Newspaper, count: publishedNewsCount },
-    { id: 'accounts' as const, label: 'Аккаунты', icon: Users },
+    { id: 'accounts' as const, label: 'Аккаунт', icon: UserRound },
     { id: 'settings' as const, label: 'Настройки', icon: Settings },
   ];
 
@@ -30,135 +30,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate }) => 
     try { const url = new URL(link.url); return ['support','discord','twitch'].includes(link.id) && url.protocol === 'https:' && !url.username && !url.password; }
     catch { return false; }
   });
-  return (
-    <aside className="launcher-sidebar flex w-[224px] shrink-0 flex-col border-r border-white/[0.06] bg-[#14151c] z-30 select-none">
-      {/* Brand Header with sefi-logo.png */}
-      <div className="flex h-[74px] items-center px-4">
-        <div className="flex items-center gap-3 w-full">
-          <img
-            src={sefiLogo}
-            alt="SEFI Launcher"
-            className="h-10 w-auto max-w-[180px] object-contain "
-          />
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <nav aria-label="Основная навигация" className="mt-3 space-y-1 px-3">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const active = currentPage === item.id;
-
-          return (
-            <button
-              aria-current={active ? 'page' : undefined}
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
-              className={`group relative flex h-11 w-full items-center gap-3 rounded-[10px] px-3 text-sm font-medium transition ${
-                active
-                  ? 'bg-white/[0.08] text-white'
-                  : 'text-white/45 hover:bg-white/[0.04] hover:text-white/75'
-              }`}
-            >
-              {active && (
-                <motion.div
-                  layoutId="sidebar-active"
-                  className="absolute left-0 h-5 w-[3px] rounded-full bg-sefi-purple"
-                />
-              )}
-
-              <Icon
-                size={18}
-                aria-hidden="true"
-                className={active ? 'text-fuchsia-300' : 'text-white/50 group-hover:text-white/80'}
-              />
-              <span className="flex-1 text-left">{item.label}</span>
-              {item.count !== undefined && item.count > 0 && (
-                <span title={`Новостей: ${item.count}`}
-                  className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-fuchsia-500/20 text-[10px] leading-none tabular-nums font-semibold text-fuchsia-300 border border-fuchsia-400/20">
-                  {item.count}
-                </span>
-              )}
-            </button>
-          );
-        })}
-        {links.length > 0 && <div className="mt-4 border-t border-white/[0.07] pt-3">
-          {links.map(link => <button key={link.id} type="button" title={link.label} onClick={() => void window.electronAPI.openExternal(link.url)} className="group flex h-10 w-full items-center gap-3 rounded-[10px] px-3 text-sm text-white/55 transition hover:bg-fuchsia-400/10 hover:text-fuchsia-200">
-            {link.id === 'support' ? <Heart size={18} className="shrink-0 text-fuchsia-300" /> : link.id === 'twitch' ? <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className="shrink-0" aria-hidden="true"><path d="M11.571 4.714h1.715v5.143h-1.715zm4.715 0H18v5.143h-1.714zM6 0 1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg> : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="shrink-0" aria-hidden="true"><path d="M8 5 5 6c-2 3-3 7-3 11l5 2 1-2m8-12 3 1c2 3 3 7 3 11l-5 2-1-2M7 8c3-2 7-2 10 0M7 16c3 2 7 2 10 0"/><circle cx="8.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>}
-            <span className="min-w-0 flex-1 text-left text-xs leading-tight line-clamp-2">{link.label}</span><ExternalLink size={12} className="shrink-0 text-white/30" />
-          </button>)}
-        </div>}
-      </nav>
-
-      {/* Active Account Widget */}
-      <div className="mt-auto p-3">
-        <button type="button" aria-label="Открыть аккаунты"
-          onClick={() => onNavigate('accounts')}
-          className="w-full text-left group cursor-pointer rounded-[14px] border border-white/[0.07] bg-white/[0.035] p-3 transition hover:border-fuchsia-400/30 hover:bg-white/[0.06]"
-        >
-          <div className="flex items-center gap-3">
-            <PlayerAvatar account={activeAccount} />
-
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-semibold text-white">
-                {activeAccount?.username || 'Нет аккаунта'}
-              </div>
-
-              <div className="mt-0.5 flex items-center gap-1.5 text-[11px] font-medium leading-none">
-                <span className={`inline-block size-1.5 rounded-full ${
-                  activeAccount?.communityConnected
-                    ? activeAccount.whitelistStatus === 'approved'
-                      ? 'bg-emerald-400'
-                      : activeAccount.whitelistStatus === 'rejected'
-                      ? 'bg-rose-400'
-                      : 'bg-amber-400'
-                    : activeAccount
-                    ? 'bg-emerald-400'
-                    : 'bg-zinc-500'
-                }`} />
-                <span className={
-                  activeAccount?.communityConnected
-                    ? activeAccount.whitelistStatus === 'approved'
-                      ? 'text-emerald-400/90'
-                      : activeAccount.whitelistStatus === 'rejected'
-                      ? 'text-rose-400/90'
-                      : 'text-amber-400/90'
-                    : activeAccount
-                    ? 'text-white/60'
-                    : 'text-white/40'
-                }>
-                  {activeAccount?.communityConnected
-                    ? activeAccount.whitelistStatus === 'approved'
-                      ? 'Доступ открыт'
-                      : activeAccount.whitelistStatus === 'rejected'
-                      ? 'Доступ отклонён'
-                      : 'Ожидает одобрения'
-                    : activeAccount
-                    ? 'Готово к игре'
-                    : 'Требуется вход'}
-                </span>
-              </div>
-
-            </div>
-          </div>
-
-          <div className="mt-2.5 flex items-center justify-between">
-            <span className="inline-flex rounded-md bg-violet-400/10 px-2 py-0.5 text-[10px] font-medium text-violet-300">
-              {activeAccount?.communityConnected
-                ? 'Twitch'
-                : activeAccount?.type === 'microsoft'
-                ? 'Лицензия'
-                : 'Офлайн'}
-            </span>
-            <span className="text-[10px] text-white/30 group-hover:text-white/60 transition">
-              Управление
-            </span>
-          </div>
-        </button>
-        <p className="mt-3 px-1 text-[11px] leading-none text-white/40 select-text" title="Версия лаунчера">
-          SEFI Launcher v{launcherVersion}
-        </p>
-      </div>
-    </aside>
-  );
+  const status=activeAccount?.communityConnected ? activeAccount.whitelistStatus === 'approved' ? 'Доступ открыт' : activeAccount.whitelistStatus === 'rejected' ? 'Доступ отклонён' : 'Ожидает одобрения' : activeAccount ? 'Готово к игре' : 'Требуется вход';
+  return <aside className="sidebar">
+   <button className="brand-button" onClick={()=>onNavigate('home')} aria-label="SEFI — главная"><img className="logo" src={sefiLogo} alt="SEFI Launcher"/></button>
+   <nav className="nav" aria-label="Основная навигация">{navItems.map(item=><button key={item.id} className={currentPage===item.id?'active':''} aria-current={currentPage===item.id?'page':undefined} onClick={()=>onNavigate(item.id)}><item.icon size={16} strokeWidth={1.7}/><span>{item.label}</span></button>)}</nav>
+   <div className="community-actions">{links.map(link=><button className="community-action" key={link.id} onClick={()=>void window.electronAPI.openExternal(link.url)}>{link.id==='support'?<Heart size={16} strokeWidth={1.7}/>:link.id==='discord'?<svg className="community-brand-icon" aria-hidden="true" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Discord</title><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/></svg>:<svg className="community-brand-icon" aria-hidden="true" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitch</title><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>}<span>{link.label}</span></button>)}</div>
+   <button className="account-block" onClick={()=>onNavigate('accounts')} aria-label="Открыть аккаунт"><PlayerAvatar account={activeAccount}/><span className="account-summary"><strong>{activeAccount?.username||'Нет аккаунта'}</strong><small>{status}</small></span><ChevronRight size={14}/></button>
+   <span className="launcher-version">SEFI Launcher v{launcherVersion}</span>
+  </aside>;
 };

@@ -197,7 +197,12 @@ function setupIpc() {
   secureIpc.handle('set-active-account', async (_, id) => await setActiveAccount(id));
 
   secureIpc.handle('get-launcher-config', getLauncherConfig);
-  secureIpc.handle('get-server-status', getServerStatus);
+  secureIpc.handle('get-server-status', async () => {
+    const config = await getLauncherConfig();
+    const settings = await getSettings();
+    const endpoint = config.server.endpoints?.find(item => item.id === settings.selectedServerId) || config.server.endpoints?.[0];
+    return getServerStatus(endpoint?.host || config.server.ip, endpoint?.port || config.server.port);
+  });
 
   async function newsRequest(event: Electron.IpcMainInvokeEvent, body?: object) {
     if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== mainWindow.webContents.mainFrame) {
@@ -350,6 +355,12 @@ function setupIpc() {
 }
 
 function setupAutoUpdater() {
+  if (app.commandLine.hasSwitch('ui-preview')) {
+    autoUpdater.autoInstallOnAppQuit = false;
+    secureIpc.handle('check-for-updates', async () => ({status:'error',error:'Локальная тестовая сборка. Автообновления отключены.'}));
+    secureIpc.handle('install-update', () => undefined);
+    return;
+  }
   let updateState: UpdateInfo = { status: 'idle' };
   const publish = (state: UpdateInfo) => { updateState = state; sendToMain('update-status-change', state); };
   updateChecks = new UpdateChecks({

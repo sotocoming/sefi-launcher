@@ -31,7 +31,7 @@ const fs = require('node:fs'), path = require('node:path'), assert = require('no
     const ru = page.getByRole('radio', { name: 'RU: minecraft.sotocoming.ru', exact: true });
     const euro = page.getByRole('radio', { name: 'EURO: mc.sotocoming.ru', exact: true });
     const toggleLabel = page.getByText('Подключаться сразу', { exact: true });
-    const play = page.getByRole('button', { name: /^ИГРАТЬ/ });
+    const play = page.getByRole('button', { name: /^Играть/i });
     await toggle.waitFor();
     await page.waitForTimeout(500); // Let the home entrance animation finish before measuring layout.
     assert.equal(await toggle.isChecked(), false);

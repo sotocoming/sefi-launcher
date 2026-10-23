@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { serverAccessWarning } from '../../utils/server-access';
 import { launchErrorMessage } from '../../utils/errors';
-import { Play, Download, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowRight, Play, Download, Loader2, AlertCircle } from 'lucide-react';
 import { useStore } from '../../store/store';
 
 export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAccounts }) => {
@@ -110,15 +110,15 @@ export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAcc
   return (
     <div className="relative">
       <motion.button
-        whileHover={!isDisabled ? { scale: 1.01 } : {}}
-        whileTap={!isDisabled ? { scale: 0.99 } : {}}
+        whileHover={!isDisabled ? { backgroundColor: '#8d42b4' } : {}}
+        whileTap={!isDisabled ? { opacity: 0.9 } : {}}
         onClick={handlePlay}
         disabled={isDisabled}
-        className={`launch-button ${isError ? 'launch-button-error' : ''}`}
+        className={`play launch-button ${isError ? 'launch-button-error' : ''}`}
       >
-        <div className="relative flex items-center justify-start gap-4 px-6 h-full">
+        <div className="play-inner">
           <div
-            className="launch-icon flex size-11 shrink-0 items-center justify-center"
+            className="play-circle launch-icon"
           >
             {isLaunching ? (
               <Loader2 size={20} className="animate-spin" />
@@ -129,24 +129,25 @@ export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAcc
             )}
           </div>
 
-          <div className="text-left min-w-0 flex-1">
-            <div className="launch-title leading-tight">
+          <div className="play-copy">
+            <div className="launch-title">
               {isLaunching
-                ? 'ЗАПУСК...'
+                ? 'Запуск…'
                 : isRunning
-                ? 'В ИГРЕ'
+                ? 'В игре'
                 : isError
-                ? 'ПОВТОРИТЬ ЗАПУСК'
+                ? 'Повторить запуск'
                 : !activeAccount
-                ? 'ВЫБЕРИТЕ АККАУНТ'
+                ? 'Выберите аккаунт'
                 : needsMicrosoftLogin
-                ? 'НУЖНА ЛИЦЕНЗИЯ'
-                : 'ИГРАТЬ'}
+                ? 'Нужна лицензия'
+                : 'Играть'}
             </div>
-            <div className="launch-detail mt-0.5 font-medium truncate">
+            <div className="launch-detail">
               {getSubtext()}
             </div>
           </div>
+          <span className="play-arrow" aria-hidden="true"><ArrowRight size={24} strokeWidth={2}/></span>
         </div>
       </motion.button>
       <dialog ref={warningDialog} onCancel={() => setWarningAccountId(null)} onClose={() => setWarningAccountId(null)}
@@ -156,7 +157,7 @@ export const PlayButton: React.FC<{ onOpenAccounts: () => void }> = ({ onOpenAcc
         <p id="server-access-detail" className="mt-3 text-sm leading-6 text-white/70">{accessWarning}</p>
         <div className="mt-5 flex flex-wrap gap-3">
           <button autoFocus onClick={() => { setWarningAccountId(null); onOpenAccounts(); }}
-            className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold hover:bg-purple-500">Аккаунты</button>
+            className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold hover:bg-purple-500">Аккаунт</button>
           <button onClick={continueLaunch} disabled={isDisabled}
             className="rounded-xl border border-white/20 px-4 py-2 text-sm hover:bg-white/10 disabled:opacity-50">Всё равно запустить</button>
           <button onClick={() => setWarningAccountId(null)} className="px-3 py-2 text-sm text-white/60 hover:text-white">Отмена</button>

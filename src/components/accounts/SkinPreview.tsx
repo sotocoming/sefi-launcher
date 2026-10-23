@@ -17,7 +17,7 @@ export function SkinPreview({ png, slim }: { png: string; slim: boolean }) {
     image.src = 'data:image/png;base64,' + png;
     Promise.all([import('skinview3d'), image.decode()]).then(([{ SkinViewer }]) => {
       if (!alive || !canvas.current) return;
-      instance = new SkinViewer({ canvas: canvas.current, width: 224, height: 260,
+      instance = new SkinViewer({ canvas: canvas.current, width: 224, height: 210,
         pixelRatio: Math.min(window.devicePixelRatio || 1, 2), zoom: 0.82, renderPaused: true });
       viewer.current = instance;
       instance.loadSkin(image, { model: model.current ? 'slim' : 'default' });
@@ -46,7 +46,7 @@ export function SkinPreview({ png, slim }: { png: string; slim: boolean }) {
     <span className="absolute left-3 top-3 rounded-md border border-cyan-200/15 bg-cyan-200/5 px-2 py-0.5 text-[10px] font-medium text-cyan-200/60">3D</span>
     <canvas ref={canvas} tabIndex={ready ? 0 : -1} role="img" aria-label="3D-скин персонажа. Перетаскивайте для вращения, колесо для приближения."
       aria-describedby="skin-rotation-help" data-ready={ready} hidden={failed}
-      className="h-[260px] w-56 touch-none cursor-grab outline-none active:cursor-grabbing focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-cyan-200/40"
+      className="h-[210px] w-56 touch-none cursor-grab outline-none active:cursor-grabbing focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-cyan-200/40"
       onKeyDown={event => {
         const current = viewer.current;
         if (!current || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home'].includes(event.key)) return;
@@ -61,7 +61,7 @@ export function SkinPreview({ png, slim }: { png: string; slim: boolean }) {
         } else position.y = Math.max(-30, Math.min(30, position.y + (event.key === 'ArrowUp' ? 5 : -5)));
         current.controls.update(); current.render();
       }} />
-    {failed && <div role="status" className="flex h-[260px] flex-col items-center justify-center gap-3 px-4 text-center">
+    {failed && <div role="status" className="flex h-[210px] flex-col items-center justify-center gap-3 px-4 text-center">
       <img src={'data:image/png;base64,' + png} alt="Текстура скина" className="h-24 w-24 [image-rendering:pixelated]" />
       <p className="text-xs text-white/50">3D-просмотр недоступен на этом устройстве.</p>
     </div>}

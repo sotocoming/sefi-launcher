@@ -13,3 +13,5 @@ The native React UI follows the approved original composition: left navigation, 
 All server status, authentication, skin editing, launch progress and settings remain native. Unavailable ping displays an em dash rather than fabricated latency.
 
 Local preview launches with --ui-preview and a separate --user-data-dir. This disables updater installation only for that explicit preview switch; normal production behavior is retained.
+
+Home overview refinement: server, modpack and news share one bordered surface. Endpoint choices are flat rows with a subtle selected wash; internal structure uses whitespace and thin dividers. News dates use Russian day/month formatting.

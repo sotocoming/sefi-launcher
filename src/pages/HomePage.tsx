@@ -13,6 +13,6 @@ export const HomePage: React.FC<{onNavigate:(page:'home'|'map'|'news'|'accounts'
   <img className="original-world" src={world} alt=""/>
   <div className="original-intro"><h1>Твой уютный мир<br/><span>Всегда рядом</span></h1><p><b>{name}</b> · Minecraft 1.20.1 · Fabric</p></div>
   <img className="original-mascot" src={mascot} alt="Маскот SEFI с чёрным котом"/>
-  <div className="original-console"><div className="status-panels"><ServerStatusCard/><ModpackStatusCard/></div><NewsBanner onOpenNews={()=>onNavigate('news')}/><PlayButton onOpenAccounts={()=>onNavigate('accounts')}/></div>
+  <div className="original-console"><div className="launcher-overview"><div className="status-panels"><ServerStatusCard/><ModpackStatusCard/></div><NewsBanner onOpenNews={()=>onNavigate('news')}/></div><PlayButton onOpenAccounts={()=>onNavigate('accounts')}/></div>
  </motion.div>;
 };

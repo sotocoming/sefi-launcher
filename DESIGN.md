@@ -30,3 +30,5 @@ The update indicator has a bounded static external mint halo (soft7px blur), vis
 Pack status semantics: checking uses soft blue#a9c8f2, missing installation uses rose-red#eda8b5, available update uses amber#e6c777, ready keeps mint#92dfbd. Text labels always remain alongside color.
 
 Preview implementation is integrated with upstream master fe6aaca (published launcher1.0.33). Keep claims fix1.0.2 and current installer/privacy packaging alongside the UI; package metadata and sidebar version come from the same package.json. This is a local UI preview, not a published replacement release.
+
+The map uses one shared SEFI surface. Launcher embeds /maps?embed=launcher and owns title/reload/open-browser; the embedded website hides its standalone header and retains one zoom/fit group. Refresh uses a bounded origin/source-validated message and preserves the child document/view, with a reload fallback for older pages. The15s slow notice is canceled once loaded. map-preview is an explicit local build mode only; ordinary builds use the HTTPS website.

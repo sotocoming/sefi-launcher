@@ -10,6 +10,8 @@ import type {
 } from './index';
 
 export interface IElectronAPI {
+  getReleaseNotesVersion(): Promise<string>;
+  acknowledgeReleaseNotes(version: string): Promise<void>;
   // Game
   launchGame(): Promise<void>;
 

@@ -3,6 +3,8 @@ import type { IElectronAPI } from '../src/types/electron';
 import type { GameState, DownloadProgress, Settings } from '../src/types';
 
 const api: IElectronAPI = {
+  getReleaseNotesVersion: () => ipcRenderer.invoke('get-release-notes-version'),
+  acknowledgeReleaseNotes: version => ipcRenderer.invoke('acknowledge-release-notes', version),
   launchGame: () => ipcRenderer.invoke('launch-game'),
   
   repairResourcePacks: () => ipcRenderer.invoke('repair-resource-packs'),

@@ -1,3 +1,4 @@
+import {ReleaseNotes} from './components/updates/ReleaseNotes';
 import { useEffect, useState } from 'react';
 import type { LaunchRecoveryTarget } from './utils/errors';
 import { AnimatePresence, MotionConfig } from 'framer-motion';
@@ -14,6 +15,7 @@ export default function App() {
   const { initStore, refreshServerStatus, setGameState, setDownloadProgress, setUpdateInfo } = useStore();
   const [currentPage, setCurrentPage] = useState<'home' | 'map' | 'news' | 'accounts' | 'settings'>('home');
 
+  const [notesRequest,setNotesRequest]=useState(0);
   const [settingsTarget,setSettingsTarget]=useState<LaunchRecoveryTarget>('game');
   const [updatesRequest,setUpdatesRequest]=useState(0);
 
@@ -74,12 +76,13 @@ export default function App() {
               {currentPage === 'map' && <MapPage key="map" />}
               {currentPage === 'news' && <NewsPage key="news" onNavigate={setCurrentPage} />}
               {currentPage === 'accounts' && <AccountsPage key="accounts" />}
-              {currentPage === 'settings' && <SettingsPage key="settings" updatesRequest={updatesRequest} initialTab={settingsTarget} />}
+              {currentPage === 'settings' && <SettingsPage key="settings" updatesRequest={updatesRequest} initialTab={settingsTarget} onOpenReleaseNotes={()=>setNotesRequest(n=>n+1)} />}
             </AnimatePresence>
           </div>
         </main>
       </div>
     </div>
+      <ReleaseNotes request={notesRequest}/>
     </MotionConfig>
   );
 }

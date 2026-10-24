@@ -7,7 +7,7 @@ import { useStore } from '../store/store';
 import type { LaunchRecoveryTarget } from '../utils/errors';
 import type { JavaStatus } from '../types';
 
-export const SettingsPage: React.FC<{ updatesRequest?: number;initialTab?:LaunchRecoveryTarget }> = ({ updatesRequest = 0,initialTab='game' }) => {
+export const SettingsPage: React.FC<{ updatesRequest?: number;initialTab?:LaunchRecoveryTarget;onOpenReleaseNotes?:()=>void }> = ({ updatesRequest = 0,initialTab='game',onOpenReleaseNotes }) => {
   const { settings, updateSettings, gameState } = useStore();
 
   const playing = !['idle', 'error'].includes(gameState.status);
@@ -217,7 +217,7 @@ export const SettingsPage: React.FC<{ updatesRequest?: number;initialTab?:Launch
             note="Нужен запущенный Discord с разрешённой игровой активностью."
             accessibleName="Показывать игру в Discord" checked={settings?.discordPresence!==false} disabled={!settings}
             onToggle={()=>{if(settings)void updateSettings({...settings,discordPresence:settings.discordPresence===false});}}/>
-          <SettingRow title="Обновления лаунчера"><LauncherUpdatePanel/></SettingRow>
+          <SettingRow title="Обновления лаунчера" control={<button className="s-button" onClick={onOpenReleaseNotes}>Посмотреть изменения</button>}><LauncherUpdatePanel/></SettingRow>
         </section>
       </div>
     </div>

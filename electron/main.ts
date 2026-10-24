@@ -1,3 +1,4 @@
+import { getReleaseNotesVersion, acknowledgeReleaseNotes } from './release-notes';
 import { cancelCommunityBrowser } from './minecraft/community-browser';
 import { trustedIpc, trustedDocument, embeddingHeaders } from './ipc-security';
 import { canonicalPack } from './minecraft/pack-sources';
@@ -138,6 +139,8 @@ function setupIpc() {
   });
   secureIpc.on('window-close', () => mainWindow?.close());
 
+  secureIpc.handle('get-release-notes-version', getReleaseNotesVersion);
+  secureIpc.handle('acknowledge-release-notes', (_, version) => acknowledgeReleaseNotes(version));
   secureIpc.handle('get-settings', getSettings);
   secureIpc.handle('save-settings', async (_, settings) => {
     await saveSettings(settings);

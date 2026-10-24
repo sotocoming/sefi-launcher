@@ -226,8 +226,16 @@ export const SettingsPage: React.FC = () => {
           <h2>Во время игры</h2>{toggle('Скрывать лаунчер на время игры',closeAfterLaunch,handleToggleClose)}
         </section>
         <section data-setting="launcher" className="setting-group setting-discord">
-          {toggle('Показывать игру в Discord',settings?.discordPresence!==false,()=>{if(settings)void updateSettings({...settings,discordPresence:settings.discordPresence===false});},'Sweet Home и время игры в вашем профиле','Статус в Discord')}
-          <p className="setting-detail">Работает, когда Discord запущен и разрешена игровая активность.</p>
+          <div className="setting-heading setting-toggle-heading">
+            <h2>Discord</h2>
+            <button type="button" className="setting-inline-switch" role="switch" aria-label="Показывать игру в Discord"
+              aria-checked={settings?.discordPresence!==false} disabled={!settings}
+              onClick={()=>{if(settings)void updateSettings({...settings,discordPresence:settings.discordPresence===false});}}>
+              <span className="setting-switch" aria-hidden="true"><i /></span>
+            </button>
+          </div>
+          <p>Показывать Sweet Home и время игры в профиле.</p>
+          <p className="setting-detail">Нужен запущенный Discord с разрешённой игровой активностью.</p>
         </section>
         <section data-setting="launcher" className="setting-group">
           <h2>Обновления</h2><p>Проверяем автоматически раз в 2 часа и приостанавливаем на время игры.</p>

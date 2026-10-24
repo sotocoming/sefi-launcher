@@ -62,6 +62,9 @@
 @media(max-width:1160px) { .settings-page .settings-menu { gap:24px; } .settings-page .setting-repair-row { align-items:flex-start; flex-direction:column; gap:10px; } }
 @media(prefers-reduced-motion:reduce) { .settings-page .setting-switch i { transition:none; } }
 
-.settings-page .setting-discord .setting-switch-row { padding:0; }
-.settings-page .setting-discord .setting-switch-row>span:first-child { gap:5px; }
-.settings-page .setting-discord>p.setting-detail { margin-top:12px; }
+
+.settings-page .setting-toggle-heading { justify-content:space-between; gap:20px; }
+.settings-page .setting-inline-switch { display:flex; align-items:center; justify-content:center; width:40px; height:28px; margin:-3px -3px -3px 0; padding:0; border:0; border-radius:5px; background:none; }
+.settings-page .setting-inline-switch:disabled { opacity:.45; }
+.settings-page .setting-inline-switch[aria-checked=true] .setting-switch { background:#9a5ab3; border-color:#c78fdf; }
+.settings-page .setting-inline-switch[aria-checked=true] .setting-switch i { transform:translateX(14px); background:#fff1ff; }

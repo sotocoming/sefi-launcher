@@ -1,23 +1,21 @@
 import React from 'react';
-
-
 import { useStore } from '../../store/store';
-import modpackIcon from '../../assets/icons/homestead-modpack-icon.png';
 
 export const ModpackStatusCard: React.FC = () => {
   const { modpackStatus, launcherConfig } = useStore();
-
-  const name = launcherConfig?.modpack?.name || 'Homestead Cozy';
-  const version = modpackStatus?.currentVersion || modpackStatus?.latestVersion || launcherConfig?.modpack?.version;
-  const checking = !modpackStatus;
-  const hasInstalledVersion = !!modpackStatus?.currentVersion;
-  const hasUpdate = modpackStatus?.updateAvailable ?? false;
-
-  const state = checking ? 'Проверка…' : !hasInstalledVersion ? 'Нужна установка' : hasUpdate ? 'Есть обновление' : 'Готово к запуску';
-  const detail = checking ? 'Проверяем установленную версию сборки.' : !hasInstalledVersion ? 'Установим моды и настройки сервера при первом запуске.' : hasUpdate ? 'Новая версия установится при следующем запуске.' : 'Моды и настройки сервера проверяем перед запуском.';
+  const name=launcherConfig?.modpack?.name || 'Homestead Cozy';
+  const version=modpackStatus?.currentVersion || modpackStatus?.latestVersion || launcherConfig?.modpack?.version;
+  const checking=!modpackStatus;
+  const installed=!!modpackStatus?.currentVersion;
+  const hasUpdate=modpackStatus?.updateAvailable ?? false;
+  const state=checking?'Проверка…':!installed?'Нужна установка':hasUpdate?'Есть обновление':'Готово к запуску';
+  const detail=checking?'Проверяем установленную версию сборки.':!installed?'Установим моды и настройки сервера при первом запуске.':hasUpdate?'Новая версия установится при следующем запуске.':'Моды и настройки сервера проверяем перед каждым запуском.';
   return <section className="pack-panel" aria-label="Игровая сборка">
-    <div className="pack-background-layer" aria-hidden="true"><img className="pack-background" src={modpackIcon} alt=""/></div>
-    <div className="pack-heading"><div><h2>{name} {version && <span>v{version}</span>}</h2><p>Minecraft 1.20.1 · Fabric</p></div></div>
-    <div className="pack-description"><strong className={checking || !hasInstalledVersion || hasUpdate ? 'pack-pending' : 'pack-ready-text'}>{state}</strong><p>{detail}</p></div>
+    <div className="pack-heading">
+      <div className="pack-heading-line"><h2 title={name}>{name}</h2>{version&&<span className="pack-version" title={version}>v{version}</span>}</div>
+      <p>Minecraft 1.20.1 · Fabric</p>
+    </div>
+    <p className="pack-summary">{detail}</p>
+    <div className={'pack-status '+(checking||!installed||hasUpdate?'is-pending':'is-ready')} role="status" aria-live="polite"><strong>{state}</strong></div>
   </section>;
 };

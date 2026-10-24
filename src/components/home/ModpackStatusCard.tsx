@@ -8,6 +8,7 @@ export const ModpackStatusCard: React.FC = () => {
   const checking=!modpackStatus;
   const installed=!!modpackStatus?.currentVersion;
   const hasUpdate=modpackStatus?.updateAvailable ?? false;
+  const statusKind=checking?'checking':!installed?'missing':hasUpdate?'update':'ready';
   const state=checking?'Проверка…':!installed?'Нужна установка':hasUpdate?'Есть обновление':'Готово к запуску';
   const detail=checking?'Проверяем установленную версию сборки.':!installed?'Установим моды и настройки сервера при первом запуске.':hasUpdate?'Новая версия установится при следующем запуске.':'Моды и настройки сервера проверяем перед каждым запуском.';
   return <section className="pack-panel" aria-label="Игровая сборка">
@@ -16,6 +17,6 @@ export const ModpackStatusCard: React.FC = () => {
       <p>Minecraft 1.20.1 · Fabric</p>
     </div>
     <p className="pack-summary">{detail}</p>
-    <div className={'pack-status '+(checking||!installed||hasUpdate?'is-pending':'is-ready')} role="status" aria-live="polite"><strong>{state}</strong></div>
+    <div className={'pack-status is-'+statusKind} role="status" aria-live="polite"><strong>{state}</strong></div>
   </section>;
 };

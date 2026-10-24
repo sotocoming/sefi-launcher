@@ -22,6 +22,7 @@ const api: IElectronAPI = {
   getAccounts: () => ipcRenderer.invoke('get-accounts'),
   addOfflineAccount: (username: string) => ipcRenderer.invoke('add-offline-account', username),
   loginMicrosoft: () => ipcRenderer.invoke('login-microsoft'),
+  cancelCommunityLogin: () => ipcRenderer.invoke('cancel-community-login'),
   loginCommunity: () => ipcRenderer.invoke('login-community'),
   linkMinecraftAccount: (id: string) => ipcRenderer.invoke('link-minecraft-account', id),
   refreshCommunityProfile: (accountId: string) => ipcRenderer.invoke('refresh-community-profile', accountId),
@@ -38,6 +39,7 @@ const api: IElectronAPI = {
     ipcRenderer.invoke('react-news', id, reaction, prev),
 
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
   installUpdate: () => ipcRenderer.invoke('install-update'),
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
   

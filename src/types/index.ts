@@ -135,9 +135,12 @@ export interface ServerStatus {
   favicon?: string;
 }
 
-export type UpdateStatus = 'idle' | 'checking' | 'available' | 'downloading' | 'ready' | 'error';
+export type UpdateStatus = 'idle' | 'checking' | 'available' | 'downloading' | 'ready' | 'installing' | 'error';
 
 export interface UpdateInfo {
+  phase?: 'check' | 'download' | 'install';
+  canInstall?: boolean;
+  checkedAt?: number;
   status: UpdateStatus;
   version?: string;
   releaseNotes?: string;

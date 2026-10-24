@@ -29,6 +29,7 @@ export interface IElectronAPI {
   getAccounts(): Promise<Account[]>;
   addOfflineAccount(username: string): Promise<Account>;
   loginMicrosoft(): Promise<Account>;
+  cancelCommunityLogin(): Promise<void>;
   loginCommunity(): Promise<Account>;
   linkMinecraftAccount(id: string): Promise<Account | null>;
   refreshCommunityProfile(accountId: string): Promise<Account | null>;
@@ -52,6 +53,7 @@ export interface IElectronAPI {
 
   // Updates & Links
   checkForUpdates(): Promise<UpdateInfo>;
+  getUpdateStatus?(): Promise<UpdateInfo>;
   installUpdate(): Promise<void>;
   openExternal(url: string): Promise<void>;
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Minus, Square, X, DownloadCloud, Sparkles } from 'lucide-react';
-import { useStore } from '../../store/store';
+import { Minus, Square, X } from 'lucide-react';
+import { LauncherUpdateIndicator } from '../updates/LauncherUpdate';
 
 interface WindowButtonProps {
   icon: typeof Minus;
@@ -22,8 +22,7 @@ const WindowButton: React.FC<WindowButtonProps> = ({ icon: Icon, onClick, danger
   );
 };
 
-export const TitleBar: React.FC = () => {
-  const { updateInfo, installLauncherUpdate, gameState } = useStore();
+export const TitleBar: React.FC<{onOpenUpdates:()=>void}> = ({onOpenUpdates}) => {
 
   const handleMinimize = () => {
     if (window.electronAPI?.minimize) {
@@ -49,25 +48,7 @@ export const TitleBar: React.FC = () => {
 
       {/* Right controls area: Update status + window action buttons */}
       <div className="flex items-center gap-3 titlebar-no-drag">
-        {/* Update Notification Indicator */}
-        {updateInfo?.status === 'downloading' && (
-          <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400">
-            <DownloadCloud size={13} className="animate-bounce text-emerald-400" />
-            <span>Загрузка {updateInfo.version ? `v${updateInfo.version}` : ''} ({updateInfo.percent || 0}%)</span>
-          </div>
-        )}
-
-        {updateInfo?.status === 'ready' && (
-          <button
-            onClick={installLauncherUpdate}
-            disabled={!['idle','error'].includes(gameState.status)}
-            title={!['idle','error'].includes(gameState.status) ? 'Установите обновление после выхода из игры' : 'Установить обновление'}
-            className="flex items-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-500/20 px-3.5 py-1 text-xs font-semibold text-emerald-300 transition hover:bg-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-          >
-            <Sparkles size={13} className="text-emerald-300" />
-            <span>Обновление готово! <b>Перезапустить</b></span>
-          </button>
-        )}
+        <LauncherUpdateIndicator onOpen={onOpenUpdates}/>
 
         {/* Window Controls */}
         <div className="window-actions">

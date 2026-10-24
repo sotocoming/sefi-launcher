@@ -1,3 +1,4 @@
+import { cancelCommunityBrowser } from './minecraft/community-browser';
 import { trustedIpc, trustedDocument, embeddingHeaders } from './ipc-security';
 import { canonicalPack } from './minecraft/pack-sources';
 import packCatalog from './minecraft/modpack-catalog.json';
@@ -175,6 +176,7 @@ function setupIpc() {
     bringToFront();
     return publicAccount(acc);
   });
+  secureIpc.handle('cancel-community-login', () => cancelCommunityBrowser());
   secureIpc.handle('login-community', async () => {
     const acc = await loginCommunity();
     bringToFront();
@@ -248,7 +250,7 @@ function setupIpc() {
     await launchGame((state) => {
       discordPresence.gameState(state);
       gameBusy = !['idle', 'error'].includes(state.status);
-      autoUpdater.autoInstallOnAppQuit = !gameBusy;
+      autoUpdater.autoInstallOnAppQuit = !app.commandLine.hasSwitch('ui-preview') && !gameBusy;
       if (!gameBusy) void updateChecks?.run();
       sendToMain('game-state-change', state);
       if (state.status === 'downloading') {
@@ -358,15 +360,21 @@ function setupAutoUpdater() {
   if (app.commandLine.hasSwitch('ui-preview')) {
     autoUpdater.autoInstallOnAppQuit = false;
     secureIpc.handle('check-for-updates', async () => ({status:'error',error:'Локальная тестовая сборка. Автообновления отключены.'}));
-    secureIpc.handle('install-update', () => undefined);
+    secureIpc.handle('get-update-status', () => ({status:'idle'}));
+    secureIpc.handle('install-update', () => { throw new Error('В тестовой сборке установка обновлений отключена.'); });
     return;
   }
   let updateState: UpdateInfo = { status: 'idle' };
+  let downloadReady = false;
+  const fail = (err: unknown) => {
+    const phase = updateState.status === 'installing' ? 'install' : ['available','downloading'].includes(updateState.status) ? 'download' : updateState.phase || 'check';
+    publish({status:'error',phase,canInstall:downloadReady,version:updateState.version,error:err instanceof Error ? err.message : 'Update error'});
+  };
   const publish = (state: UpdateInfo) => { updateState = state; sendToMain('update-status-change', state); };
   updateChecks = new UpdateChecks({
     state: () => updateState,
     blocked: () => gameBusy || !net.isOnline(),
-    check: async () => { await autoUpdater.checkForUpdates(); },
+    check: async () => { try { await autoUpdater.checkForUpdates(); } catch (err) { if(updateState.status !== 'error') fail(err); throw err; } },
   });
   autoUpdater.logger = console;
   // Automatically download updates in the background when available
@@ -390,7 +398,7 @@ function setupAutoUpdater() {
 
   autoUpdater.on('update-not-available', () => {
     publish({
-      status: 'idle'
+      status: 'idle', checkedAt: Date.now()
     });
   });
 
@@ -405,8 +413,9 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.on('update-downloaded', (info) => {
+    downloadReady = true;
     publish({
-      status: 'ready',
+      status: 'ready', canInstall:true,
       version: info.version,
       releaseNotes: typeof info.releaseNotes === 'string' ? info.releaseNotes : undefined
     });
@@ -414,12 +423,10 @@ function setupAutoUpdater() {
 
   autoUpdater.on('error', (err) => {
     console.error('AutoUpdater error:', err);
-    publish({
-      status: 'error',
-      error: err?.message || 'Update check error'
-    });
+    fail(err);
   });
 
+  secureIpc.handle('get-update-status', () => updateState);
   secureIpc.handle('check-for-updates', async () => {
     if (isDev) return { status: 'error', error: 'Обновления доступны в установленном лаунчере.' };
     return await updateChecks!.run(true);
@@ -427,7 +434,11 @@ function setupAutoUpdater() {
 
   secureIpc.handle('install-update', () => {
     // isSilent: true installs silently, isForceRunAfter: true launches new version immediately
-    if (!gameBusy) autoUpdater.quitAndInstall(false, true);
+    if (gameBusy) throw new Error('Сначала завершите Minecraft.');
+    if (isDev || !downloadReady) throw new Error('Обновление ещё не загружено.');
+    if (updateState.status === 'installing') return;
+    publish({...updateState,status:'installing',phase:'install',canInstall:true});
+    try { autoUpdater.quitAndInstall(false, true); } catch(err) { fail(err); throw err; }
   });
 
   // Check for updates shortly after launcher launch in production

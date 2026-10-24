@@ -26,12 +26,15 @@ class Auth {
 }
 const mod = {exports:{}};
 vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../dist-electron/electron/minecraft/accounts.js'),'utf8'), {
- exports:mod.exports,module:mod,console,URL,Buffer,AbortSignal,setTimeout,clearTimeout,queueMicrotask,
+ exports:mod.exports,module:mod,console,Error,URL,Buffer,AbortSignal,setTimeout,clearTimeout,queueMicrotask,
  require(id) {
   if (id==='electron') return {app:{getPath:()=>dir},BrowserWindow:FakeWindow};
   if (id==='msmc') return {Auth};
   if (id==='./community-browser') return {};
-  if (id==='./microsoft-session') return {MicrosoftSessionError:class extends Error{},microsoftFailure:e=>e,minecraftSession:async()=>({profile:{id:uuid,name:'Gon_Zumo'},accessToken:'test-game-token'})};
+  if (id==='./account-store') return {readAccounts:async()=>JSON.parse(fs.readFileSync(file,'utf8')),updateAccounts:async change=>{const a=JSON.parse(fs.readFileSync(file,'utf8'));const result=change(a);fs.writeFileSync(file,JSON.stringify(a));return result;}};
+  if (id==='./account-session') return {};
+  if (id==='./community-request') return {communityRequest:async(route,token,body)=>{assert(route.endsWith('/auto-link'));assert.equal(body.minecraft_access_token,'test-game-token');if(!succeeds)throw Error('Provider rejected proof');return {user:{mc_type:'microsoft',mc_uuid:uuid,mc_verified_at:123,whitelist_status:'pending'}};}};
+  if (id==='./microsoft-session') return {MicrosoftSessionError:class extends Error{},microsoftFailure:e=>e,microsoftCodeSession:async()=>({profile:{id:uuid,name:'Gon_Zumo'},accessToken:'test-game-token'})};
   return require(id);
  },
  fetch:async (url, options) => {

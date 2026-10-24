@@ -15,9 +15,9 @@ export class UpdateChecks {
     if (this.pending) return this.pending;
     const now = (this.deps.now || Date.now)();
     const state = this.deps.state();
+    if (['checking','available','downloading','ready','installing'].includes(state.status)) return state;
     if (this.deps.blocked()) return manual ? { status: 'error', error: 'Проверка недоступна во время игры или без подключения к сети.' } : state;
-    if (['checking', 'available', 'downloading', 'ready'].includes(state.status)
-        || now - this.lastAttempt < 60_000 || !manual && now < this.nextCheck) return state;
+    if (now - this.lastAttempt < 60_000 || !manual && now < this.nextCheck) return state;
     this.lastAttempt = now;
     this.nextCheck = now + 2 * 60 * 60_000;
     this.pending = (async () => {

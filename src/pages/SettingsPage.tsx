@@ -2,29 +2,14 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FolderOpen } from 'lucide-react';
 import { SettingRow, SwitchSetting } from '../components/settings/SettingRow';
+import { LauncherUpdatePanel } from '../components/updates/LauncherUpdate';
 import { useStore } from '../store/store';
 import type { JavaStatus } from '../types';
 
-export const SettingsPage: React.FC = () => {
-  const { settings, updateSettings, setUpdateInfo, updateInfo, gameState, installLauncherUpdate } = useStore();
+export const SettingsPage: React.FC<{ updatesRequest?: number }> = ({ updatesRequest = 0 }) => {
+  const { settings, updateSettings, gameState } = useStore();
 
-  const [checkingUpdate, setCheckingUpdate] = useState(false);
   const playing = !['idle', 'error'].includes(gameState.status);
-  const checkUpdates = async () => {
-    if (playing || checkingUpdate) return;
-    setCheckingUpdate(true);
-    try { setUpdateInfo(await window.electronAPI.checkForUpdates()); }
-    catch { setUpdateInfo({ status: 'error', error: 'Не удалось проверить обновления. Повторите позже.' }); }
-    finally { setCheckingUpdate(false); }
-  };
-  const updateText = playing ? 'Проверки приостановлены на время игры.'
-    : updateInfo?.status === 'checking' ? 'Проверяем обновления…'
-    : updateInfo?.status === 'downloading' ? 'Скачивание обновления: '+(updateInfo.percent || 0)+'%'
-    : updateInfo?.status === 'ready' ? 'Обновление скачано и готово к установке.'
-    : updateInfo?.status === 'available' ? 'Найдено обновление. Начинаем загрузку…'
-    : updateInfo?.status === 'error' ? 'Не удалось проверить или скачать обновление. Повторите позже.'
-    : updateInfo?.status === 'idle' ? 'Установлена актуальная версия.'
-    : 'Проверяйте вручную или дождитесь автоматической проверки.';
   const [repairingControls, setRepairingControls] = useState(false);
   const [controlsMessage, setControlsMessage] = useState('');
   const [controlsError, setControlsError] = useState(false);
@@ -162,6 +147,7 @@ export const SettingsPage: React.FC = () => {
   };
 
   const [activeTab,setActiveTab]=useState('game');
+  useEffect(()=>{if(updatesRequest>0)setActiveTab('launcher');},[updatesRequest]);
   const sections = [['game','Игра'],['java','Java и файлы'],['pack','Сборка'],['launcher','Лаунчер']];
 
   return <motion.div key="settings" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="workspace-page settings-page">
@@ -230,11 +216,7 @@ export const SettingsPage: React.FC = () => {
             note="Нужен запущенный Discord с разрешённой игровой активностью."
             accessibleName="Показывать игру в Discord" checked={settings?.discordPresence!==false} disabled={!settings}
             onToggle={()=>{if(settings)void updateSettings({...settings,discordPresence:settings.discordPresence===false});}}/>
-          <SettingRow title="Обновления лаунчера" description="Автоматически раз в 2 часа. На время игры проверка приостанавливается."
-            control={<button className="s-button" onClick={checkUpdates} disabled={playing||checkingUpdate||['checking','available','downloading'].includes(updateInfo?.status||'')}>{checkingUpdate?'Проверяем…':'Проверить'}</button>}>
-            <p className="setting-row-note" role="status">{updateText}</p>
-            {updateInfo?.status==='ready'&&<div className="setting-actions"><button className="s-button" onClick={installLauncherUpdate} disabled={playing}>Установить и перезапустить</button></div>}
-          </SettingRow>
+          <SettingRow title="Обновления лаунчера"><LauncherUpdatePanel/></SettingRow>
         </section>
       </div>
     </div>

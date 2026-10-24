@@ -1,0 +1,30 @@
+.launcher-update-panel{position:relative;padding:14px 16px;border:1px solid #49374f;border-radius:10px;background:#1c1424;font-family:Onest,sans-serif;isolation:isolate}
+.update-status-line{display:flex;align-items:center;gap:9px;min-width:0;color:#e9ddef;font-size:13px;line-height:20px}
+.update-status-line strong{font-weight:500}.update-version{margin-left:auto;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#c5b1d1}
+.update-signal{display:inline-grid;place-items:center;position:relative;flex:none;width:20px;height:20px;color:#cfb0df}
+.update-description{margin:8px 0 0;color:#c7b7d2;font-size:12px;line-height:20px;font-weight:400}
+.update-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}.update-notice{color:#e2c9bd}
+.update-state-error .update-status-line,.update-state-error .update-signal{color:#f0b0bd}
+.update-state-ready .update-status-line,.update-state-downloading .update-status-line,.update-state-available .update-status-line{color:#a5e1c5}
+.update-state-ready .has-energy,.update-state-downloading .has-energy{color:#bcf6d8;filter:drop-shadow(0 2px 7px #63df9c70)}
+.update-state-checking .update-signal svg,.update-state-installing .update-signal svg{animation:update-turn 1.8s linear infinite}
+.update-progress{height:4px;overflow:hidden;background:#3b2c44;border-radius:4px;margin-top:14px}
+.update-progress>span{display:block;transform-origin:left;width:100%;height:100%;background:#9cdeba;transition:transform .3s ease-out}
+.update-progress-meta{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;line-height:20px;font-variant-numeric:tabular-nums;color:#b9d7c7}
+.settings-page .update-install{background:#203a2c;border-color:#548b6c;color:#c8f2db}
+.settings-page .update-install:hover:enabled{background:#2a4c39;border-color:#83bc9c}
+.update-energy{position:absolute;width:42px;height:32px;left:-11px;top:-6px;pointer-events:none;overflow:visible}
+.update-particle{position:absolute;left:calc(11px + var(--particle)*5px);top:11px;width:2.5px;height:2.5px;border-radius:50%;background:#c0ffdc;box-shadow:0 2px 6px #72efa9b0;opacity:0;animation:update-shed 3s ease-out infinite;animation-delay:calc(var(--particle)*.4s)}
+.update-state-ready .update-particle{animation-iteration-count:1;animation-duration:2.6s}
+.window-chrome .launcher-update-indicator{position:relative;display:flex;align-items:center;gap:7px;flex:none;max-width:240px;height:24px;width:auto;padding:2px 9px;border:1px solid #49374f;border-radius:6px;background:#201627;color:#cfb9dd;font:400 12px/18px Onest,sans-serif;text-align:left;isolation:isolate}
+.launcher-update-indicator>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.window-chrome .launcher-update-indicator .update-signal{width:16px;height:16px}
+.window-chrome .launcher-update-indicator.update-state-ready,.window-chrome .launcher-update-indicator.update-state-downloading{border-color:#406d54;background:#192b22;color:#bdeacd}
+.window-chrome .launcher-update-indicator.update-state-error{border-color:#805264;color:#f0b0bd}
+.window-chrome .launcher-update-indicator:hover{border-color:#a485b6;filter:brightness(1.12)}
+.window-chrome .launcher-update-indicator:focus-visible{outline-offset:1px}
+@keyframes update-turn{to{transform:rotate(360deg)}}
+@keyframes update-shed{0%{opacity:0;transform:translate(0,-2px) scale(.5)}20%{opacity:.75}100%{opacity:0;transform:translate(calc((var(--particle) - 2)*5px),18px) scale(.35)}}
+@media(prefers-reduced-motion:reduce){.update-particle{display:none}.update-state-checking .update-signal svg,.update-state-installing .update-signal svg{animation:none}.update-progress>span{transition:none}}
+
+.has-energy::before{content:"";position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(circle,#79e6a733,transparent 72%);pointer-events:none}

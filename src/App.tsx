@@ -13,6 +13,8 @@ export default function App() {
   const { initStore, refreshServerStatus, setGameState, setDownloadProgress, setUpdateInfo } = useStore();
   const [currentPage, setCurrentPage] = useState<'home' | 'map' | 'news' | 'accounts' | 'settings'>('home');
 
+  const [updatesRequest,setUpdatesRequest]=useState(0);
+
   useEffect(() => {
     initStore();
 
@@ -40,6 +42,10 @@ export default function App() {
       });
     }
 
+    Promise.resolve(window.electronAPI?.getUpdateStatus?.()).then(info=>{
+      if(info?.status && (info.status !== 'idle' || info.checkedAt) && !useStore.getState().updateInfo) setUpdateInfo(info);
+    }).catch(()=>{});
+
     return () => {
       clearInterval(interval);
       unsubGameState();
@@ -54,11 +60,11 @@ export default function App() {
       <div className="original-app">
         <a href="#main-content" className="skip-link">К содержимому</a>
         {/* Navigation Sidebar */}
-        <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+        <Sidebar currentPage={currentPage} onNavigate={page=>{setUpdatesRequest(0);setCurrentPage(page);}} />
 
         {/* Content View with Frameless TitleBar */}
         <main id="main-content" tabIndex={-1} className="original-main app-main">
-          <TitleBar />
+          <TitleBar onOpenUpdates={()=>{setUpdatesRequest(n=>n+1);setCurrentPage('settings');}} />
 
           <div className="app-page">
             <AnimatePresence mode="wait">
@@ -66,7 +72,7 @@ export default function App() {
               {currentPage === 'map' && <MapPage key="map" />}
               {currentPage === 'news' && <NewsPage key="news" onNavigate={setCurrentPage} />}
               {currentPage === 'accounts' && <AccountsPage key="accounts" />}
-              {currentPage === 'settings' && <SettingsPage key="settings" />}
+              {currentPage === 'settings' && <SettingsPage key="settings" updatesRequest={updatesRequest} />}
             </AnimatePresence>
           </div>
         </main>

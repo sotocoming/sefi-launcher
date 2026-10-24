@@ -1,0 +1,20 @@
+import { app } from 'electron';
+import { readFileSync, readdirSync } from 'fs';
+import path from 'path';
+
+let cachedAssets: {logo:string;fonts:string} | undefined;
+function assets() {
+  if(cachedAssets)return cachedAssets;
+  try {
+    const dir=path.join(app.getAppPath(),'dist','assets'), files=readdirSync(dir);
+    const read=(prefix:string)=>readFileSync(path.join(dir,files.find(name=>name.startsWith(prefix))!)).toString('base64');
+    cachedAssets={logo:'data:image/png;base64,'+read('logo-cat-'),fonts:[0,1].map((n)=>"@font-face{font-family:Onest;font-weight:"+(n?'500 700':'400')+";src:url(data:font/ttf;base64,"+read('Onest-'+n+'-')+") format('truetype')}").join('')};
+  }catch{cachedAssets={logo:'',fonts:''};}
+  return cachedAssets;
+}
+export function browserAuthPage(invalid=false) {
+  const media=assets();
+  const title=invalid?'Подтверждение не принято':'Подтверждение передано';
+  const message=invalid?'Эта ссылка недействительна или относится к другой попытке входа. Вернитесь в SEFI Launcher и начните вход заново.':'Лаунчер завершает вход. Вернитесь в приложение — результат появится там.';
+  return '<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+title+' · SEFI Launcher</title><style>'+media.fonts+"\n:root{color-scheme:dark;font-family:Onest,sans-serif;background:#120d19;color:#f4ecf7}*{box-sizing:border-box}body{margin:0;min-height:100svh;display:grid;place-items:center;padding:32px 24px;background:radial-gradient(ellipse at 50% 0%,#32203b70,transparent 65%),#120d19}::selection{background:#76508c;color:#fff}main{width:100%;max-width:452px}.logo{display:block;width:144px;height:86px;object-fit:contain;margin:0 auto 38px}.auth-content{padding:0 8px}h1{font-size:28px;line-height:36px;font-weight:500;letter-spacing:-.025em;margin:0 0 14px;text-wrap:balance}p{font-size:14px;line-height:24px;color:#cbbbd4;margin:0 0 24px}.account{padding:15px 0;margin-bottom:24px;border-block:1px solid #49374f;display:flex;align-items:center;gap:12px}.account-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:#34243e;color:#dcc1e9}.account strong{display:block;font-size:14px;line-height:22px;font-weight:500;overflow-wrap:anywhere}.account small{font-size:12px;color:#cbbbd4}button{font:500 14px/22px Onest,sans-serif;min-height:44px;border-radius:8px;padding:11px 18px;cursor:pointer;border:1px solid transparent;transition:background .16s,color .16s}button.primary{width:100%;background:#9557ac;color:#fff}button.primary:hover:enabled{background:#a569ba}button:disabled{cursor:wait;opacity:.6}button.secondary{background:transparent;color:#d1bddb;display:block;margin:8px auto 0}button.secondary:hover:enabled{color:#fff;background:#251b2d}button:focus-visible{outline:2px solid #d5a5ec;outline-offset:4px}.safety{border-top:1px solid #49374f;margin-top:30px;padding-top:20px;font-size:12px;line-height:20px;color:#bca9c9}.error{padding:12px 14px;border:1px solid #825267;border-radius:8px;background:#33202c;color:#f3c5d1;font-size:13px;line-height:22px;margin-bottom:20px}.receipt{color:#b4e6cb;margin-bottom:16px;width:36px;height:36px;display:grid;place-items:center;background:#21352b;border-radius:10px}.close-note{font-size:12px;color:#bca9c9;margin-top:28px}svg{width:20px;height:20px;stroke-width:1.6}[hidden]{display:none!important}@media(max-width:480px){body{padding:28px 22px}.logo{margin-bottom:28px}h1{font-size:25px;line-height:33px}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}"+'</style></head><body><main>'+(media.logo?'<img class="logo" src="'+media.logo+'" alt="SEFI Launcher">':'')+'<div class="auth-content">'+(invalid?'':'<div class="receipt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4M9 10l2 2 4-4"/></svg></div>')+'<h1>'+title+'</h1><p>'+message+'</p><p class="safety">Эту вкладку можно закрыть.</p></div></main></body></html>';
+}

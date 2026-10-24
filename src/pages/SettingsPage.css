@@ -61,3 +61,7 @@
 .settings-page .settings-sections>.setting-group[data-setting=launcher]+.setting-group[data-setting=launcher] { margin-top:20px; padding-top:20px; }
 @media(max-width:1160px) { .settings-page .settings-menu { gap:24px; } .settings-page .setting-repair-row { align-items:flex-start; flex-direction:column; gap:10px; } }
 @media(prefers-reduced-motion:reduce) { .settings-page .setting-switch i { transition:none; } }
+
+.settings-page .setting-discord .setting-switch-row { padding:0; }
+.settings-page .setting-discord .setting-switch-row>span:first-child { gap:5px; }
+.settings-page .setting-discord>p.setting-detail { margin-top:12px; }

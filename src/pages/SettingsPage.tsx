@@ -225,10 +225,9 @@ export const SettingsPage: React.FC = () => {
         <section data-setting="launcher" className="setting-group">
           <h2>Во время игры</h2>{toggle('Скрывать лаунчер на время игры',closeAfterLaunch,handleToggleClose)}
         </section>
-        <section data-setting="launcher" className="setting-group">
-          <h2>Discord</h2><p>Показывать Sweet Home и время игры в профиле.</p>
-          {toggle('Показывать игру в Discord',settings?.discordPresence!==false,()=>{if(settings)void updateSettings({...settings,discordPresence:settings.discordPresence===false});})}
-          <p className="setting-detail">Включено по умолчанию. Нужен запущенный Discord с разрешённой игровой активностью.</p>
+        <section data-setting="launcher" className="setting-group setting-discord">
+          {toggle('Показывать игру в Discord',settings?.discordPresence!==false,()=>{if(settings)void updateSettings({...settings,discordPresence:settings.discordPresence===false});},'Sweet Home и время игры в вашем профиле','Статус в Discord')}
+          <p className="setting-detail">Работает, когда Discord запущен и разрешена игровая активность.</p>
         </section>
         <section data-setting="launcher" className="setting-group">
           <h2>Обновления</h2><p>Проверяем автоматически раз в 2 часа и приостанавливаем на время игры.</p>

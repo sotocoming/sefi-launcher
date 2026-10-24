@@ -20,3 +20,5 @@ Opaque settings surface and flat page background verified in settings-contrast-g
 
 ## Approved refined settings implementation
 Final result: passed. Source reference: settings-refined-game.png and settings-refined-java.png, approved by user. Implemented screenshots: settings-final-game.png, settings-final-java.png, settings-final-pack.png and settings-final-launcher.png. Matched at1280×720 with same fixture. All four categories have zero horizontal overflow; Java, pack and launcher also have zero vertical overflow. Native controls replace preview DOM adaptation; fullscreen accessible label and settings guards retained. Renderer typecheck/build, Discord persistence, repair states and all-screen/minimum-window checks passed.
+
+Discord row refinement: removed repeated heading and explanatory labels. One switch row now contains a title and purpose; one short prerequisite line follows. Screenshot settings-discord-refined.png; detail settings-discord-detail.png. Production build and Discord default/persistence regression passed. Packaged preview was not replaced or restarted in this pass.

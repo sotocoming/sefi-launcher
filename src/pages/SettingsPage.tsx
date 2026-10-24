@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FolderOpen } from 'lucide-react';
-import './SettingsPage.css';
+import { SettingRow, SwitchSetting } from '../components/settings/SettingRow';
 import { useStore } from '../store/store';
 import type { JavaStatus } from '../types';
 
@@ -83,8 +83,8 @@ export const SettingsPage: React.FC = () => {
   useEffect(() => {
     if (settings) {
       setRam(Math.round(settings.ramMax / 1024));
-      setFullscreen(settings.fullscreen);
-      setCloseAfterLaunch(settings.closeOnLaunch);
+      setFullscreen(settings.fullscreen ?? false);
+      setCloseAfterLaunch(settings.closeOnLaunch ?? false);
       setJavaPath(settings.javaPath || 'Java SEFI · автоматическая установка');
       if (settings.gameDirectory) setGameDir(settings.gameDirectory);
     }
@@ -163,85 +163,78 @@ export const SettingsPage: React.FC = () => {
 
   const [activeTab,setActiveTab]=useState('game');
   const sections = [['game','Игра'],['java','Java и файлы'],['pack','Сборка'],['launcher','Лаунчер']];
-  const toggle = (label: string, checked: boolean, onClick: () => void, description?: string, visibleLabel = label) => (
-    <button type="button" className="setting-switch-row" role="switch" aria-label={label}
-      aria-checked={checked} disabled={!settings} onClick={onClick}>
-      <span>{visibleLabel}{description && <small>{description}</small>}</span><span className="setting-switch" aria-hidden="true"><i /></span>
-    </button>
-  );
+
   return <motion.div key="settings" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="workspace-page settings-page">
     <header className="page-head"><h1>Настройки</h1><p>Игра, файлы и поведение лаунчера</p></header>
     <div className="settings-layout">
       <nav className="settings-menu" aria-label="Разделы настроек">{sections.map(([id,label]) =>
         <button key={id} aria-pressed={activeTab===id} onClick={()=>setActiveTab(id)}>{label}</button>)}</nav>
       <div className="settings-sections" data-tab={activeTab} key={activeTab}>
-        <section data-setting="game" className="setting-group setting-memory">
-          <h2>Память</h2><p>Для Homestead Cozy рекомендуем 4–8 ГБ оперативной памяти.</p>
-          <div className="memory-control"><label htmlFor="game-memory">Выделено для Minecraft</label><output htmlFor="game-memory">{ram} ГБ</output></div>
-          <input id="game-memory" aria-label="Выделенная оперативная память" aria-valuetext={ram+' ГБ'} type="range" style={{'--memory-fill': ((ram-2)/14*100)+'%'} as React.CSSProperties} min={2} max={16} step={1} value={ram} disabled={!settings}
-            onChange={e=>handleRamChange(Number(e.target.value))}/>
-          <div className="memory-scale"><span>2 ГБ</span><span>16 ГБ</span></div>
+        <section data-setting="game" className="settings-tab">
+          <SettingRow title="Память" description="Для Homestead Cozy рекомендуем 4–8 ГБ оперативной памяти."
+            className="setting-memory" control={<output className="memory-value" htmlFor="game-memory">{ram} ГБ</output>}>
+            <input id="game-memory" aria-label="Выделенная оперативная память" aria-valuetext={ram+' ГБ'}
+              type="range" style={{'--memory-fill': ((ram-2)/14*100)+'%'} as React.CSSProperties}
+              min={2} max={16} step={1} value={ram} disabled={!settings} onChange={e=>handleRamChange(Number(e.target.value))}/>
+            <div className="memory-scale"><span>2 ГБ</span><span>16 ГБ</span></div>
+          </SettingRow>
+          <SwitchSetting title="Полноэкранный режим" description="Открывать Minecraft на весь экран."
+            accessibleName="Полноэкранный режим по умолчанию" checked={fullscreen} disabled={!settings} onToggle={handleToggleFullscreen}/>
         </section>
-        <section data-setting="game" className="setting-group setting-display">
-          {toggle('Полноэкранный режим по умолчанию',fullscreen,handleToggleFullscreen,'Открывать Minecraft на весь экран','Полноэкранный режим')}
+        <section data-setting="java" className="settings-tab">
+          <SettingRow title="Java для игры"
+            description={settings?.javaPath?'Используем выбранную вами Java. Версию и разрядность проверяем перед запуском.':'Java 21 устанавливается автоматически при первом запуске игры.'}
+            control={<span className={'setting-status '+(javaStatus?.status==='ready'?'is-ready':'')}>
+              {javaBusy?'Подготовка…':!javaStatus?'Проверяем…':javaStatus.status==='ready'?'Java '+javaStatus.version+' · 64 бит':javaStatus.status==='missing'?'Установится при запуске':'Нужна проверка'}
+            </span>}>
+            <div className="setting-path">{javaStatus?.path || javaPath}</div>
+            <div className="setting-actions">
+              <button className="s-button" disabled={playing||javaBusy||!settings} onClick={handleSelectJava}>Выбрать свою Java</button>
+              {settings?.javaPath?<button className="s-button" disabled={playing||javaBusy||!settings} onClick={handleResetJava}>Использовать Java SEFI</button>:
+                <button className="s-button" disabled={playing||javaBusy||!settings} onClick={handlePrepareJava}>{javaBusy?'Подготовка Java…':javaStatus?.status==='ready'?'Проверить Java SEFI':'Скачать Java SEFI'}</button>}
+            </div>
+            {(javaTask||javaStatus?.message)&&<p className="setting-row-note" role="status">{javaTask||javaStatus?.message}</p>}
+            {javaError&&<p className="setting-feedback" role="alert">{javaError}</p>}
+          </SettingRow>
+          <SettingRow title="Папка игры" description="Здесь хранятся сборка, миры и скриншоты.">
+            <div className="setting-path">{gameDir}</div>
+            <div className="setting-actions">
+              <button className="s-button" disabled={playing||javaBusy||!settings} onClick={handleSelectGameDir}>Изменить папку</button>
+              <button className="s-button" disabled={!settings} onClick={handleOpenGameDir}><FolderOpen size={14} strokeWidth={1.5}/>Открыть папку</button>
+            </div>
+            <p className="setting-row-note">При выборе диска создадим на нём папку SEFI Minecraft.</p>
+            {directoryError&&<p className="setting-feedback" role="alert">{directoryError}</p>}
+          </SettingRow>
         </section>
-        <section data-setting="java" className="setting-group">
-          <div className="setting-heading"><h2>Java</h2><span className={'setting-status '+(javaStatus?.status==='ready'?'is-ready':'')}>
-            {javaBusy?'Подготовка…':!javaStatus?'Проверяем…':javaStatus.status==='ready'?'Java '+javaStatus.version+' · 64 бит':javaStatus.status==='missing'?'Установится при запуске':'Нужна проверка'}</span></div>
-          <p>{settings?.javaPath?'Используем выбранную вами Java. Версию и разрядность проверяем перед запуском.':'Java 21 устанавливается автоматически при первом запуске игры.'}</p>
-          <div className="setting-path">{javaPath}</div>
-          <div className="setting-actions">
-            <button className="s-button" disabled={playing||javaBusy||!settings} onClick={handleSelectJava}>Выбрать свою Java</button>
-            {settings?.javaPath?<button className="s-button" disabled={playing||javaBusy||!settings} onClick={handleResetJava}>Использовать Java SEFI</button>:
-            <button className="s-button" disabled={playing||javaBusy||!settings} onClick={handlePrepareJava}>{javaBusy?'Подготовка Java…':javaStatus?.status==='ready'?'Проверить Java SEFI':'Скачать Java SEFI'}</button>}
+        <section data-setting="pack" className="settings-tab">
+          <SettingRow title="Установка сборки"
+            description="Моды и настройки загружаются автоматически при запуске. Уже скачанный официальный ZIP Homestead 1.3.7 можно импортировать."
+            control={<button className="s-button" disabled={importing||playing||!settings} onClick={handleImport}>{importing?'Проверяем архив…':'Импортировать ZIP'}</button>}>
+            <p className="setting-row-note">Проверим версию и состав архива. Недостающие моды скачаем отдельно.</p>
+            {importMessage&&<p role={importError?'alert':'status'} className="setting-feedback">{importMessage}</p>}
+          </SettingRow>
+          <div className="setting-recovery">
+            <h2 className="setting-group-title">Восстановление</h2>
+            <p className="setting-row-description">Перед применением закройте Minecraft. Создадим резервную копию и сохраним остальные настройки.</p>
+            <SettingRow headingLevel="h3" title="Сочетания Shift / Ctrl + ЛКМ" description="Отключить конфликтующие назначения JEI."
+              control={<button className="s-button" disabled={playing||repairingControls||!settings} onClick={handleRepairControls}>{repairingControls?'Исправляем…':'Исправить управление'}</button>}/>
+            <SettingRow headingLevel="h3" title="Интерфейс Homestead" description="Включить ресурс-пак сборки."
+              control={<button className="s-button" disabled={playing||repairingControls||!settings} onClick={handleRepairResources}>Вернуть интерфейс сборки</button>}/>
+            {controlsMessage&&<p role={controlsError?'alert':'status'} className="setting-feedback">{controlsMessage}</p>}
           </div>
-          {javaStatus?.path&&<p className="setting-detail setting-path">{javaStatus.path}</p>}
-          {(javaTask||javaStatus?.message)&&<p className="setting-detail" role="status">{javaTask||javaStatus?.message}</p>}
-          {javaError&&<p className="setting-feedback" role="alert">{javaError}</p>}
         </section>
-        <section data-setting="java" className="setting-group">
-          <h2>Папка игры</h2><p>Здесь хранятся сборка, миры и скриншоты.</p>
-          <div className="setting-path">{gameDir}</div>
-          <div className="setting-actions">
-            <button className="s-button" disabled={playing||javaBusy||!settings} onClick={handleSelectGameDir}>Изменить папку</button>
-            <button className="s-button" disabled={!settings} onClick={handleOpenGameDir}><FolderOpen size={14} strokeWidth={1.5}/>Открыть папку</button>
-          </div>
-          <p className="setting-detail">При выборе диска создадим на нём папку SEFI Minecraft.</p>
-          {directoryError&&<p className="setting-feedback" role="alert">{directoryError}</p>}
-        </section>
-        <section data-setting="pack" className="setting-group">
-          <h2>Установка сборки</h2><p>Моды и настройки загружаются автоматически при запуске. Если официальный ZIP Homestead 1.3.7 уже скачан, можно импортировать его.</p>
-          <div className="setting-actions"><button className="s-button" disabled={importing||playing||!settings} onClick={handleImport}>{importing?'Проверяем архив…':'Импортировать ZIP сборки'}</button></div>
-          <p className="setting-detail">Проверим версию и состав архива. Недостающие моды скачаем отдельно.</p>
-          {importMessage&&<p role={importError?'alert':'status'} className="setting-feedback">{importMessage}</p>}
-        </section>
-        <section data-setting="pack" className="setting-group">
-          <h2>Восстановление</h2><p>Исправления сохраняют остальные настройки и создают резервную копию. Перед применением закройте Minecraft.</p>
-          <div className="setting-repair-row"><div><h3>Сочетания Shift / Ctrl + ЛКМ</h3><p>Отключить конфликтующие назначения JEI.</p></div>
-            <button className="s-button" disabled={playing||repairingControls||!settings} onClick={handleRepairControls}>{repairingControls?'Исправляем…':'Исправить управление'}</button></div>
-          <div className="setting-repair-row"><div><h3>Интерфейс Homestead</h3><p>Включить ресурс-пак сборки.</p></div><button className="s-button" disabled={playing||repairingControls||!settings} onClick={handleRepairResources}>Вернуть интерфейс сборки</button></div>
-          {controlsMessage&&<p role={controlsError?'alert':'status'} className="setting-feedback">{controlsMessage}</p>}
-        </section>
-        <section data-setting="launcher" className="setting-group">
-          <h2>Во время игры</h2>{toggle('Скрывать лаунчер на время игры',closeAfterLaunch,handleToggleClose)}
-        </section>
-        <section data-setting="launcher" className="setting-group setting-discord">
-          <div className="setting-heading setting-toggle-heading">
-            <h2>Discord</h2>
-            <button type="button" className="setting-inline-switch" role="switch" aria-label="Показывать игру в Discord"
-              aria-checked={settings?.discordPresence!==false} disabled={!settings}
-              onClick={()=>{if(settings)void updateSettings({...settings,discordPresence:settings.discordPresence===false});}}>
-              <span className="setting-switch" aria-hidden="true"><i /></span>
-            </button>
-          </div>
-          <p>Показывать Sweet Home и время игры в профиле.</p>
-          <p className="setting-detail">Нужен запущенный Discord с разрешённой игровой активностью.</p>
-        </section>
-        <section data-setting="launcher" className="setting-group">
-          <h2>Обновления</h2><p>Проверяем автоматически раз в 2 часа и приостанавливаем на время игры.</p>
-          <p className="setting-detail" role="status">{updateText}</p>
-          <div className="setting-actions"><button className="s-button" onClick={checkUpdates} disabled={playing||checkingUpdate||['checking','available','downloading'].includes(updateInfo?.status||'')}>{checkingUpdate?'Проверяем…':'Проверить обновления'}</button>
-            {updateInfo?.status==='ready'&&<button className="s-button" onClick={installLauncherUpdate} disabled={playing}>Установить и перезапустить</button>}</div>
+        <section data-setting="launcher" className="settings-tab">
+          <SwitchSetting title="Скрывать лаунчер во время игры" description="Окно вернётся после выхода из Minecraft."
+            accessibleName="Скрывать лаунчер на время игры" checked={closeAfterLaunch} disabled={!settings} onToggle={handleToggleClose}/>
+          <SwitchSetting title="Статус в Discord" description="Показывать Sweet Home и время игры в профиле."
+            note="Нужен запущенный Discord с разрешённой игровой активностью."
+            accessibleName="Показывать игру в Discord" checked={settings?.discordPresence!==false} disabled={!settings}
+            onToggle={()=>{if(settings)void updateSettings({...settings,discordPresence:settings.discordPresence===false});}}/>
+          <SettingRow title="Обновления лаунчера" description="Автоматически раз в 2 часа. На время игры проверка приостанавливается."
+            control={<button className="s-button" onClick={checkUpdates} disabled={playing||checkingUpdate||['checking','available','downloading'].includes(updateInfo?.status||'')}>{checkingUpdate?'Проверяем…':'Проверить'}</button>}>
+            <p className="setting-row-note" role="status">{updateText}</p>
+            {updateInfo?.status==='ready'&&<div className="setting-actions"><button className="s-button" onClick={installLauncherUpdate} disabled={playing}>Установить и перезапустить</button></div>}
+          </SettingRow>
         </section>
       </div>
     </div>

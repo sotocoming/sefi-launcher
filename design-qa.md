@@ -17,3 +17,6 @@ Visual checks at 1280×720 and regression at 1100×680 passed. Collapsed news ha
 
 ## Settings contrast pass
 Opaque settings surface and flat page background verified in settings-contrast-game.png. Body contrast against #211a29 is 10.3:1; secondary copy is 9.1:1. Range track and switch boundaries were brightened. Renderer typecheck, production build, all-screen/minimum-window regression and Discord persistence passed. Existing open preview was not restarted.
+
+## Approved refined settings implementation
+Final result: passed. Source reference: settings-refined-game.png and settings-refined-java.png, approved by user. Implemented screenshots: settings-final-game.png, settings-final-java.png, settings-final-pack.png and settings-final-launcher.png. Matched at1280×720 with same fixture. All four categories have zero horizontal overflow; Java, pack and launcher also have zero vertical overflow. Native controls replace preview DOM adaptation; fullscreen accessible label and settings guards retained. Renderer typecheck/build, Discord persistence, repair states and all-screen/minimum-window checks passed.

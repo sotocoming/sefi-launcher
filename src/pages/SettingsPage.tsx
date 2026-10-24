@@ -163,10 +163,10 @@ export const SettingsPage: React.FC = () => {
 
   const [activeTab,setActiveTab]=useState('game');
   const sections = [['game','Игра'],['java','Java и файлы'],['pack','Сборка'],['launcher','Лаунчер']];
-  const toggle = (label: string, checked: boolean, onClick: () => void) => (
+  const toggle = (label: string, checked: boolean, onClick: () => void, description?: string, visibleLabel = label) => (
     <button type="button" className="setting-switch-row" role="switch" aria-label={label}
       aria-checked={checked} disabled={!settings} onClick={onClick}>
-      <span>{label}</span><span className="setting-switch" aria-hidden="true"><i /></span>
+      <span>{visibleLabel}{description && <small>{description}</small>}</span><span className="setting-switch" aria-hidden="true"><i /></span>
     </button>
   );
   return <motion.div key="settings" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="workspace-page settings-page">
@@ -175,16 +175,15 @@ export const SettingsPage: React.FC = () => {
       <nav className="settings-menu" aria-label="Разделы настроек">{sections.map(([id,label]) =>
         <button key={id} aria-pressed={activeTab===id} onClick={()=>setActiveTab(id)}>{label}</button>)}</nav>
       <div className="settings-sections" data-tab={activeTab} key={activeTab}>
-        <section data-setting="game" className="setting-group">
+        <section data-setting="game" className="setting-group setting-memory">
           <h2>Память</h2><p>Для Homestead Cozy рекомендуем 4–8 ГБ оперативной памяти.</p>
           <div className="memory-control"><label htmlFor="game-memory">Выделено для Minecraft</label><output htmlFor="game-memory">{ram} ГБ</output></div>
           <input id="game-memory" aria-label="Выделенная оперативная память" aria-valuetext={ram+' ГБ'} type="range" style={{'--memory-fill': ((ram-2)/14*100)+'%'} as React.CSSProperties} min={2} max={16} step={1} value={ram} disabled={!settings}
             onChange={e=>handleRamChange(Number(e.target.value))}/>
           <div className="memory-scale"><span>2 ГБ</span><span>16 ГБ</span></div>
         </section>
-        <section data-setting="game" className="setting-group">
-          <h2>Экран</h2>
-          {toggle('Полноэкранный режим по умолчанию',fullscreen,handleToggleFullscreen)}
+        <section data-setting="game" className="setting-group setting-display">
+          {toggle('Полноэкранный режим по умолчанию',fullscreen,handleToggleFullscreen,'Открывать Minecraft на весь экран','Полноэкранный режим')}
         </section>
         <section data-setting="java" className="setting-group">
           <div className="setting-heading"><h2>Java</h2><span className={'setting-status '+(javaStatus?.status==='ready'?'is-ready':'')}>

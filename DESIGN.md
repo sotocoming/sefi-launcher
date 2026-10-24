@@ -28,3 +28,5 @@ Play failures replace the main action with one compact plum/rose recovery surfac
 The update indicator has a bounded static external mint halo (soft7px blur), visible beyond the button and below its edge, with the existing perimeter sparks. Geometry and reduced-motion behavior stay unchanged. Pack titles and versions ellipsize with full title attributes; checking/missing/update/ready variants retain the same shared footer geometry.
 
 Pack status semantics: checking uses soft blue#a9c8f2, missing installation uses rose-red#eda8b5, available update uses amber#e6c777, ready keeps mint#92dfbd. Text labels always remain alongside color.
+
+Preview implementation is integrated with upstream master fe6aaca (published launcher1.0.33). Keep claims fix1.0.2 and current installer/privacy packaging alongside the UI; package metadata and sidebar version come from the same package.json. This is a local UI preview, not a published replacement release.

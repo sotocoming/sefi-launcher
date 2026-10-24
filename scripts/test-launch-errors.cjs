@@ -10,6 +10,7 @@ const cases=[
 ['HTTP 429','rate-limit','retry'],['fetch failed ENOTFOUND','network','retry'],['ETIMEDOUT','timeout','retry'],
 ['Сервис SEFI временно недоступен (HTTP 503). Аккаунт сохранён; повторите запуск позже.','service','retry'],
 ['В установке лаунчера отсутствует SEFI Auth.','launcher','settings','launcher'],
+['В установке лаунчера отсутствует исправление карты SEFI. Переустановите лаунчер.','launcher','settings','launcher'],
 ['EACCES: access denied','permission','settings','java'],['Windows запретила запуск Java.','permission','settings','java'],
 ['Для этой сборки нужна Java 21. Выберите Java SEFI в настройках.','java','settings','java'],
 ['Диск недоступен. Папка игры не существует.','directory','settings','java'],

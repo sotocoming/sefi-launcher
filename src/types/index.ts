@@ -166,3 +166,11 @@ export interface ControlRepairResult {
   changed: number;
   backupPath?: string;
 }
+
+export type ReportAttachmentId = 'build'|'launch'|'game'|'crash';
+export interface LaunchReportDraft {
+ id:string; title:string; summary:string; author:string|null; hasFailure:boolean;
+ attachments:{id:ReportAttachmentId;label:string;detail:string;available:boolean}[];
+}
+export interface LaunchReportPreview {token:string;text:string;bytes:number;canSend:boolean}
+export interface LaunchReportResult {id:string;ticketId?:number;warning?:string}

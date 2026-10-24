@@ -1,3 +1,4 @@
+import {LaunchReportDialog} from './components/reports/LaunchReportDialog';
 import {ReleaseNotes} from './components/updates/ReleaseNotes';
 import { useEffect, useState } from 'react';
 import type { LaunchRecoveryTarget } from './utils/errors';
@@ -15,6 +16,8 @@ export default function App() {
   const { initStore, refreshServerStatus, setGameState, setDownloadProgress, setUpdateInfo } = useStore();
   const [currentPage, setCurrentPage] = useState<'home' | 'map' | 'news' | 'accounts' | 'settings'>('home');
 
+  const [reportRequest,setReportRequest]=useState<{sequence:number;message:string}|null>(null);
+  useEffect(()=>{const open=(event:Event)=>{const value=(event as CustomEvent).detail?.message;setReportRequest(previous=>({sequence:(previous?.sequence||0)+1,message:typeof value==='string'?value.slice(0,16000):''}));};window.addEventListener('sefi-open-launch-report',open);return()=>window.removeEventListener('sefi-open-launch-report',open);},[]);
   const [notesRequest,setNotesRequest]=useState(0);
   const [settingsTarget,setSettingsTarget]=useState<LaunchRecoveryTarget>('game');
   const [updatesRequest,setUpdatesRequest]=useState(0);
@@ -83,6 +86,7 @@ export default function App() {
       </div>
     </div>
       <ReleaseNotes request={notesRequest}/>
+      <LaunchReportDialog request={reportRequest} onOpenAccounts={()=>setCurrentPage('accounts')}/>
     </MotionConfig>
   );
 }

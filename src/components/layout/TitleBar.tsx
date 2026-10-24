@@ -1,5 +1,4 @@
 import React from 'react';
-import { Minus, Square, X } from 'lucide-react';
 import { LauncherUpdateIndicator } from '../updates/LauncherUpdate';
 
 interface WindowButtonProps {

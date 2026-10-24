@@ -1,3 +1,4 @@
+import {prepareLaunchReport,previewLaunchReport,sendLaunchReport,exportLaunchReport} from './launch-reports';
 import { getReleaseNotesVersion, acknowledgeReleaseNotes } from './release-notes';
 import { cancelCommunityBrowser } from './minecraft/community-browser';
 import { trustedIpc, trustedDocument, embeddingHeaders } from './ipc-security';
@@ -139,6 +140,13 @@ function setupIpc() {
   });
   secureIpc.on('window-close', () => mainWindow?.close());
 
+  secureIpc.handle('prepare-launch-report', (_,message) => prepareLaunchReport(message));
+  secureIpc.handle('preview-launch-report', (_,id,options) => previewLaunchReport(id,options));
+  secureIpc.handle('send-launch-report', (_,id,token) => sendLaunchReport(id,token));
+  secureIpc.handle('export-launch-report', (_,id,token) => {
+    if(!mainWindow||mainWindow.isDestroyed())throw new Error('Окно лаунчера закрыто.');
+    return exportLaunchReport(mainWindow,id,token);
+  });
   secureIpc.handle('get-release-notes-version', getReleaseNotesVersion);
   secureIpc.handle('acknowledge-release-notes', (_, version) => acknowledgeReleaseNotes(version));
   secureIpc.handle('get-settings', getSettings);

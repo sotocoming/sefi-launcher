@@ -23,3 +23,5 @@
 @media(prefers-reduced-motion:reduce){.launch-preparation-track span{transition:none}}
 
 .server-access-dialog{width:min(448px,calc(100vw - 48px));padding:24px;border:1px solid #674a75;border-radius:12px;background:#1c1424;color:#efe4f5;font-family:Onest,sans-serif}.server-access-dialog h2{font-size:18px;line-height:25px;font-weight:500}.server-access-dialog p{font-size:13px;line-height:22px;color:#cfbcd9}.server-access-dialog button{font-size:12px;line-height:18px;font-weight:400;border-radius:7px;padding:9px 12px}.server-access-dialog button:first-child{background:#803f9d;color:#fff0fa}.server-access-dialog button:first-child:hover{background:#9554af}.server-access-dialog::backdrop{background:#08050bbf}
+
+.launch-failure-actions .launch-report-action{background:transparent;color:#e2c5dc;border-color:#805465}.launch-report-action:hover{background:#382232}

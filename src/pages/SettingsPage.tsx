@@ -217,7 +217,7 @@ export const SettingsPage: React.FC<{ updatesRequest?: number;initialTab?:Launch
             note="Нужен запущенный Discord с разрешённой игровой активностью."
             accessibleName="Показывать игру в Discord" checked={settings?.discordPresence!==false} disabled={!settings}
             onToggle={()=>{if(settings)void updateSettings({...settings,discordPresence:settings.discordPresence===false});}}/>
-          <SettingRow title="Обновления лаунчера" control={<button className="s-button" onClick={onOpenReleaseNotes}>Посмотреть изменения</button>}><LauncherUpdatePanel/></SettingRow>
+          <SettingRow title="Обновления лаунчера" control={<div className="report-settings-actions"><button className="s-button" onClick={onOpenReleaseNotes}>Посмотреть изменения</button><button className="s-button" onClick={()=>window.dispatchEvent(new CustomEvent('sefi-open-launch-report'))}>Сообщить о проблеме</button></div>}><LauncherUpdatePanel/></SettingRow>
         </section>
       </div>
     </div>

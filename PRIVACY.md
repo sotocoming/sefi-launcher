@@ -1,6 +1,6 @@
 # SEFI Launcher privacy policy
 
-Last updated: October 21, 2026.
+Last updated: October 24, 2026.
 
 [Русская версия](PRIVACY.ru.md).
 
@@ -39,6 +39,26 @@ to their respective policies.
 
 ## Reports and optional input diagnostics
 
+A launch or crash report can also be prepared manually in the launcher.
+Opening the form does not upload anything. The user chooses attachments:
+launcher version, OS, architecture and allocated memory; a limited launch log;
+game warnings and errors; or a crash file from the last launch. The launcher
+keeps bounded current-launch records in memory and checks only known log and
+crash files for that launch when preparing a report. After restarting the
+launcher, saved errors and crashes from the last 24 hours can be selected manually;
+they are labeled as a previous session and are unchecked by default. Known authentication data,
+personal paths and recognized chat lines are filtered before preview. The
+preview shows the prepared contents; the comment and Discord-ticket option
+are also chosen by the user.
+
+Launcher reports go directly to the authenticated SEFI endpoint only when
+the user presses Send to website. A manual retry of the same contents keeps
+the same report ID. There are no automatic uploads or background retries.
+Without signing in, a JSON copy can be saved to a folder chosen through Save
+a copy. The website stores reports for SEFI support. If a ticket is requested,
+Discord receives the description and a diagnostic link accessible to panel
+administrators.
+
 The in-game /report form sends data only after the user chooses to send a report.
 It includes the entered title, description and reproduction steps, plus selected
 attachments. Available attachments include mod names, versions and hashes,
@@ -53,7 +73,7 @@ A recording is attached only if it exists and the input attachment is selected.
 Filtering is not a guarantee that every possible personal detail is removed:
 review the preview and do not enter passwords or other secrets in free text.
 
-Reports pass through a service bound to 127.0.0.1 on the user's computer and then
+In-game /report submissions pass through a service bound to 127.0.0.1 on the user's computer and then
 to the authenticated SEFI report endpoint. A local copy is saved in sefi-reports
 inside the game directory. The Discord-ticket option is selected by default and
 can be disabled before sending; if enabled, the server can forward report data

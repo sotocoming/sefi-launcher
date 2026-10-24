@@ -10,6 +10,10 @@ import type {
 } from './index';
 
 export interface IElectronAPI {
+  prepareLaunchReport(message?:string):Promise<import('./index').LaunchReportDraft>;
+  previewLaunchReport(id:string,options:{attachments:import('./index').ReportAttachmentId[];comment:string;discord:boolean}):Promise<import('./index').LaunchReportPreview>;
+  sendLaunchReport(id:string,token:string):Promise<import('./index').LaunchReportResult>;
+  exportLaunchReport(id:string,token:string):Promise<{cancelled:boolean}>;
   getReleaseNotesVersion(): Promise<string>;
   acknowledgeReleaseNotes(version: string): Promise<void>;
   // Game

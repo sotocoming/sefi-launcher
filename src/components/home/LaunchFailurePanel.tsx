@@ -19,6 +19,7 @@ export function LaunchFailurePanel({failure,onRecover,onRetry,canRetry,busy=fals
         {busy?'Проверяем…':failure.actionLabel}
       </button>
       {failure.action!=='retry' && failure.action!=='reload' && <button type="button" className="launch-retry" disabled={!canRetry||busy} onClick={onRetry}>Повторить запуск</button>}
+      <button type="button" className="launch-report-action" onClick={()=>window.dispatchEvent(new CustomEvent('sefi-open-launch-report',{detail:{message:failure.technical}}))}>Отправить отчёт</button>
       <details className="launch-diagnostics" onToggle={event=>{const node=event.currentTarget;if(node.open)requestAnimationFrame(()=>node.scrollIntoView({block:'nearest',behavior:'instant'}));}}>
         <summary>Подробности</summary>
         <div className="launch-diagnostics-body"><pre tabIndex={0} aria-label="Технические подробности ошибки">{failure.technical}</pre>

@@ -3,6 +3,10 @@ import type { IElectronAPI } from '../src/types/electron';
 import type { GameState, DownloadProgress, Settings } from '../src/types';
 
 const api: IElectronAPI = {
+  prepareLaunchReport: message => ipcRenderer.invoke('prepare-launch-report',message),
+  previewLaunchReport: (id,options) => ipcRenderer.invoke('preview-launch-report',id,options),
+  sendLaunchReport: (id,token) => ipcRenderer.invoke('send-launch-report',id,token),
+  exportLaunchReport: (id,token) => ipcRenderer.invoke('export-launch-report',id,token),
   getReleaseNotesVersion: () => ipcRenderer.invoke('get-release-notes-version'),
   acknowledgeReleaseNotes: version => ipcRenderer.invoke('acknowledge-release-notes', version),
   launchGame: () => ipcRenderer.invoke('launch-game'),

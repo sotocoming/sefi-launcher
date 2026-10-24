@@ -157,6 +157,7 @@ export const useStore = create<StoreState>((set, get) => ({
       return;
     }
     
+    set({gameState:{status:'checking'},downloadProgress:null});
     try {
       await settingsSaveQueue;
       await window.electronAPI.launchGame();

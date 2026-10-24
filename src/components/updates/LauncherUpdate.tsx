@@ -17,13 +17,21 @@ function UpdateEnergy({ state }: {state:string}) {
     observer.observe(element);document.addEventListener('visibilitychange',sync);reduced.addEventListener('change',sync);
     return()=>{observer.disconnect();document.removeEventListener('visibilitychange',sync);reduced.removeEventListener('change',sync);};
   },[]);
+  const sparks=[
+    [4,-16,22,3.4,-.4],[15,-9,34,3.8,-2.6],[28,-8,27,3.2,-1.5],
+    [40,-4,38,4.2,-3.1],[52,3,24,3.5,-.9],[64,7,33,4.1,-2.1],
+    [78,10,26,3.3,-1.3],[91,16,35,3.9,-3.4]
+  ];
   return <span ref={ref} className="update-energy" aria-hidden="true">{visible && (state==='downloading'||state==='ready') &&
-    [0,1,2,3,4].map(i=><i key={state+'-'+i} className="update-particle" style={{'--particle':i} as React.CSSProperties}/>)}</span>;
+    sparks.map(([x,dx,dy,duration,delay],i)=><i key={i} className="update-particle" style={{
+      '--spark-x':x+'%','--spark-dx':dx+'px','--spark-dy':dy+'px',
+      '--spark-duration':duration+'s','--spark-delay':delay+'s','--spark-size':i%3===0?'3px':'2px'
+    } as React.CSSProperties}/>)}</span>;
 }
 function UpdateSignal({ state, energy }: {state:string;energy:boolean}) {
   const Icon=state==='error'?CircleAlert:state==='idle'?Check:state==='ready'?Sparkles:state==='downloading'?ArrowDownToLine:LoaderCircle;
   return <span className={'update-signal '+(energy?'has-energy':'')}><Icon size={15} strokeWidth={1.6} aria-hidden="true"/>
-    {energy&&<UpdateEnergy state={state}/>}</span>;
+    </span>;
 }
 export function LauncherUpdatePanel() {
   const {updateInfo,gameState,checkLauncherUpdate,installLauncherUpdate}=useStore();
@@ -57,6 +65,6 @@ export function LauncherUpdateIndicator({onOpen}: {onOpen:()=>void}) {
   const title=view.state==='downloading'?'Загрузка · '+view.progress+'%':view.state==='ready'?'Обновление готово':view.state==='error'?'Ошибка обновления':view.state==='installing'?'Перезапуск…':view.title;
   return <button type="button" className={'launcher-update-indicator update-state-'+view.state} onClick={onOpen}
     aria-label={title+'. Открыть обновления лаунчера'} title={view.notice||view.detail}>
-    <UpdateSignal state={view.state} energy={view.energy}/><span>{title}</span>
+    <UpdateSignal state={view.state} energy={view.energy}/><span className="launcher-update-label">{title}</span>{view.energy&&<UpdateEnergy state={view.state}/>}
   </button>;
 }

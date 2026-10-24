@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { LaunchRecoveryTarget } from './utils/errors';
 import { AnimatePresence, MotionConfig } from 'framer-motion';
 import { useStore } from './store/store';
 import { Sidebar } from './components/layout/Sidebar';
@@ -13,6 +14,7 @@ export default function App() {
   const { initStore, refreshServerStatus, setGameState, setDownloadProgress, setUpdateInfo } = useStore();
   const [currentPage, setCurrentPage] = useState<'home' | 'map' | 'news' | 'accounts' | 'settings'>('home');
 
+  const [settingsTarget,setSettingsTarget]=useState<LaunchRecoveryTarget>('game');
   const [updatesRequest,setUpdatesRequest]=useState(0);
 
   useEffect(() => {
@@ -60,7 +62,7 @@ export default function App() {
       <div className="original-app">
         <a href="#main-content" className="skip-link">К содержимому</a>
         {/* Navigation Sidebar */}
-        <Sidebar currentPage={currentPage} onNavigate={page=>{setUpdatesRequest(0);setCurrentPage(page);}} />
+        <Sidebar currentPage={currentPage} onNavigate={page=>{setSettingsTarget('game');setUpdatesRequest(0);setCurrentPage(page);}} />
 
         {/* Content View with Frameless TitleBar */}
         <main id="main-content" tabIndex={-1} className="original-main app-main">
@@ -68,11 +70,11 @@ export default function App() {
 
           <div className="app-page">
             <AnimatePresence mode="wait">
-              {currentPage === 'home' && <HomePage key="home" onNavigate={setCurrentPage} />}
+              {currentPage === 'home' && <HomePage key="home" onNavigate={setCurrentPage} onOpenSettings={tab=>{setSettingsTarget(tab);setUpdatesRequest(0);setCurrentPage('settings');}} />}
               {currentPage === 'map' && <MapPage key="map" />}
               {currentPage === 'news' && <NewsPage key="news" onNavigate={setCurrentPage} />}
               {currentPage === 'accounts' && <AccountsPage key="accounts" />}
-              {currentPage === 'settings' && <SettingsPage key="settings" updatesRequest={updatesRequest} />}
+              {currentPage === 'settings' && <SettingsPage key="settings" updatesRequest={updatesRequest} initialTab={settingsTarget} />}
             </AnimatePresence>
           </div>
         </main>

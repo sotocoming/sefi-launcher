@@ -16,7 +16,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
     getAccounts:async()=>{if(window.failRefresh)throw Error('Список временно недоступен');return window.accounts;},
     getCommunitySkin:async()=>null,
     getSettings:async()=>({ramMax:4096}),getModpackStatus:async()=>({installed:true}),getServerStatus:async()=>({online:true}),getLauncherConfig:async()=>({server:{ip:'test.invalid',port:25565},news:[]}),
-    launchGame:async()=>{window.launches++;},
+    onGameStateChange:cb=>{window.gameChanged=cb;return()=>{};},launchGame:async()=>{window.launches++;window.gameChanged?.({status:'idle'});},
     linkMinecraftAccount:async()=>{window.linkCalls++;window.failRefresh=true;throw Error('Привязка не завершена');},
     loginCommunity:async()=>{const comm={id:'comm',uuid:'offline',username:'Godot_Plane',type:'offline',active:true,communityConnected:true,twitchLogin:'godot_plane',whitelistStatus:'approved'};ms.active=false;window.accounts=[ms,comm];return comm;},
    },{get:(target,key)=>key in target?target[key]:()=>()=>{}});

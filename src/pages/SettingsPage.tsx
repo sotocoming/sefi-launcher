@@ -4,9 +4,10 @@ import { FolderOpen } from 'lucide-react';
 import { SettingRow, SwitchSetting } from '../components/settings/SettingRow';
 import { LauncherUpdatePanel } from '../components/updates/LauncherUpdate';
 import { useStore } from '../store/store';
+import type { LaunchRecoveryTarget } from '../utils/errors';
 import type { JavaStatus } from '../types';
 
-export const SettingsPage: React.FC<{ updatesRequest?: number }> = ({ updatesRequest = 0 }) => {
+export const SettingsPage: React.FC<{ updatesRequest?: number;initialTab?:LaunchRecoveryTarget }> = ({ updatesRequest = 0,initialTab='game' }) => {
   const { settings, updateSettings, gameState } = useStore();
 
   const playing = !['idle', 'error'].includes(gameState.status);
@@ -146,7 +147,7 @@ export const SettingsPage: React.FC<{ updatesRequest?: number }> = ({ updatesReq
     } finally { setImporting(false); }
   };
 
-  const [activeTab,setActiveTab]=useState('game');
+  const [activeTab,setActiveTab]=useState<string>(initialTab);
   useEffect(()=>{if(updatesRequest>0)setActiveTab('launcher');},[updatesRequest]);
   const sections = [['game','Игра'],['java','Java и файлы'],['pack','Сборка'],['launcher','Лаунчер']];
 

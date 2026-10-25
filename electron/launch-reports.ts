@@ -109,7 +109,9 @@ export async function sendLaunchReport(id:unknown,token:unknown):Promise<LaunchR
   d.result={id:response.id,...(ticketId?{ticketId}:{}),...(warning?{warning}:{})};return d.result;
  }catch(error){
   if(error instanceof CommunitySessionError){
-   if(error.status===429)throw new Error('Слишком часто: один новый отчёт в минуту, до 10 за сутки. Можно сохранить копию на компьютере.');
+   if(error.status===429)throw new Error('Лимит отправок временно исчерпан. Попробуйте позже или сохраните копию на компьютере.');
+   if(error.status===413)throw new Error('Отчёт слишком большой. Уберите часть приложений или сохраните копию на компьютере.');
+   if(error.status===503)throw new Error('Приём отчётов временно недоступен. Сохраните копию на компьютере и попробуйте позже.');
    if(error.status===401)throw new Error('Сессия SEFI истекла. Войдите заново. Подготовленный отчёт остаётся в этом окне.');
    if(!error.status||error.status>=500)throw new Error('Сайт сейчас недоступен. Повторите отправку позже или сохраните копию. Автоматически ничего не отправится.');
   }

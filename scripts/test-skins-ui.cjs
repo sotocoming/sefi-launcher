@@ -51,7 +51,7 @@ async function difference(page,a,b){
     window.electronAPI=new Proxy({
      getAccounts:async()=>mode==='guest'?[]:[account],getSettings:async()=>({ramMax:4096}),getServerStatus:async()=>({online:false,players:0,maxPlayers:20}),getModpackStatus:async()=>({installed:false}),getLauncherConfig:async()=>null,
      refreshCommunityProfile:async()=>null,
-     getCommunitySkin:async()=>{if(mode==='unavailable')throw Error('Сервис скинов недоступен. Попробуйте ещё раз позже.');return saved;},
+     getOfficialSkin:async()=>null,getCommunitySkin:async()=>{if(mode==='unavailable')throw Error('Сервис скинов недоступен. Попробуйте ещё раз позже.');return saved;},
      chooseSkin:async()=>({png,filename:'hoodie.png'}),
      saveCommunitySkin:async(id,png,model)=>{window.skinCalls.push({id,model});return saved={png,model,sha256:'a'.repeat(64)};},
      resetCommunitySkin:async()=>{window.skinCalls.push({reset:true});return saved=null;},
@@ -109,7 +109,7 @@ async function difference(page,a,b){
     await page.getByRole('status').filter({hasText:'Скин сохранён'}).waitFor();
     await page.getByRole('img',{name:'Голова SEFI_Player из скина'}).waitFor();
    } else if(mode==='microsoft'||mode==='bound'){
-    const link=page.getByRole('link',{name:'Изменить на Minecraft.net'});
+    const link=page.getByRole('link',{name:'Minecraft.net'});
     await link.click();
     assert.equal(await page.getByRole('button',{name:'Выбрать PNG'}).count(),0);
     assert.equal((await page.evaluate(()=>window.skinCalls))[0].url,'https://www.minecraft.net/en-us/msaprofile/mygames/editskin');

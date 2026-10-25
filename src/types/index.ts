@@ -152,6 +152,7 @@ export interface UpdateInfo {
 
 export interface SkinDraft { png: string; filename: string; }
 export interface CommunitySkin { png: string; model: 'classic' | 'slim'; sha256: string; }
+export interface OfficialSkin { png: string; model: 'classic' | 'slim'; cape?: string; }
 
 export interface JavaStatus {
   status: 'ready' | 'missing' | 'error';

@@ -5,11 +5,10 @@ import './ReleaseNotes.css';
 
 const releases: Record<string, {title:string; text:string}[]> = {
  '1.1.0': [
-  {title:'Освежили оформление',text:'Выровняли элементы и упорядочили блоки интерфейса.'},
-  {title:'Доработали состояния',text:'Улучшили отображение обновлений и ошибок запуска.'},
-  {title:'Подогнали экран аккаунта',text:'Содержимое помещается при стандартной высоте окна.'},
-  {title:'Добавили отправку отчёта',text:'После сбоя можно выбрать диагностику и отправить её в поддержку. Только по вашему нажатию.'},
-  {title:'Перевели сборку',text:'Добавили русский перевод модов, книг, заданий и подсказок. Стандартный шрифт сохранён.'},
+  {title:'Новый интерфейс',text:'Обновили главную, новости, аккаунт и настройки в едином стиле.'},
+  {title:'Русский перевод сборки',text:'Перевели моды, книги, задания и подсказки. Перевод устанавливается вместе со сборкой.'},
+  {title:'Понятнее обновления и ошибки',text:'Добавили заметный индикатор обновления. При проблеме с запуском покажем причину и предложим следующий шаг.'},
+  {title:'Отчёт о проблеме',text:'После сбоя можно выбрать логи, проверить содержимое и отправить отчёт в поддержку. Отправку решаете вы.'},
  ]
 };
 export function ReleaseNotes({request=0}:{request?:number}){
@@ -28,7 +27,7 @@ export function ReleaseNotes({request=0}:{request?:number}){
  if(!items)return null;
  return <dialog ref={dialog} className="release-notes" aria-labelledby="release-notes-title" aria-describedby="release-notes-intro" onCancel={e=>{e.preventDefault();void close();}}>
   <div className="release-notes-header"><h2 id="release-notes-title">Что нового <span>{version}</span></h2><button type="button" className="release-notes-close" aria-label="Закрыть список изменений" disabled={saving} onClick={()=>void close()}><X size={16} strokeWidth={1.5}/></button></div>
-  <p id="release-notes-intro">Лаунчер стал аккуратнее и понятнее. Вот что изменилось в этой версии.</p>
+  <p id="release-notes-intro">Новый интерфейс, русский перевод сборки и помощь при проблемах с запуском.</p>
   <ul className="release-notes-list">{items.map(item=><li key={item.title}><h3>{item.title}</h3><p>{item.text}</p></li>)}</ul>
   {error&&<p role="alert" className="release-notes-error">{error}</p>}
   <footer><span>Доступно в настройках → Лаунчер</span><div>{error&&<button type="button" className="s-button" onClick={()=>{dismissed.current=true;setOpen(false);}}>Пока закрыть</button>}<button autoFocus type="button" className="s-button primary" disabled={saving} onClick={()=>void close()}>{saving?'Сохраняем…':'Понятно'}</button></div></footer>

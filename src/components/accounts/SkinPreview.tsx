@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import type { SkinViewer } from 'skinview3d';
 
-export function SkinPreview({ png, slim }: { png: string; slim: boolean }) {
+export function SkinPreview({ png, slim, cape }: { png: string; slim: boolean; cape?: string }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const viewer = useRef<SkinViewer | null>(null);
   const model = useRef(slim);
@@ -21,6 +21,7 @@ export function SkinPreview({ png, slim }: { png: string; slim: boolean }) {
         pixelRatio: Math.min(window.devicePixelRatio || 1, 2), zoom: 0.82, renderPaused: true });
       viewer.current = instance;
       instance.loadSkin(image, { model: model.current ? 'slim' : 'default' });
+      if (cape) void instance.loadCape('data:image/png;base64,' + cape).then(() => { if (alive) instance?.render(); }).catch(() => {});
       instance.controls.enablePan = false;
       instance.controls.enableDamping = false;
       instance.controls.minDistance = 38;
@@ -36,7 +37,7 @@ export function SkinPreview({ png, slim }: { png: string; slim: boolean }) {
       setReady(true);
     }).catch(() => { if (alive) { instance?.dispose(); viewer.current = null; setFailed(true); } });
     return () => { alive = false; viewer.current = null; instance?.dispose(); };
-  }, [png]);
+  }, [png, cape]);
   useEffect(() => {
     const current = viewer.current;
     if (current) { current.playerObject.skin.modelType = slim ? 'slim' : 'default'; current.render(); }

@@ -15,6 +15,7 @@ import { getServerStatus } from './server-status';
 import { getAccounts, addOfflineAccount, loginMicrosoft, loginCommunity, linkMinecraftAccount, refreshCommunityProfile, removeAccount, setActiveAccount } from './minecraft/accounts';
 import { getModpackStatus } from './minecraft/modpack';
 import { chooseSkin, getCommunitySkin, saveCommunitySkin, resetCommunitySkin } from './minecraft/skins';
+import { getOfficialSkin } from './minecraft/official-skin';
 import { getJavaStatus, getJavaPath, inspectJava } from './minecraft/java';
 import { prepareGameDirectory } from './minecraft/game-directory';
 import { publicAccount } from './minecraft/account-store';
@@ -163,6 +164,7 @@ function setupIpc() {
   }
   secureIpc.handle('choose-skin', event => chooseSkin(skinWindow(event)));
   secureIpc.handle('get-community-skin', (event, id: string) => { skinWindow(event); return getCommunitySkin(id); });
+  secureIpc.handle('get-official-skin', (event, id: string, refresh?: boolean) => { skinWindow(event); return getOfficialSkin(id, refresh); });
   secureIpc.handle('save-community-skin', (event, id: string, png: string, model: 'classic' | 'slim') => {
     skinWindow(event); return saveCommunitySkin(id, png, model);
   });

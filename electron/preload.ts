@@ -22,6 +22,7 @@ const api: IElectronAPI = {
   openDirectory: (dirPath: string) => ipcRenderer.invoke('open-directory', dirPath),
   
   getCommunitySkin: id => ipcRenderer.invoke('get-community-skin', id),
+  getOfficialSkin: (id, refresh) => ipcRenderer.invoke('get-official-skin', id, refresh),
   chooseSkin: () => ipcRenderer.invoke('choose-skin'),
   saveCommunitySkin: (id, png, model) => ipcRenderer.invoke('save-community-skin', id, png, model),
   resetCommunitySkin: id => ipcRenderer.invoke('reset-community-skin', id),

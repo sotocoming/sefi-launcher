@@ -57,6 +57,16 @@ body{margin:0;background:#140f1c;color:var(--ui-text);font-family:Onest,sans-ser
 .news-feature.is-preview .article-footer { margin-top:24px; }
 
 /* Keep the account actions in view at the launcher's default and minimum heights. */
+.article-footer .news-like[aria-pressed=true]{background:#563363;border-color:#b886d1;color:#f4e8fb}
+.article-footer .news-like[aria-pressed=true] svg{fill:#d6b6e855;stroke:#f4e8fb}
+.article-footer .news-like[aria-pressed=true]:hover{background:#654073}
+.official-skin-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--ui-muted);font-size:12px;line-height:20px;text-align:center;padding:16px}
+.official-skin-body .official-skin{gap:14px}
+.official-skin-body .official-skin-title{font-size:14px;line-height:22px;font-weight:500;color:var(--ui-text)}
+.official-skin-body .official-skin-description{font-size:12px;line-height:20px;color:var(--ui-muted);margin-top:6px}
+.official-skin-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.official-skin-body .official-skin-actions a{font-size:12px}
+.official-skin-body .official-skin-error{font-size:12px;line-height:20px;color:#f0b0bd}
 @media(max-height:780px){
  .accounts-page{gap:18px;padding-top:24px;padding-bottom:24px}
  .accounts-page .community-identity{padding:20px}
@@ -69,6 +79,7 @@ body{margin:0;background:#140f1c;color:var(--ui-text);font-family:Onest,sans-ser
  .accounts-page .identity-footer{padding:12px 20px}
  .accounts-page .skin-head{padding:14px 16px;gap:5px}
  .accounts-page .skin-stage{height:clamp(128px,calc(100dvh - 520px),220px);min-height:0}
+ .accounts-page .official-skin-body .skin-stage{height:clamp(200px,calc(100dvh - 420px),260px)}
  .accounts-page .skin-stage canvas{max-height:100%}
  .accounts-page .skin-stage>div{height:100%;min-height:0}
  .accounts-page .skin-controls{padding:14px 16px}

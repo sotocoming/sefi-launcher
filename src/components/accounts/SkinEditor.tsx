@@ -2,7 +2,7 @@ import { SkinPreview } from './SkinPreview';
 import { useStore } from '../../store/store';
 import { useEffect, useState } from 'react';
 import { ExternalLink, Upload, Check, Shirt, LoaderCircle } from 'lucide-react';
-import type { Account, CommunitySkin, SkinDraft } from '../../types';
+import type { Account, CommunitySkin, OfficialSkin, SkinDraft } from '../../types';
 
 const officialUrl = 'https://www.minecraft.net/en-us/msaprofile/mygames/editskin';
 export function SkinEditor({ account }: { account: Account | null }) {
@@ -17,6 +17,18 @@ export function SkinEditor({ account }: { account: Account | null }) {
   const [loading, setLoading] = useState(eligible);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [officialSkin, setOfficialSkin] = useState<OfficialSkin | null>(null);
+  const [refresh, setRefresh] = useState(0);
+  useEffect(() => {
+    if (!official || !account) return;
+    let alive = true;
+    setOfficialSkin(null); setLoading(true); setError('');
+    window.electronAPI.getOfficialSkin(account.id, refresh > 0).then(skin => {
+      if (alive) setOfficialSkin(skin);
+    }).catch(() => { if (alive) setError('Не удалось загрузить скин Minecraft. Проверьте подключение и попробуйте ещё раз.'); })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, [official, account?.id, refresh]);
   useEffect(() => {
     if (!eligible || !account) return;
     let alive = true;
@@ -49,9 +61,15 @@ export function SkinEditor({ account }: { account: Account | null }) {
       <h2 className="flex items-center gap-2 text-sm font-semibold text-white"><Shirt size={17} className="text-sefi-purple" /> Внешний вид</h2>
       <span className="text-[11px] text-white/45">{account?.username || 'Профиль не выбран'} · {official ? 'Minecraft Java' : 'SEFI Community'}</span>
     </div>
-    {official ? <div className="official-skin">
-      <div><p className="text-sm font-medium text-white">Ваш официальный скин</p><p className="mt-2 max-w-md text-xs leading-5 text-white/50">Скин и плащ загружаются из Minecraft. Измените скин в личном кабинете — он будет виден и игрокам SEFI.</p></div>
-      <a href={officialUrl} onClick={e => { e.preventDefault(); void window.electronAPI.openExternal(officialUrl); }} className="shrink-0 inline-flex items-center gap-2 rounded-xl border border-sefi-purple/25 bg-sefi-purple/10 px-4 py-3 text-xs font-semibold text-sefi-purple hover:bg-sefi-purple/20">Изменить на Minecraft.net <ExternalLink size={14} /></a>
+    {official ? <div className="skin-editor-body official-skin-body">
+      <div className="skin-stage">
+        {officialSkin ? <SkinPreview png={officialSkin.png} slim={officialSkin.model === 'slim'} cape={officialSkin.cape}/> : <div className="official-skin-placeholder" role="status"><Shirt size={38} strokeWidth={1}/><span>{loading ? 'Загружаем скин Minecraft…' : error ? 'Скин пока недоступен' : 'В профиле нет скина'}</span></div>}
+      </div>
+      <div className="skin-controls official-skin">
+        <div><p className="official-skin-title">Официальный скин</p><p className="official-skin-description">Внешний вид из Minecraft Java. Смена скина доступна в личном кабинете Minecraft.</p></div>
+        {error && <p role="alert" className="official-skin-error">{error}</p>}
+        <div className="official-skin-actions"><a href={officialUrl} onClick={e => { e.preventDefault(); void window.electronAPI.openExternal(officialUrl); }} className="s-button">Minecraft.net <ExternalLink size={13}/></a><button className="text-action" disabled={loading} onClick={() => setRefresh(n => n + 1)}>{loading ? 'Загружаем…' : 'Обновить'}</button></div>
+      </div>
     </div> : <div className="skin-editor-body">
       <div className="skin-stage">
         {png ? <SkinPreview png={png} slim={model === 'slim'} /> : <div className="flex h-56 flex-col items-center justify-center gap-3 text-white/25"><Shirt size={54} strokeWidth={1} /><span className="text-xs">{loading ? 'Загружаем скин…' : 'Ваш персонаж'}</span></div>}

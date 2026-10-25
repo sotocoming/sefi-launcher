@@ -43,6 +43,7 @@ export interface IElectronAPI {
   setActiveAccount(id: string): Promise<void>;
 
   getCommunitySkin(id: string): Promise<import('./index').CommunitySkin | null>;
+  getOfficialSkin(id: string, refresh?: boolean): Promise<import('./index').OfficialSkin | null>;
   chooseSkin(): Promise<import('./index').SkinDraft | null>;
   saveCommunitySkin(id: string, png: string, model: 'classic' | 'slim'): Promise<import('./index').CommunitySkin | null>;
   resetCommunitySkin(id: string): Promise<null>;

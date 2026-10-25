@@ -1,0 +1,566 @@
+{
+  "version": "1.0.0",
+  "sourceCommit": "bc210ef6e6b7f4fa937b66104de3ac56bb8036bc",
+  "archive": "SEFI-Russian-full-1.0.0.zip",
+  "archiveSha256": "6e6314dae29dc3c0f7c96b38292cad7a86de8b00cda6e8821ee0961b471ff1ce",
+  "projectId": 882046,
+  "fileId": 8110152,
+  "modpackSha256": "c70a94dbcef617b67faa226788d07b17368dac52edd75226bb05b1202f564ccc",
+  "files": [
+    {
+      "path": "config/fancymenu/customization/drippy_loading_overlay_layout.txt",
+      "sha256": "84bdaeeb2ae77fb053db94ffbeb12edf7d0dea48d9042b062ae64d6a571ea245",
+      "size": 11963,
+      "previous": [
+        "0b1ea9a8dc7612b0a900244d108f64a0050e323ee94fea81cdc2c7057c1888a0",
+        "84bdaeeb2ae77fb053db94ffbeb12edf7d0dea48d9042b062ae64d6a571ea245"
+      ]
+    },
+    {
+      "path": "config/fancymenu/customization/pause_screen_layout.txt",
+      "sha256": "94b665aef92c0347467455beb30fbb70e55eb027deb0dd1b788b1edd0e66ca06",
+      "size": 39760,
+      "previous": [
+        "613eabb4ac82163096030e044c9e9d8aa61d5aeedc70786b8999032068705430",
+        "94b665aef92c0347467455beb30fbb70e55eb027deb0dd1b788b1edd0e66ca06"
+      ]
+    },
+    {
+      "path": "config/fancymenu/customization/plush_update_popup_layout.txt",
+      "sha256": "b24f800c50b7e805a757ead3950aa4cccdab210b5066f931cd7f035c20b5cbc6",
+      "size": 17065,
+      "previous": [
+        "3a2100fe6f4eea8cbe3598b6a88efb802e57996e9aee38934f06ecbd341cc21b",
+        "b24f800c50b7e805a757ead3950aa4cccdab210b5066f931cd7f035c20b5cbc6"
+      ]
+    },
+    {
+      "path": "config/fancymenu/customization/title_screen_layout.txt",
+      "sha256": "e71322ac48d65588645d9bba81daf43ed1641d1e9b7627ac5b99f7938c42d197",
+      "size": 71184,
+      "previous": [
+        "e4f70418c758cc1e1c605854494a26e1b007f94e334fc51538d12e5532b97140",
+        "e71322ac48d65588645d9bba81daf43ed1641d1e9b7627ac5b99f7938c42d197"
+      ]
+    },
+    {
+      "path": "config/fancymenu/customization/title_screen_layout_night.txt",
+      "sha256": "6e0046b10e7e1d8dd8603a8ca1ab7c5c5afc2fe168b64e12db294b882701bc84",
+      "size": 70133,
+      "previous": [
+        "2dbb338c17b3b0c570f81d9e417dc5315df66fde2049e91ae56f058c98b9b4e9",
+        "6e0046b10e7e1d8dd8603a8ca1ab7c5c5afc2fe168b64e12db294b882701bc84"
+      ]
+    },
+    {
+      "path": "config/fancymenu/customization/title_screen_noftb.txt",
+      "sha256": "be41ee7058d0732ed0acfc7619ea631f9169d6d8bda77581b6c34bbe54583fe2",
+      "size": 47397,
+      "previous": [
+        "272fdf9238a288ca3ded6cc37e1b78bd6a3d9689b1a2e831918917319c6507cb",
+        "be41ee7058d0732ed0acfc7619ea631f9169d6d8bda77581b6c34bbe54583fe2"
+      ]
+    },
+    {
+      "path": "config/fancymenu/customization/title_screen_nothing.txt",
+      "sha256": "3d47c9598968fe9f3f92147ef4e8b5276c2abf4de3d9426137e3802c4370b55a",
+      "size": 36257,
+      "previous": [
+        "3d47c9598968fe9f3f92147ef4e8b5276c2abf4de3d9426137e3802c4370b55a",
+        "b2619432a2018c85087c1a65d0e4472b202ac984d8cd340cc770b717bc6374aa"
+      ]
+    },
+    {
+      "path": "config/fancymenu/customization/welcomescreen_welcome_layout.txt",
+      "sha256": "e86d0200687a4a0319e40a7e25a81f3fafaf03c21358e0c91e9091ed6181d6ff",
+      "size": 47123,
+      "previous": [
+        "dc2072d6481d98c740770ef41d2cc5cb6541d25fdf0874a9ac7b3dfa26a23408",
+        "e86d0200687a4a0319e40a7e25a81f3fafaf03c21358e0c91e9091ed6181d6ff"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapter_groups.snbt",
+      "sha256": "e4c0942dc3be3ccfa8869b9e77e6b937bcae7613c46b3fb700db4eaec6120943",
+      "size": 31,
+      "previous": [
+        "739539b4146abfddb28d18027abc040e62af3634552c3c8092d021545f0c08fe"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/beginning_game.snbt",
+      "sha256": "9a6c64fcc279ec96ac938a870f3d6bbc1330fbeca37575c3319eb669acb5016d",
+      "size": 31985,
+      "previous": [
+        "053e4ae6297b0e66793179fc8e28d185b92a8770cce9d1a3f27ac57d7747e650",
+        "47ff0191bb217c5ca270e55bd9e95797cc7aa85cdbed6d6c894161c27f6339e1"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/catch_of_the_day.snbt",
+      "sha256": "1d836c26a1f3ec7ac1a2ea13e065bc1e21466307431f5939f03f5aed22cab101",
+      "size": 41085,
+      "previous": [
+        "2d5ecfc8b8b5965ce6700c6fbcfe34f0d0a2a939debfcab4014cf6378b256f58",
+        "cee66470f629fb34c97313d86c3ab6c3ec8a861348b631ef004a99fda5f0b869"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/deep_dark_secrets.snbt",
+      "sha256": "a5fbb4fef3cc5e4af9dd31d37c3f1dfeeaf6b5708b55f434bf1733fb0a2100ff",
+      "size": 18220,
+      "previous": [
+        "166f9e64801c77c0011ab059f2c6243834c82404353c782f8336fd697f6796a7",
+        "5bde1911a35e9d34fb434a06639ad5e08a72c8fda0e6e0707da4ff7d43f71dea"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/echoes_of_the_void.snbt",
+      "sha256": "36e1b95548f61737e1115b2cec121d2ffd998df106a47aff1674d1f838f101f6",
+      "size": 13175,
+      "previous": [
+        "64c120317954864b98c88d7e9686b2f4fb85e2a772ce97b9077e843f3a6c94ce",
+        "b02f6e89e10ff572b5e8e1ed325b96ef50ca9d6f67ab0bf86424c50def45494e"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/embers_beneath.snbt",
+      "sha256": "afb2bc4ceccc208c749378c215a00accec1ab4273472e436a014c4c06d1c14fc",
+      "size": 18152,
+      "previous": [
+        "903f597a6dd886db635d93540580109905ec656b829b369abecad89990b09728",
+        "f7a6887b3df5e8c53be95668fd378bf919a894731e2f9dce82e8c9c1e9c3a3ab"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/forged_fables.snbt",
+      "sha256": "7c77185a55888fd1d6117c240a5412631e7b7fe2495aabe11d2207b6e28e91b1",
+      "size": 60901,
+      "previous": [
+        "685edb427fae4777f3484bf30271ad13557448ac9d2bceb3166982c3eb91a6e5",
+        "d619fdb5feee341a657842fb67c44ef69134ed0adaf45c9c13317e49a4302f18"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/herbal_hexesz.snbt",
+      "sha256": "317011b2f91e7b2af73b63bf2924dbf1c831609948834ff67294edc4d0d09468",
+      "size": 29599,
+      "previous": [
+        "8a07b7528405aba03613338efe7549493804b0b9f1ed62e5414474d0ff7f0a5d",
+        "d295e234d4fea7376bfecc6e4f06a71c8703ced67b88748de6dad506d05cd575"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/homestead.snbt",
+      "sha256": "96b970d81cb4f725353da9ec2b50ee0cd7990947ecb374cbaee367503decc3f9",
+      "size": 6394,
+      "previous": [
+        "1e310575d7bde85fda7d1bc8489afcbd56031893b27ebfe4a9b40cebb5250564",
+        "224d85890e0735cbf377365ef91c80b2e4797daefdd378669be8956acf9af154"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/just_some_things.snbt",
+      "sha256": "c6951ce08b52d1bd0724588cc19c9e560c3864480da48cd192e2e5bae2f5d970",
+      "size": 4715,
+      "previous": [
+        "8ea9d9620f333a7cbeea6140559bc32516ebd2ca0285da33084f4f0d3603c216",
+        "bce1b31f7aeb0745e90e339254325d8fdf75f0bfb5f2e0adfb7d427d7c014b00"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/liquid_courage.snbt",
+      "sha256": "511ad263815141d61dda414107bde7689f75bb13eb4d57b4669fe66564f9fbf1",
+      "size": 36067,
+      "previous": [
+        "13c84ea5371d1f197f829822d13b450e434ec799bc15f7d53471285fafa4da68",
+        "33942931f9d462ffc5558778ea266e88a487f21b499b106f950ee72567cd4f8e"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/mastery.snbt",
+      "sha256": "b170892ff64d5412c295898e70503c0a85f72f745af4e95b4bad2767b826c7cb",
+      "size": 2351,
+      "previous": [
+        "445361092cbc681832243d1bf422405cb82d639089dfa373fabc9c5b285c940e",
+        "e49678bd0e599333488af29dc9a1348c22ae80c16bfd5d875cc6ba19899fbe90"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/of_vines_and_vintage.snbt",
+      "sha256": "fad6c6d0e39adff9e9800b9a9b55e27949be3ef2f9f63a385cbb76dbe5abca10",
+      "size": 30037,
+      "previous": [
+        "04d4e44798bff26f161c064bcbf8ad1429120a354df834baf233c1a1b39a3076",
+        "0b3c064135199a8bea063a4ba526ba6c34ad0fd9f0a32ca73c222d7ae1e1d31d"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/roots_that_run_deep.snbt",
+      "sha256": "186fb589f1c22d74bda2615ad2447dbf34367c7f139067d9723be34c61351708",
+      "size": 43294,
+      "previous": [
+        "021e95e972630ec45af534372ee3e125f414888671f2d5e460f940a74b1759ab",
+        "3fd575409a99262ddf1f1a91e68bd365ee5d3630813ef68b2d7ca0c3152996ae"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/seasoned_and_settled.snbt",
+      "sha256": "ab90cbb33ca76e56a24b994bcd81df62f08e4398b49c04a86bc5b7bda0d6785c",
+      "size": 52194,
+      "previous": [
+        "7f2b517dc5145ff76efebb8aa86c47ae0b2c76ca588ed77ba4f3f5b055bb3104",
+        "9c0fc57f539c5a9c32a56715d83cf5a9ef774f628d51923177d237de8ca325a6"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/shaped_with_care.snbt",
+      "sha256": "8364cd69246fd4d15d3738900fdf98299495d97ab4ecb023a1791bba2555a4bb",
+      "size": 7786,
+      "previous": [
+        "693293a2e67ffa533f1e7ff4914610eaf31fb6e9caff511964bc6f12535008b8",
+        "cbfc1676071327829bf22e2b78649a1f957414025aa86a344368215ea46b5225"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/signals_in_the_stillness.snbt",
+      "sha256": "f5c718c2ba9248bec4a94b07710ae4221709060750600e54ddf1430458a5e1c6",
+      "size": 9336,
+      "previous": [
+        "56cbf0ff07d9a40df53e550dd592225b7a4d701c1a8bde7d9666f2a92adce352",
+        "8d3354059d79f6b0c2d869864e71c65771473f0d2199da7aaacdf421d2743c46"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/squishy_friends.snbt",
+      "sha256": "96b68b297b066812329ba0f68d5dca9c73853d30d1a1b70b4116483264d6c73e",
+      "size": 12524,
+      "previous": [
+        "7714521646ca293f6405dc9097279ec4d5b7953417bf44ea239f6f2ed65a249e",
+        "79810080e39c1bdfea2292c3100f62869c9d017f596c47c386219857f5b3f466"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/the_heart_of_the_homestead.snbt",
+      "sha256": "5009ef536fa170f3c304b3d45a4ae44abea497c1841e270d798735a0bb9ef703",
+      "size": 21171,
+      "previous": [
+        "968ff31b254eab3072cfcdf175c599b6f140ccf856df6c80c21d89f8d6524257",
+        "d8c931124642443c44697a0d6bcc785b4f350f172e874769fb007f9221f4b6b5"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/the_portable_life.snbt",
+      "sha256": "2c4c0f915fa8f73bebe2f9c32872fcb216acd0c9a3d2d283edbd8ef651540c40",
+      "size": 42364,
+      "previous": [
+        "34fffb6f74544539916ccc21ddeb1df8c43b77b48762fb0ae112cb913725c4ca",
+        "cc7393eca810baf274920d405ccb8b604d141029b4370d19eba3673f1091f79c"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/tidy_corners.snbt",
+      "sha256": "32dd16a86bd1bff16b3dd2fe8e5ef89108978a2d9715ba4d4b4ea49fa59bfec8",
+      "size": 8907,
+      "previous": [
+        "a655c9cc7761d2b2d66e70c8c922c650dc63c5194caa61de351160a8fc989a61",
+        "d4e34de3ffecf93d0fb829e88a1e7cdfa7070f6295d49bca87494f514d5c1ff2"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/timber_and_time.snbt",
+      "sha256": "0db20863a0699df0a40dfd2bdcec85a09d59fbabb3dff7b2ab525c4a608db540",
+      "size": 70833,
+      "previous": [
+        "0ba79d6a8454008e667ea99410ffca4d3266136c57d980b65564b0aee1f5ab4a",
+        "95d7929f9718fc6049599afa7077de611bb83ded3e18d9459e4b29ef287b219d"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/tips.snbt",
+      "sha256": "48aea822af8f86fe6496b769c37f61feab50da7e6ba6a49ff120d67330f8c521",
+      "size": 25065,
+      "previous": [
+        "23ceaab1886535b211a5a83f6b77dd06699ec9c2d2742a26e7378ab2b97cf1fd",
+        "5878739537fba84fb8a3d59ad6fdd06df199b73062918017a0bea79ede9cd3e9"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/tranquilitea.snbt",
+      "sha256": "b8be4bc38cce5f14dc89a4405863abc8d22df574344eedc59a017d39fca7b35a",
+      "size": 17705,
+      "previous": [
+        "48d70789e3f34236256942247d0e2494cdb9edaa64180e0e581cec23a9facfbf",
+        "b349081f37f6249f40288208acc79d165d95029995b5e25224c53113963787d5"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/chapters/whispers_of_the_wilds.snbt",
+      "sha256": "c3dd57c45a5f3e820789d8eb9aa82c2ddd8cf2cae3aa7720e3ec0affe83bca8b",
+      "size": 21968,
+      "previous": [
+        "83e1627610c338b2575ca715279f5d7fafaa6272072e01024fa9572773e32af4",
+        "b4ed96049fe1127c4ff1893dbe0ea32c353742304c0723d6e0522f2068e087d7"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/data.snbt",
+      "sha256": "f5d78a8baf7d2d41d0555166347e8202d14ebf06e14cf1beed70c95551883b80",
+      "size": 612,
+      "previous": [
+        "0d16101c70631ca0cf9c08e42992ac4f7de5f5d7e702e5d2b2baed4abe2abc98"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/reward_tables/alchemy.snbt",
+      "sha256": "b64158a69a219cb8d10b97812566d49b2b4006d34945e3ab7e0e3e4e00021239",
+      "size": 408,
+      "previous": [
+        "93645c23afbce42e4b9fdf7d9a2840f3960b90bad33e7af491bc37e92bcb017f",
+        "ae0f9cadf44ee85a776965c0ca15a49890c1820713248b2b2c60c9211a8bd361"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/reward_tables/flowers.snbt",
+      "sha256": "e5c31b3416cea2fc7c7df15487476d2ff43a07ecd8a239928337822222099a41",
+      "size": 1020,
+      "previous": [
+        "6ef32a26a95bc6a00cac47198376b303f88dec6dfe83f164565af26a244fd889",
+        "b3361b3ce6c2e98ea2262c11ab4b624e79659eba3690ee988b4ee84c67860865"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/reward_tables/logs.snbt",
+      "sha256": "871eadbe91ba70fada66b198cbd3bab0f4830e0e1765bbf9163b2c53ae9a1da3",
+      "size": 496,
+      "previous": [
+        "1d5d20dfc8fde19ee089961b33a8ef978649704c577e4a7f286cbdf7b33adaaa",
+        "41b151bed3d38c4b0612042f74f98d027b794fe08d2897bd2ca4544f22ac602d"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/reward_tables/op_items.snbt",
+      "sha256": "dadf6d33d4bc7594c116ae05051ac119d9d489e826c4bbee7cbf71a5cb37992b",
+      "size": 3513,
+      "previous": [
+        "064108701a95aaf1fc9b7fb535e8a1a7b87c60aa8568bc1a9098e89cd3636c0d",
+        "2f33e32a8b6e898fbf572b7d84d760b5359e2f4f01b68b58a40e62f6e4f8df79"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/reward_tables/plushies.snbt",
+      "sha256": "ecff50d4c42a69cdfb4af741632a526a410eb118eef5a5f5dfa196b7591be5a1",
+      "size": 789,
+      "previous": [
+        "e0695b56a336472c28d59930c49c5fa31185ed262accf99c314a998bc67a279a",
+        "f51e1af4efd4b6f931c3cc7034ff8a4b4f2ea82391e931b40f78b400baf90d20"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/reward_tables/random_rewards.snbt",
+      "sha256": "5ab084a7d83d703690c2a006f6f4ecaca6841c834902ff608bac4d25b5ecbcfc",
+      "size": 1841,
+      "previous": [
+        "13fb292d3c9980d1410400f2207ad48bc4dcd103e05f31cbec353cc0c2dced21",
+        "ff7a22b5e11ef1b35ba34bbb56f5337cefe41db9d4751684fec5013e3c3704a4"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/reward_tables/stone.snbt",
+      "sha256": "213d4935bd324de9bc2d6d3958ad2aa3344eb39d9df41252bda5217695bf9c5a",
+      "size": 479,
+      "previous": [
+        "4040267176216342642cd34b5aff2ef567d922c04442790e3aded6d375168f6a",
+        "ef897423c00860a2260c0905325049237aa82e2fd26524b24666aa3ea278630f"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/reward_tables/tinkering.snbt",
+      "sha256": "830db69c8df2953682573b6f2079e09d3621f34b2a20afbfadaaf01a029e1a53",
+      "size": 255,
+      "previous": [
+        "3e82075d38a8169076680f3bb9830d78f6b765c9a8a13ac9d6d76edf3afc0b94",
+        "5007df3946f1ef58b15e4c83b0d495045b29ed65beb5a06f17ca4e7fe93a3210"
+      ]
+    },
+    {
+      "path": "config/ftbquests/quests/reward_tables/wool.snbt",
+      "sha256": "6aeb365bde9c68ba1ea669909ce4016430dedf9d00382e59d5db770f35092378",
+      "size": 888,
+      "previous": [
+        "5d3eacce97f74554b2dee2d059b763fea0d82a9da4385b15a0301a5c72af2b04",
+        "600266a083fe34b2a5a6492e860cade1eb04bae6e8348de1275d456c9c70c3f1"
+      ]
+    },
+    {
+      "path": "kubejs/startup_scripts/amd_drivers.js",
+      "sha256": "0ae57f1ce2183e0e221ac7a9ff6002f657b707b52c9bb397352fb9503691718f",
+      "size": 169,
+      "previous": [
+        "1421c6ca0cf25a4e14b2edc4259e291670d13c804cc52c58eb061b4147a5eaf9",
+        "31432d533e43ecc5ebaaeb6accdbf5bfd5704e5a9624ffa088ac2c184b6cddd1"
+      ]
+    },
+    {
+      "path": "kubejs/startup_scripts/homestead.js",
+      "sha256": "2dcfbfd190dbe268486987b7820e41cbee158c1de8fe9215cea571992eee2a76",
+      "size": 59,
+      "previous": [
+        "2dcfbfd190dbe268486987b7820e41cbee158c1de8fe9215cea571992eee2a76",
+        "c67ab0e999cfed3749e4123773f89980accdb19bb2a6b378dc6b6e30dbcddeb7"
+      ]
+    },
+    {
+      "path": "kubejs/startup_scripts/nvidia_graphics_card.js",
+      "sha256": "34ad5962c61b4337934686bbb3fc931a3b531b1c362d097cadecaa7dcf9065dc",
+      "size": 185,
+      "previous": [
+        "751f5429702d2aab1f21d07cb069f1700da4427a486b386cae5c190448433909",
+        "efa59ecd7f797d6e5bc12e04c42a76850ae0906a38d51c08cbc806cfda4faee2"
+      ]
+    },
+    {
+      "path": "kubejs/startup_scripts/obsidian_template.js",
+      "sha256": "de49982fb034ede0460cde54ca1bc784a01b8747bb4099e71317fb8d7be75d52",
+      "size": 249,
+      "previous": [
+        "53c0b57d86d54b55fd8c9ce0fe58e1443b4ce1037c8bdfd14a24e5b2cb40d0bd",
+        "fe4a216d9746707bd26c5464ee4969ab5794dcda4794935e5737ff830b0fb558"
+      ]
+    },
+    {
+      "path": "kubejs/startup_scripts/ram.js",
+      "sha256": "d0455a7833cbda8c6c85cf0ed3a0bc8e7fc3b56eb4cdfbd5d9a6bd3db342fb32",
+      "size": 201,
+      "previous": [
+        "6939c9098deb0bd0d15ed7629d85040bd1ade5918f3d679011efed6ba8826616",
+        "d04c91c0a4f86ef4fc72387110abe617a66769fe27e8606ac541fb73d2de13c9"
+      ]
+    },
+    {
+      "path": "kubejs/startup_scripts/shiitake_mushroom_soup.js",
+      "sha256": "c8a3f94909fd41edbea6fbdbdf8505fa75be110a0bc083e9d11c261c4aab0c0c",
+      "size": 265,
+      "previous": [
+        "46f7c9b0eb9a4fde4461184ad9b649e25998178cc396e66d11e5be0b1ffd4626",
+        "55934b99a2239a8c0f06e89491ae3dd3d7e6efffdce9bc77dbb527ad1e64ea40"
+      ]
+    },
+    {
+      "path": "mods/sefi-localization-1.0.0.jar",
+      "sha256": "fce8dd7d130d5f287302c6d7e878badd40ddecdb765973f21dca72b7cc56b2cc",
+      "size": 17920,
+      "previous": [
+        "dc114ecb50c770f80820d6f0cdbaf8ad802deb2e0cbab13220c85755906fdff6"
+      ]
+    },
+    {
+      "path": "patchouli_books/homestead/book.json",
+      "sha256": "0937e22cbf15777ec675d847f08d4d89606206c3954f3d4e9f5ed029c13fb9be",
+      "size": 672,
+      "previous": [
+        "3d7348d2615a64540d11ff6c890fb0a707dc32a87840af0e57be1076141dc793",
+        "c0ae29b08e29bc901b35a75d869a092522e46465b1aabd5718d52cdb18fe62e0"
+      ]
+    },
+    {
+      "path": "patchouli_books/homestead/ru_ru/categories/basics.json",
+      "sha256": "98dd550733297ca0ef8a093c6f7d42365881293a3e3f93f64ac333ffb45dc417",
+      "size": 209,
+      "previous": [
+        "98dd550733297ca0ef8a093c6f7d42365881293a3e3f93f64ac333ffb45dc417"
+      ]
+    },
+    {
+      "path": "patchouli_books/homestead/ru_ru/entries/blueprints_and_builds/blueprints_and_builds.json",
+      "sha256": "dec8367bf609b8dff6292c37ae53ae678fe98a6ebb1c04ce326e1457ada4d6d4",
+      "size": 3017,
+      "previous": [
+        "f37703412888c7b3c7a13d10e9a87c79ebe731ecf0adce1b8a460d12551fa33d"
+      ]
+    },
+    {
+      "path": "patchouli_books/homestead/ru_ru/entries/intro/intro.json",
+      "sha256": "10f6dea926c33ca18416946cf253341e5be2ee52af61de77ee8598c70e708021",
+      "size": 2471,
+      "previous": [
+        "c2a7c7cc1be550a685b8380211ad50b8c3446ddc99ba649b9f650a45c6adf7a1"
+      ]
+    },
+    {
+      "path": "patchouli_books/homestead/ru_ru/entries/lore/lore.json",
+      "sha256": "2e4c99f1efbe89a549c27faa1414c574afb1fcfde37248db7a6762f5f77a56fa",
+      "size": 7728,
+      "previous": [
+        "720ed0964614149c6a447800feece513ff6e8310877698ec575ae673187fed01"
+      ]
+    },
+    {
+      "path": "patchouli_books/roots_take_hold/book.json",
+      "sha256": "74d320af899c5abf8a271f70867a4fe2683550e502cea63d038882ca28222b1d",
+      "size": 683,
+      "previous": [
+        "950d5c7bcc097e863ba2895bcdf28f9b24eb06b4a70bce14a1a4058b005603f3",
+        "ea9261251696dd5eedb7ce49e87d174b5f2999025de1872c850795982fc4a337"
+      ]
+    },
+    {
+      "path": "patchouli_books/roots_take_hold/ru_ru/categories/journey.json",
+      "sha256": "cef88cda348445eebaa39beeaf22986b1795e7787915d744e4835df62333c945",
+      "size": 188,
+      "previous": [
+        "cef88cda348445eebaa39beeaf22986b1795e7787915d744e4835df62333c945"
+      ]
+    },
+    {
+      "path": "patchouli_books/roots_take_hold/ru_ru/entries/journey/journey.json",
+      "sha256": "f351cc75e58cfd6ced07445617b684f0d3b804288f9cff1cd6a919c9fd07b0ef",
+      "size": 6048,
+      "previous": [
+        "ae87d1e814958541b8354d1325fda2125713a408486ef081b0c7487df7c7ab9b"
+      ]
+    },
+    {
+      "path": "patchouli_books/welcome/book.json",
+      "sha256": "30f813959ec734245fa51edf6967faaf88f7c514129cba674ddb901dda3c8091",
+      "size": 1196,
+      "previous": [
+        "30f813959ec734245fa51edf6967faaf88f7c514129cba674ddb901dda3c8091",
+        "b2d867d3a4a9c7e556c8c69a784ac4d57eea692a0698f821d1e07d2fdb17c386"
+      ]
+    },
+    {
+      "path": "patchouli_books/welcome/ru_ru/categories/welcome.json",
+      "sha256": "6e66de6606fd7fd30567eaa8c556809e061f975a05460f7dbca227166098ef74",
+      "size": 265,
+      "previous": [
+        "6e66de6606fd7fd30567eaa8c556809e061f975a05460f7dbca227166098ef74"
+      ]
+    },
+    {
+      "path": "patchouli_books/welcome/ru_ru/entries/welcome/welcome.json",
+      "sha256": "a608f4adf75ff88a67293f75ee81af1d88e5daceb86d1371505935566affbd35",
+      "size": 4024,
+      "previous": [
+        "539406291b63197026b7c7af3f2c1d115fcea9a505efcd90c838a3a09825c920"
+      ]
+    },
+    {
+      "path": "resourcepacks/SEFI-Russian-1.0.0.zip",
+      "sha256": "248158b15b40b278852d470f26eb706cac8555578278450a19ebe00fd4d8b9c5",
+      "size": 620211,
+      "previous": [
+        "f836c9ca7a23d504f8132e373cd27715b6cf35e289b0cb81d5f30ec97f0d3309"
+      ]
+    },
+    {
+      "path": "scripts/mods/Custom/template.zs",
+      "sha256": "0b7e351d8824e856d80bddee9f7c71d507b724759513e2b21b475119b329e690",
+      "size": 1514,
+      "previous": [
+        "ddaf2957cfd74fd42a2ced4d860c5135b110c4ea3257af389c7d04da3869b71f",
+        "ec7b684fd0c8abb9be1e18a9d985797ca42f5e247f0e01f261054b933a87e567"
+      ]
+    }
+  ]
+}

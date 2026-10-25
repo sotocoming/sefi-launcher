@@ -1,5 +1,6 @@
 import { beginLaunchDiagnostics, setDiagnosticCredentials, recordDiagnosticState, setDiagnosticEnvironment, recordDiagnosticLines, type LaunchDiagnostics } from './launch-diagnostics';
 import { ensureClaimsColorFix } from './claims-fix';
+import { ensureRussianLocalization } from './localization';
 import { startReportBroker } from './report-broker';
 import { ensureReportMod } from './report-mod';
 import { protectMinecraftHandler } from './game-integrity';
@@ -85,6 +86,9 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       onStateChange({ status: 'downloading', progress });
     });
   }
+
+  onStateChange({status: 'downloading', progress: {stage: 'modpack', task: 'Проверка русского перевода сборки', total: 1, downloaded: 0, percentage: 0}});
+  await ensureRussianLocalization(settings.gameDirectory, await getLauncherConfig());
 
   onStateChange({
     status: 'downloading',

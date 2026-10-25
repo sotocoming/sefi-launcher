@@ -4,7 +4,7 @@ const source=fs.readFileSync(path.join(__dirname,'../electron/minecraft/ticket-b
 const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
 const serverKey=crypto.generateKeyPairSync('ed25519');
 const account={type:'offline',username:'test_player',uuid:'12345678-1234-1234-1234-123456789abc',communityToken:'TEST_SECRET_MUST_NOT_BE_LOGGED'};
-const logs=[];let status=200,calls=0,delay=0;
+const logs=[];let status=200,calls=0,delay=0,calibrated=null;
 class CommunitySessionError extends Error {constructor(status){super('TEST_SECRET_MUST_NOT_BE_LOGGED');this.status=status;}}
 const api=async route=>{
  if(route.endsWith('/config'))return {version:2,server:'sefi-homestead',public_key:serverKey.publicKey.export({type:'spki',format:'der'}).toString('base64')};
@@ -14,7 +14,7 @@ const api=async route=>{
  return {ticket:crypto.randomBytes(32).toString('base64url')};
 };
 const moduleObject={exports:{}};
-vm.runInNewContext(compiled,{exports:moduleObject.exports,require:name=>name==='electron'?{app:{on(){}}}:name==='./community-request'?{communityRequest:api,CommunitySessionError}:require(name),Buffer,console:{warn:message=>logs.push(message)},setTimeout},{filename:'ticket-broker.js'});
+vm.runInNewContext(compiled,{exports:moduleObject.exports,require:name=>name==='./server-clock'?{serverClockNow:()=>calibrated,serverClockStatus:()=>({warning:false,driftSeconds:0})}:name==='electron'?{app:{on(){}}}:name==='./community-request'?{communityRequest:api,CommunitySessionError}:require(name),Buffer,console:{warn:message=>logs.push(message)},setTimeout},{filename:'ticket-broker.js'});
 function challenge(changes={}) {
  const client=crypto.generateKeyPairSync('ed25519');
  const raw=Buffer.from(JSON.stringify({v:2,server:'sefi-homestead',name:account.username,uuid:account.uuid,nonce:crypto.randomBytes(32).toString('base64url'),client_key:client.publicKey.export({type:'spki',format:'der'}).toString('base64'),expires:Math.floor(Date.now()/1000)+45,...changes}));
@@ -32,6 +32,7 @@ function challenge(changes={}) {
   const before=calls;status=200;
   for(const changes of [{expires:Math.floor(Date.now()/1000)-1},{name:'other'},{uuid:'wrong'}]){response=await post(challenge(changes));assert.equal(response.status,403);await response.text();}
   const forged=challenge();forged.signature='A'.repeat(86);response=await post(forged);assert.equal(response.status,403);await response.text();assert.equal(calls,before);
+  calibrated=Math.floor(Date.now()/1000)+180;response=await post(challenge({expires:calibrated+45}));assert.equal(response.status,200);await response.text();calibrated=Math.floor(Date.now()/1000)-180;response=await post(challenge({expires:calibrated+45}));assert.equal(response.status,200);await response.text();calibrated=null;response=await post(challenge({expires:Math.floor(Date.now()/1000)+225}));assert.equal(response.status,409);assert.equal((await response.json()).error,'clock_desync');
   assert(!logs.join('\n').includes(account.communityToken));
   assert(logs.some(s=>s.includes('status=503')));assert(logs.some(s=>s.includes('status=401')));
   console.log('Broker HTTP: signed proof, replay rejection, temporary failure followed by fresh challenge, delayed response, revoked session, expiry/profile/signature rejection, secret-free diagnostics PASS');

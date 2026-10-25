@@ -27,9 +27,14 @@ public final class SefiAuthClient implements ClientModInitializer {
     private final LoginRetry retry = new LoginRetry();
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger("SefiAuth-Client");
     private static long now() { return System.nanoTime() / 1000000; }
+    private String failureHint = "";
     private void fail(net.minecraft.client.MinecraftClient client, Object handler, KeyPair sessionKey, boolean temporary, String stage, int status) {
+        fail(client, handler, sessionKey, temporary, stage, status, "");
+    }
+    private void fail(net.minecraft.client.MinecraftClient client, Object handler, KeyPair sessionKey, boolean temporary, String stage, int status, String hint) {
         client.execute(() -> {
             if (connection != handler || key != sessionKey || !retry.active()) return;
+            failureHint = hint;
             LOG.warn("Launcher login attempt={} stage={} status={} temporary={}", retry.attempt(), stage, status, temporary);
             retry.fail(now(), temporary);
             if (!retry.active()) finish(client);
@@ -40,11 +45,13 @@ public final class SefiAuthClient implements ClientModInitializer {
     private Text deferredLoginWarning;
     private void finish(net.minecraft.client.MinecraftClient client) {
         loginFeedback.reset(); deferredLoginWarning = null;
-        if (client.player != null) client.player.sendMessage(Text.literal("§e[SEFI] Автовход не сработал. Переподключитесь к серверу."), false);
+        if (client.player != null) client.player.sendMessage(Text.literal("§e[SEFI] " + (failureHint.isEmpty() ? "Автовход не сработал. Откройте лаунчер, проверьте профиль и переподключитесь к серверу." : failureHint)), false);
+        failureHint = "";
     }
     @Override public void onInitializeClient() {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> { key = null; connection = null; attempted.set(false); retry.reset(); voiceReconnect.reset(); loginFeedback.reset(); deferredLoginWarning = null; });
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            failureHint = "";
             key = null; connection = null; attempted.set(false); retry.reset(); voiceReconnect.reset(); loginFeedback.reset(); deferredLoginWarning = null;
             if (!System.getProperty("sefi.authPort", "").matches("[0-9]{4,5}")) return;
             var entry = client.getCurrentServerEntry();
@@ -132,6 +139,12 @@ public final class SefiAuthClient implements ClientModInitializer {
                         byte[] raw = response.body();
                         if (response.statusCode() != 200 || raw.length > 1024) {
                             int status = response.statusCode();
+                            if (raw.length <= 1024) {
+                                JsonObject error = JsonParser.parseString(new String(raw, StandardCharsets.UTF_8)).getAsJsonObject();
+                                String code = error.has("error") ? error.get("error").getAsString() : "";
+                                if (code.equals("clock_desync")) { fail(client, handler, sessionKey, false, "clock_desync", status, "Автовход не сработал: проверьте часы компьютера. Включите автоматическую синхронизацию времени в Windows и переподключитесь."); return; }
+                                if (code.equals("challenge_expired")) { fail(client, handler, sessionKey, true, "challenge_expired", status, "Срок подтверждения входа истёк. Проверьте время компьютера и переподключитесь к серверу."); return; }
+                            }
                             fail(client, handler, sessionKey, status == 429 || status >= 500, "broker_http", status); return;
                         }
                         ticket = JsonParser.parseString(new String(raw, StandardCharsets.UTF_8)).getAsJsonObject().get("ticket").getAsString();

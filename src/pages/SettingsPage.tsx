@@ -211,7 +211,7 @@ export const SettingsPage: React.FC<{ updatesRequest?: number;initialTab?:Launch
           </div>
         </section>
         <section data-setting="launcher" className="settings-tab">
-          <SwitchSetting title="Скрывать лаунчер во время игры" description="Окно вернётся после выхода из Minecraft."
+          <SwitchSetting title="Скрывать лаунчер во время игры" description="Свернётся в трей и вернётся после выхода из Minecraft. Крестик во время игры тоже сворачивает окно."
             accessibleName="Скрывать лаунчер на время игры" checked={closeAfterLaunch} disabled={!settings} onToggle={handleToggleClose}/>
           <SwitchSetting title="Статус в Discord" description="Показывать Sweet Home и время игры в профиле."
             note="Нужен запущенный Discord с разрешённой игровой активностью."

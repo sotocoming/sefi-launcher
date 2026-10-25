@@ -13,6 +13,16 @@ import type {ReportAttachmentId,LaunchReportDraft,LaunchReportPreview,LaunchRepo
 type Source={label:string;detail:string;data:unknown;available:boolean};
 type Draft={created:number;actorId?:string;title:string;summary:string;sources:Record<ReportAttachmentId,Source>;requests:Map<string,string>;hasFailure:boolean;meaningful?:boolean;payload?:any;preview?:string;submitted?:string;busy?:boolean;result?:LaunchReportResult;secrets:string[];paths:string[]};
 const drafts=new Map<string,Draft>();
+const ticketChoices=new Map<string,Set<number>>();
+export async function getReportTickets(id:unknown):Promise<import('../src/types').ReportTicket[]>{
+ const d=get(id),actor=(await getAccounts()).find(a=>a.id===d.actorId);
+ if(!actor?.communityToken)throw new Error('Войдите в SEFI Community, чтобы увидеть свои заявки.');
+ const value=await communityRequest('/api/public/community/client-report/tickets',actor.communityToken);
+ if(!Array.isArray(value?.tickets)||value.tickets.length>30)throw new Error('Некорректный список заявок.');
+ const tickets=value.tickets.map((t:any)=>{if(!Number.isSafeInteger(t.id)||t.id<=0||typeof t.title!=='string'||t.title.length>80||typeof t.status!=='string'||typeof t.status_label!=='string')throw new Error('Некорректная заявка.');return {id:t.id,title:t.title,status:t.status,statusLabel:t.status_label.slice(0,100)};});
+ if(ticketChoices.size>=5)ticketChoices.delete(ticketChoices.keys().next().value!);
+ ticketChoices.set(String(id),new Set(tickets.map((t:any)=>t.id)));return tickets;
+}
 function get(id:unknown):Draft{
  if(typeof id!=='string')throw new Error('Некорректный отчёт.');
  const draft=drafts.get(id);if(!draft||Date.now()-draft.created>15*60*1000)throw new Error('Данные отчёта устарели. Закройте окно и соберите отчёт заново.');
@@ -78,14 +88,15 @@ export async function prepareLaunchReport(message:unknown=''):Promise<LaunchRepo
 }
 export function previewLaunchReport(id:unknown,options:unknown):LaunchReportPreview{
  const d=get(id);if(!options||typeof options!=='object'||Array.isArray(options))throw new Error('Некорректный выбор приложений.');
- const o=options as {attachments:ReportAttachmentId[];comment:string;discord:boolean};
- if(Object.keys(o).some(k=>!['attachments','comment','discord'].includes(k))||!Array.isArray(o.attachments)||o.attachments.length>4||new Set(o.attachments).size!==o.attachments.length||o.attachments.some(k=>typeof k!=='string'||!Object.hasOwn(d.sources,k)||!d.sources[k].available)||typeof o.comment!=='string'||o.comment.length>2000||typeof o.discord!=='boolean')throw new Error('Проверьте комментарий и выбор приложений.');
+ const o=options as {attachments:ReportAttachmentId[];comment:string;discord:boolean;ticketId?:number};
+ if(Object.keys(o).some(k=>!['attachments','comment','discord','ticketId'].includes(k))||!Array.isArray(o.attachments)||o.attachments.length>4||new Set(o.attachments).size!==o.attachments.length||o.attachments.some(k=>typeof k!=='string'||!Object.hasOwn(d.sources,k)||!d.sources[k].available)||typeof o.comment!=='string'||o.comment.length>2000||typeof o.discord!=='boolean')throw new Error('Проверьте комментарий и выбор приложений.');
+ if(o.ticketId!==undefined&&(!Number.isSafeInteger(o.ticketId)||!o.discord||!ticketChoices.get(String(id))?.has(o.ticketId)))throw new Error('Выберите свою открытую заявку из списка.');
  if(d.busy||d.result)throw new Error('Отчёт уже отправляется или отправлен.');
  const diagnostics:any={},errors:any={};if(o.attachments.includes('build'))diagnostics.build=d.sources.build.data;
  for(const key of (Object.keys(d.sources) as ReportAttachmentId[]).filter(k=>o.attachments.includes(k)))if(key!=='build')errors[key]=d.sources[key].data;
  if(Object.keys(errors).length)diagnostics.errors=errors;
  const description=redactReportText(d.summary.split('\n')[0].slice(0,240)+'\n\nКомментарий:\n'+(o.comment.trim()||'Без дополнительного комментария.'),d.secrets,d.paths);
- const body={id:'',title:'[Лаунчер '+app.getVersion()+'] '+d.title,description,steps:'',sections:Object.keys(diagnostics),diagnostics,discord:o.discord};
+ const body={id:'',title:'[Лаунчер '+app.getVersion()+'] '+d.title,description,steps:'',sections:Object.keys(diagnostics),diagnostics,discord:o.discord,...(o.ticketId?{ticket_id:o.ticketId}:{})};
  let hash=createHash('sha256').update(JSON.stringify({...body,id:''})).digest('hex');
  body.id=d.requests.get(hash)||(d.preview===hash&&d.payload?d.payload.id:randomUUID());
  const text=JSON.stringify(body,null,2),bytes=Buffer.byteLength(text);
@@ -106,7 +117,7 @@ export async function sendLaunchReport(id:unknown,token:unknown):Promise<LaunchR
   if(response?.ok!==true||response.id!==d.payload.id)throw new Error('Сайт не подтвердил приём отчёта. Повторите отправку; номер отчёта сохранён.');
   const ticketId=Number.isSafeInteger(response.ticket_id)&&response.ticket_id>0?response.ticket_id:undefined;
   const warning=typeof response.ticket_error==='string'&&response.ticket_error?redactReportText(response.ticket_error).slice(0,500):d.payload.discord&&!ticketId?'Сайт принял отчёт, но создание Discord-тикета пока не подтверждено.':undefined;
-  d.result={id:response.id,...(ticketId?{ticketId}:{}),...(warning?{warning}:{})};return d.result;
+  d.result={id:response.id,...(ticketId?{ticketId}:{}),...(warning?{warning}:{}),...(d.payload.ticket_id&&ticketId?{appended:true}:{})};return d.result;
  }catch(error){
   if(error instanceof CommunitySessionError){
    if(error.status===429)throw new Error('Лимит отправок временно исчерпан. Попробуйте позже или сохраните копию на компьютере.');

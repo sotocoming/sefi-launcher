@@ -1,6 +1,6 @@
 plugins { id 'fabric-loom' version '1.10.5' }
 group = 'ru.sotocoming'
-version = '0.2.0'
+version = '0.3.0'
 base { archivesName = 'sefi-input-diagnostics' }
 repositories { mavenCentral() }
 dependencies {
@@ -10,3 +10,17 @@ dependencies {
  modImplementation 'net.fabricmc.fabric-api:fabric-api:0.92.8+1.20.1'
 }
 tasks.withType(JavaCompile).configureEach { options.release = 17 }
+
+// Real report parser/network contract against a local HTTP fixture, without starting Minecraft.
+sourceSets {
+ contract {
+  java.srcDir 'src/contract/java'
+  compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+  runtimeClasspath += output + compileClasspath
+ }
+}
+tasks.register('ticketContract', JavaExec) {
+ dependsOn tasks.named('contractClasses')
+ classpath = sourceSets.contract.runtimeClasspath
+ mainClass = 'ReportTicketContract'
+}

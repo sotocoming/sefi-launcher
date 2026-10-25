@@ -3,7 +3,10 @@ import type { IElectronAPI } from '../src/types/electron';
 import type { GameState, DownloadProgress, Settings } from '../src/types';
 
 const api: IElectronAPI = {
+  getClockStatus: () => ipcRenderer.invoke('get-clock-status'),
+  openTimeSettings: () => ipcRenderer.invoke('open-time-settings'),
   prepareLaunchReport: message => ipcRenderer.invoke('prepare-launch-report',message),
+  getReportTickets: id => ipcRenderer.invoke('get-report-tickets',id),
   previewLaunchReport: (id,options) => ipcRenderer.invoke('preview-launch-report',id,options),
   sendLaunchReport: (id,token) => ipcRenderer.invoke('send-launch-report',id,token),
   exportLaunchReport: (id,token) => ipcRenderer.invoke('export-launch-report',id,token),

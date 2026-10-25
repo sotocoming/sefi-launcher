@@ -3,6 +3,7 @@ import { communityRequest, CommunitySessionError } from './community-request';
 import { createServer } from 'http';
 import { createPublicKey, verify, createHash } from 'crypto';
 import type { Account } from '../../src/types';
+import { serverClockNow, serverClockStatus } from './server-clock';
 
 const liveBrokers = new Set<() => void>();
 app.on('before-quit', () => { for (const close of liveBrokers) close(); });
@@ -47,11 +48,19 @@ export async function startTicketBroker(account: Account): Promise<{ port: numbe
       const raw = Buffer.from(body.challenge, 'base64url');
       if (!verify(null, raw, key, Buffer.from(body.signature, 'base64url'))) throw new Error();
       const challenge = JSON.parse(raw.toString('utf8'));
-      const now = Math.floor(Date.now() / 1000);
+      // Reconnecting after hours of play must refresh a stale HTTPS time sample.
+      if (serverClockNow() === null) await api('/config');
+      const calibrated = serverClockNow();
+      const now = Math.floor(calibrated ?? Date.now() / 1000);
       if (challenge.v !== 2 || challenge.server !== cfg.server || challenge.name !== account.username
           || challenge.uuid.replace(/-/g, '').toLowerCase() !== account.uuid.replace(/-/g, '').toLowerCase()
-          || !/^[A-Za-z0-9_-]{43}$/.test(challenge.nonce) || !Number.isInteger(challenge.expires)
-          || challenge.expires <= now || challenge.expires > now + 60) throw new Error();
+          || !/^[A-Za-z0-9_-]{43}$/.test(challenge.nonce) || !Number.isInteger(challenge.expires)) throw new Error();
+      if (challenge.expires <= now || challenge.expires > now + 60) {
+        if (calibrated === null && challenge.expires > now + 60) {
+          return reply(409, {error:'clock_desync',drift_seconds:challenge.expires - 45 - now});
+        }
+        return reply(403, {error:'challenge_expired'});
+      }
       const clientKey = createPublicKey({ key: Buffer.from(challenge.client_key, 'base64'), format: 'der', type: 'spki' });
       if (clientKey.asymmetricKeyType !== 'ed25519') throw new Error();
       for (const [id, expiry] of seen) if (expiry <= now) seen.delete(id);
@@ -60,8 +69,9 @@ export async function startTicketBroker(account: Account): Promise<{ port: numbe
       seen.set(id, challenge.expires);
       const result = await api('', account.communityToken, { challenge: body.challenge, signature: body.signature });
       if (typeof result.ticket !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(result.ticket)) throw new Error();
-      reply(200, { ticket: result.ticket });
-    } catch (error) { console.warn('[SEFI auth] stage=broker status=' + (error instanceof CommunitySessionError ? error.status || 0 : 403)); reply(error instanceof CommunitySessionError && (!error.status || error.status >= 500 || error.status === 429) ? 503 : 403, { error: 'Не удалось подтвердить подключение. Переподключитесь или используйте игровой пароль.' }); }
+      const clock = serverClockStatus();
+      reply(200, { ticket: result.ticket, ...(clock.warning ? {clock_warning:'clock_desync',drift_seconds:clock.driftSeconds} : {}) });
+    } catch (error) { console.warn('[SEFI auth] stage=broker status=' + (error instanceof CommunitySessionError ? error.status || 0 : 403)); reply(error instanceof CommunitySessionError && (!error.status || error.status >= 500 || error.status === 429) ? 503 : 403, { error: 'Не удалось подтвердить подключение. Проверьте профиль в лаунчере и переподключитесь к серверу.' }); }
     finally { busy--; }
   });
   server.requestTimeout = 5000; server.headersTimeout = 5000; server.setTimeout(35000);

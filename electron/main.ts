@@ -1,4 +1,4 @@
-import {prepareLaunchReport,previewLaunchReport,sendLaunchReport,exportLaunchReport} from './launch-reports';
+import {prepareLaunchReport,previewLaunchReport,sendLaunchReport,exportLaunchReport,getReportTickets} from './launch-reports';
 import { getReleaseNotesVersion, acknowledgeReleaseNotes } from './release-notes';
 import { cancelCommunityBrowser } from './minecraft/community-browser';
 import { trustedIpc, trustedDocument, embeddingHeaders } from './ipc-security';
@@ -16,6 +16,9 @@ import { getAccounts, addOfflineAccount, loginMicrosoft, loginCommunity, linkMin
 import { getModpackStatus } from './minecraft/modpack';
 import { chooseSkin, getCommunitySkin, saveCommunitySkin, resetCommunitySkin } from './minecraft/skins';
 import { getOfficialSkin } from './minecraft/official-skin';
+import { GameWindow } from './game-window';
+import { serverClockStatus } from './minecraft/server-clock';
+import { communityRequest } from './minecraft/community-request';
 import { getJavaStatus, getJavaPath, inspectJava } from './minecraft/java';
 import { prepareGameDirectory } from './minecraft/game-directory';
 import { publicAccount } from './minecraft/account-store';
@@ -36,6 +39,8 @@ if (process.platform === 'win32') {
 }
 
 let mainWindow: BrowserWindow | null = null;
+const gameWindow = new GameWindow(() => mainWindow);
+app.on('before-quit', () => gameWindow.dispose());
 let hiddenForGame = false;
 let gameBusy = false;
 let controlsRepairBusy = false;
@@ -45,6 +50,17 @@ const discordPresence = new DiscordPresence();
 app.once('before-quit', () => discordPresence.close());
 const indexFile = path.join(app.getAppPath(), 'dist/index.html');
 const secureIpc = trustedIpc(ipcMain, () => mainWindow, indexFile, isDev);
+secureIpc.handle('get-report-tickets', (_event,id:unknown)=>getReportTickets(id));
+let clockProbe: Promise<unknown> | null = null;
+let clockProbeAt = -Infinity;
+secureIpc.handle('get-clock-status', async () => {
+  if (!serverClockStatus().checked && !clockProbe && performance.now()-clockProbeAt>60000) {
+    clockProbeAt=performance.now();clockProbe=communityRequest('/api/public/community/launcher/ticket/config').catch(()=>{}).finally(()=>{clockProbe=null;});
+  }
+  if(clockProbe)await clockProbe;
+  return serverClockStatus();
+});
+secureIpc.handle('open-time-settings', async () => {if(process.platform==='win32')await shell.openExternal('ms-settings:dateandtime');});
 function sendToMain(channel: string, value: unknown) {
   if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.webContents.isDestroyed()) mainWindow.webContents.send(channel, value);
 }
@@ -96,6 +112,7 @@ function createWindow() {
   });
 
   const created = mainWindow;
+  created.on('close', event => gameWindow.close(event));
   created.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   created.webContents.on('will-navigate', (event, url) => {
     if (!trustedDocument(url, indexFile, isDev)) event.preventDefault();
@@ -261,6 +278,7 @@ function setupIpc() {
   secureIpc.handle('launch-game', async () => {
     if (controlsRepairBusy) throw new Error('Дождитесь завершения исправления управления.');
     await launchGame((state) => {
+      gameWindow.state(state.status);
       discordPresence.gameState(state);
       gameBusy = !['idle', 'error'].includes(state.status);
       autoUpdater.autoInstallOnAppQuit = !app.commandLine.hasSwitch('ui-preview') && !gameBusy;
@@ -276,7 +294,7 @@ function setupIpc() {
     }, (hideWindow) => {
       if (hideWindow && mainWindow && !mainWindow.isDestroyed()) {
         hiddenForGame = true;
-        mainWindow.hide();
+        gameWindow.hide();
       }
     }, location => discordPresence.gameLocation(location));
   });

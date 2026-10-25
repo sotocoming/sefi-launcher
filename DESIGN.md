@@ -1,5 +1,11 @@
 # SEFI Launcher visual system
 
+Runtime notices preserve Onest/plum form styling. Clock warnings use amber text and
+a Windows settings action, and clear after verified recovery. Failure recovery/report
+actions precede informational cards in the scrollable home console. Report destinations
+use a labelled native select with the current author's open tickets, title and status.
+Failed lists expose retry; local export remains available and nothing auto-submits.
+
 Approved direction: Product Design option 1, lighter revision. Reference and visual evidence remain local in artifacts/launcher-ui-preview/product-design and approved-comparison.png.
 
 - Preserve the original SEFI cat logo, Minecraft background, anime mascot and news artwork. Keep the original modpack illustration in source assets for possible future use.

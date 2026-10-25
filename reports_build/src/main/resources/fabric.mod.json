@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "sefi-input-diagnostics",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "name": "SEFI Reports",
   "description": "Temporary input trace. Does not alter controls.",
   "license": "MIT",

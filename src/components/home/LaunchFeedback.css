@@ -14,6 +14,10 @@
 .launch-diagnostics-body{padding-top:7px;border-top:1px solid #624051}.launch-diagnostics-body pre{margin:5px 0 10px;max-height:100px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:400 12px/19px Onest,sans-serif;color:#e0c5d3;user-select:text}
 .launch-diagnostics-body button{background:#382232;color:#f0dbe6}.launch-diagnostics-body>span{display:block;font-size:12px;line-height:19px;margin-top:7px;color:#dec1d0}
 .home-scene:has(.launch-failure) .original-console{max-height:calc(100% - 185px);overflow-y:auto;overflow-x:hidden;scrollbar-gutter:auto}
+.home-scene:has(.launch-failure) .original-console{display:flex;flex-direction:column}
+.home-scene:has(.launch-failure) .launch-controls{order:-1;flex:none;margin-bottom:10px}
+.home-scene:has(.launch-failure) .launch-failure{margin-top:0}
+.home-scene:has(.launch-failure) .launcher-overview,.home-scene:has(.launch-failure) .news-panel{flex:none}
 .launch-preparation{margin-top:10px;padding:14px 16px;border:1px solid #49374f;border-radius:10px;background:#21172b;color:#e9daef}
 .launch-preparation-line{display:flex;align-items:center;gap:10px}.launch-preparation-line>svg{flex:none;color:#d4afe4}
 .launch-preparation-copy{min-width:0;flex:1}.launch-preparation-copy strong{display:block;font:500 13px/20px Onest,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.launch-preparation-copy p{margin:3px 0 0;font:400 12px/18px Onest,sans-serif;color:#c6aed1}

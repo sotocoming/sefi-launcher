@@ -16,3 +16,4 @@
 .launch-report-dialog{overflow:hidden}.launch-report-dialog[open]{display:flex;flex-direction:column}.report-body{min-height:0;overflow-y:auto}.report-header,.report-footer,.report-error,.report-notice,.report-success{flex-shrink:0}.report-error{max-height:84px;overflow:auto}.report-comment-label span,.report-review-heading>span{font-size:12px}.report-review pre{font-size:12px;line-height:19px}
 
 .report-footer>p.report-notice{color:var(--ui-green)}
+.report-destination{margin-top:12px}.report-destination>label{display:block;margin-bottom:6px;font-size:12px}.report-destination select{display:block;width:100%;min-width:0;padding:8px 10px;border:1px solid var(--launcher-line);border-radius:7px;background:#130e1b;color:var(--ui-text);font:400 12px/20px Onest,sans-serif}.report-destination p{margin:6px 0 0;font-size:12px;line-height:20px;color:var(--ui-muted)}

@@ -29,6 +29,13 @@ const catalog = JSON.parse(sync.readFileSync(path.join(root, 'electron/minecraft
     config.modpack.sha256 = 'a'.repeat(64); assert.equal((await status()).updateAvailable, true); config.modpack.sha256 = catalog.archive.sha256;
     await fs.writeFile(path.join(dir, 'mods/fixture.jar'), 'broken'); assert.equal((await status()).updateAvailable, true);
     await fs.writeFile(path.join(dir, 'mods/fixture.jar'), bytes);
+    meta.files.push({name:'sefi-auth-2.0.3.jar',size:bytes.length,sha256:crypto.createHash('sha256').update(bytes).digest('hex')});
+    await fs.writeFile(path.join(dir,'mods/sefi-auth-2.0.3.jar'),bytes);
+    await fs.writeFile(path.join(dir,'modpack-meta.json'),JSON.stringify(meta));
+    assert.equal((await status()).updateAvailable,true,'old auth metadata requires one repair');
+    meta.files[1].name='sefi-auth-2.0.4.jar';await fs.rename(path.join(dir,'mods/sefi-auth-2.0.3.jar'),path.join(dir,'mods/sefi-auth-2.0.4.jar'));
+    await fs.writeFile(path.join(dir,'modpack-meta.json'),JSON.stringify(meta));
+    assert.equal((await status()).updateAvailable,false,'new auth metadata remains stable after repair');
     await fs.writeFile(path.join(dir, 'modpack-installing.json'), '{}'); assert.equal((await status()).updateAvailable, true);
     console.log('PASS: version comes from server; label changes require no installation or metadata writes; actual artifact changes, corruption and incomplete installation still require repair');
   } finally { await fs.rm(dir, { recursive: true, force: true }); }

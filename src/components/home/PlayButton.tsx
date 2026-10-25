@@ -84,7 +84,7 @@ export const PlayButton: React.FC<{ onOpenAccounts: () => void; onOpenSettings:(
   };
 
   return (
-    <div className="relative">
+    <div className="relative launch-controls">
       {isError ? <LaunchFailurePanel failure={failure} onRecover={recover} onRetry={handlePlay} canRetry={canRetry} busy={reloading}/> : <motion.button
         whileHover={!isDisabled ? { backgroundColor: '#8748a6' } : {}}
         whileTap={!isDisabled ? { opacity: 0.9 } : {}}

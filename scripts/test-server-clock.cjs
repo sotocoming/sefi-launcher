@@ -1,0 +1,8 @@
+const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict'),ts=require('typescript');
+let wall=Date.UTC(2026,9,25),mono=1000;class ClockDate extends Date{static now(){return wall;}}
+const m={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(__dirname,'../electron/minecraft/server-clock.ts'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:m.exports,Date:ClockDate,performance:{now:()=>mono}});
+const clock=m.exports;assert.equal(clock.serverClockNow(),null);clock.observeServerClock('invalid',wall,mono);assert.equal(clock.serverClockNow(),null);
+clock.observeServerClock(new Date(wall+180000).toUTCString(),wall,mono);assert.equal(clock.serverClockStatus().driftSeconds,180);assert(clock.serverClockStatus().warning);
+const start=clock.serverClockNow();wall-=240000;mono+=1000;assert.equal(clock.serverClockNow(),start+1,'server clock advances monotonically despite local clock jumps');
+mono+=300000;assert.equal(clock.serverClockNow(),null);clock.observeServerClock(new Date(wall).toUTCString(),wall-6000,mono-6000);assert.equal(clock.serverClockNow(),null,'slow sample rejected');clock.observeServerClock(new Date(wall).toUTCString(),wall,mono,'60');assert.equal(clock.serverClockNow(),null,'stale cache rejected');
+clock.observeServerClock(new Date(wall).toUTCString(),wall,mono);assert.equal(clock.serverClockStatus().warning,false);console.log('PASS: HTTPS Date sample, missing/slow/cached rejection, skew warning, monotonic advancement, local clock jumps and five-minute expiry');

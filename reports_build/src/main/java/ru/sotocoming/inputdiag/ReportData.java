@@ -22,17 +22,18 @@ public final class ReportData {
   public String title="",description="",steps="",message="";
   public boolean build=true,settings=true,errors=true,input=true,discord=true;
   public boolean sending;
+  public long ticketId;
   public JsonObject prepared;
   public int revision;
   public void changed(){revision++;prepared=null;message="";}
-  public void clear(){title="";description="";steps="";build=true;settings=true;errors=true;input=true;discord=true;sending=false;changed();}
+  public void clear(){title="";description="";steps="";ticketId=0;build=true;settings=true;errors=true;input=true;discord=true;sending=false;changed();}
  }
  public static final Draft DRAFT=new Draft();
  public static CompletableFuture<JsonObject> collect(MinecraftClient client,Draft draft){
   if(draft.prepared!=null)return CompletableFuture.completedFuture(draft.prepared);
   final int revision=draft.revision;
   final boolean build=draft.build,settings=draft.settings,errors=draft.errors,input=draft.input && InputTrace.hasRecording();
-  JsonObject body=new JsonObject();body.addProperty("id",UUID.randomUUID().toString());body.addProperty("title",draft.title.trim());body.addProperty("description",draft.description.trim());body.addProperty("steps",draft.steps.trim());body.addProperty("discord",draft.discord);
+  JsonObject body=new JsonObject();body.addProperty("id",UUID.randomUUID().toString());body.addProperty("title",draft.title.trim());body.addProperty("description",draft.description.trim());body.addProperty("steps",draft.steps.trim());body.addProperty("discord",draft.discord || draft.ticketId>0);if(draft.ticketId>0)body.addProperty("ticket_id",draft.ticketId);
   JsonArray selected=new JsonArray();if(build)selected.add("build");if(settings)selected.add("settings");if(errors)selected.add("errors");if(input)selected.add("input");body.add("sections",selected);
   JsonObject diagnostic=new JsonObject(),runtime=new JsonObject();JsonArray mods=new JsonArray(),enabled=new JsonArray(),available=new JsonArray(),bindings=new JsonArray();
   Map<JsonObject,Path> jarPaths=new LinkedHashMap<>();
@@ -85,6 +86,20 @@ public final class ReportData {
   return el;
  }
  public record DeliveryResult(boolean sent,String message) {}
+ public record Ticket(long id,String title,String status) {}
+ private static HttpClient brokerHttp(){return HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).proxy(new java.net.ProxySelector(){public java.util.List<java.net.Proxy> select(URI uri){return java.util.List.of(java.net.Proxy.NO_PROXY);}public void connectFailed(URI uri,java.net.SocketAddress address,java.io.IOException error){}}).connectTimeout(Duration.ofSeconds(3)).followRedirects(HttpClient.Redirect.NEVER).build();}
+ public static CompletableFuture<List<Ticket>> openTickets(){return CompletableFuture.supplyAsync(()->{
+  try{
+   String port=System.getProperty("sefi.reportPort",""),key=System.getProperty("sefi.reportKey","");
+   if(!port.matches("[0-9]{1,5}")||!key.matches("[0-9a-f]{64}"))throw new IllegalStateException();
+   HttpRequest request=HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+"/sefi/report/tickets")).timeout(Duration.ofSeconds(20)).header("Content-Type","application/json").header("X-SEFI-Report-Key",key).GET().build();
+   HttpResponse<java.io.InputStream> response=brokerHttp().send(request,HttpResponse.BodyHandlers.ofInputStream());
+   byte[] raw;try(var stream=response.body()){raw=stream.readNBytes(65537);}
+   if(response.statusCode()!=200||raw.length>65536)throw new IllegalStateException();
+   JsonArray list=JsonParser.parseString(new String(raw,StandardCharsets.UTF_8)).getAsJsonObject().getAsJsonArray("tickets");if(list==null||list.size()>30)throw new IllegalStateException();
+   List<Ticket> result=new ArrayList<>();for(JsonElement value:list){JsonObject t=value.getAsJsonObject();long id=t.get("id").getAsLong();String title=t.get("title").getAsString(),status=t.get("status_label").getAsString();if(id<=0||title.length()>80||status.length()>100)throw new IllegalStateException();result.add(new Ticket(id,title.replaceAll("§.|[\\p{Cntrl}]",""),status));}return List.copyOf(result);
+  }catch(Exception error){throw new java.util.concurrent.CompletionException(new IllegalStateException("Не удалось загрузить заявки. Нужен вход в SEFI и обновлённый лаунчер."));}
+ });}
  public static CompletableFuture<DeliveryResult> deliver(JsonObject body,boolean send){return CompletableFuture.supplyAsync(()->{
   try{
    Path root=FabricLoader.getInstance().getGameDir(),dir=root.resolve("sefi-reports");if(Files.isSymbolicLink(dir))throw new IllegalStateException("Папка отчётов недоступна.");Files.createDirectories(dir);
@@ -99,7 +114,7 @@ public final class ReportData {
     String error=result.has("error") && result.get("error").isJsonPrimitive()?result.get("error").getAsString():"Не отправлено. Копия сохранена; повторите позже.";
     return new DeliveryResult(false,error.substring(0,Math.min(error.length(),500)));
    }
-   if(result.has("ticket_id")&&!result.get("ticket_id").isJsonNull())return new DeliveryResult(true,"Отчёт отправлен. Discord-тикет #"+result.get("ticket_id").getAsInt()+" появится после обработки ботом.");
+   if(result.has("ticket_id")&&!result.get("ticket_id").isJsonNull())return new DeliveryResult(true,(body.has("ticket_id")?"Дополнение принято для заявки #":"Отчёт принят. Discord-тикет #")+result.get("ticket_id").getAsLong()+". Бот обработает его в канале заявки.");
    String notice=result.has("ticket_error") && !result.get("ticket_error").isJsonNull()?result.get("ticket_error").getAsString():"";
    return new DeliveryResult(true,"Отчёт отправлен. Номер: "+body.get("id").getAsString().substring(0,8)+(notice.isBlank()?"":". "+notice.substring(0,Math.min(notice.length(),300))));
   }catch(Exception e){return new DeliveryResult(false,"Не удалось отправить. Если копия сохранена, она в sefi-reports; повторите позже.");}

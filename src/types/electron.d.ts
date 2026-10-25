@@ -10,8 +10,11 @@ import type {
 } from './index';
 
 export interface IElectronAPI {
+  getClockStatus():Promise<{checked:boolean;warning:boolean;driftSeconds:number}>;
+  openTimeSettings():Promise<void>;
   prepareLaunchReport(message?:string):Promise<import('./index').LaunchReportDraft>;
-  previewLaunchReport(id:string,options:{attachments:import('./index').ReportAttachmentId[];comment:string;discord:boolean}):Promise<import('./index').LaunchReportPreview>;
+  previewLaunchReport(id:string,options:{attachments:import('./index').ReportAttachmentId[];comment:string;discord:boolean;ticketId?:number}):Promise<import('./index').LaunchReportPreview>;
+  getReportTickets(id:string):Promise<import('./index').ReportTicket[]>;
   sendLaunchReport(id:string,token:string):Promise<import('./index').LaunchReportResult>;
   exportLaunchReport(id:string,token:string):Promise<{cancelled:boolean}>;
   getReleaseNotesVersion(): Promise<string>;

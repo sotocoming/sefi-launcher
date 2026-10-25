@@ -174,4 +174,5 @@ export interface LaunchReportDraft {
  attachments:{id:ReportAttachmentId;label:string;detail:string;available:boolean}[];
 }
 export interface LaunchReportPreview {token:string;text:string;bytes:number;canSend:boolean}
-export interface LaunchReportResult {id:string;ticketId?:number;warning?:string}
+export interface LaunchReportResult {id:string;ticketId?:number;warning?:string;appended?:boolean}
+export interface ReportTicket {id:number;title:string;status:string;statusLabel:string}

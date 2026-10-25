@@ -1,5 +1,6 @@
 import {LaunchReportDialog} from './components/reports/LaunchReportDialog';
 import {ReleaseNotes} from './components/updates/ReleaseNotes';
+import {ClockWarning} from './components/layout/ClockWarning';
 import { useEffect, useState } from 'react';
 import type { LaunchRecoveryTarget } from './utils/errors';
 import { AnimatePresence, MotionConfig } from 'framer-motion';
@@ -36,6 +37,7 @@ export default function App() {
 
     if (window.electronAPI?.onGameStateChange) {
       unsubGameState = window.electronAPI.onGameStateChange((state) => {
+        if(state.status==='error'&&useStore.getState().gameState.status==='running')setCurrentPage('home');
         setGameState(state);
       });
       unsubDownload = window.electronAPI.onDownloadProgress((progress) => {
@@ -72,6 +74,7 @@ export default function App() {
         {/* Content View with Frameless TitleBar */}
         <main id="main-content" tabIndex={-1} className="original-main app-main">
           <TitleBar onOpenUpdates={()=>{setUpdatesRequest(n=>n+1);setCurrentPage('settings');}} />
+          <ClockWarning/>
 
           <div className="app-page">
             <AnimatePresence mode="wait">

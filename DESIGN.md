@@ -1,5 +1,11 @@
 # SEFI Launcher visual system
 
+Accounts retain the existing composition: a secondary cabinet action in the page header
+and a compact Discord row between community and Minecraft identities. No extra card.
+Pending authorization replaces the action with cancel and inline status; confirmed
+identity uses mint text. Errors use the existing feedback region. Keep the complete
+identity footer visible at1100×680; keyboard and account selection behavior are preserved.
+
 Runtime notices preserve Onest/plum form styling. Clock warnings use amber text and
 a Windows settings action, and clear after verified recovery. Failure recovery/report
 actions precede informational cards in the scrollable home console. Report destinations

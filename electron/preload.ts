@@ -36,6 +36,9 @@ const api: IElectronAPI = {
   loginCommunity: () => ipcRenderer.invoke('login-community'),
   linkMinecraftAccount: (id: string) => ipcRenderer.invoke('link-minecraft-account', id),
   refreshCommunityProfile: (accountId: string) => ipcRenderer.invoke('refresh-community-profile', accountId),
+  openCommunityProfile: () => ipcRenderer.invoke('open-community-profile'),
+  linkDiscordAccount: (accountId: string) => ipcRenderer.invoke('link-discord-account', accountId),
+  cancelDiscordLink: () => ipcRenderer.invoke('cancel-discord-link'),
   removeAccount: (id: string) => ipcRenderer.invoke('remove-account', id),
   setActiveAccount: (id: string) => ipcRenderer.invoke('set-active-account', id),
   

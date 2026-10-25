@@ -17,6 +17,7 @@ import { getModpackStatus } from './minecraft/modpack';
 import { chooseSkin, getCommunitySkin, saveCommunitySkin, resetCommunitySkin } from './minecraft/skins';
 import { getOfficialSkin } from './minecraft/official-skin';
 import { GameWindow } from './game-window';
+import {linkDiscordAccount, cancelDiscordLink} from './minecraft/discord-link';
 import { serverClockStatus } from './minecraft/server-clock';
 import { communityRequest } from './minecraft/community-request';
 import { getJavaStatus, getJavaPath, inspectJava } from './minecraft/java';
@@ -225,6 +226,12 @@ function setupIpc() {
     const account = (await getAccounts()).find(a => a.id === accountId);
     return account?.communityToken ? publicAccount(await refreshCommunityProfile(account.communityToken)) : null;
   });
+  secureIpc.handle('open-community-profile', async () => {await shell.openExternal('https://mc.sotocoming.ru/profile');});
+  secureIpc.handle('link-discord-account', async (_, accountId: string) => {
+    try {return publicAccount(await linkDiscordAccount(accountId, mainWindow));}
+    finally {bringToFront();}
+  });
+  secureIpc.handle('cancel-discord-link', async () => cancelDiscordLink());
   secureIpc.handle('remove-account', async (_, id) => await removeAccount(id));
   secureIpc.handle('set-active-account', async (_, id) => await setActiveAccount(id));
 

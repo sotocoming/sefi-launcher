@@ -44,6 +44,8 @@ export interface Account {
   whitelistStatus?: 'pending' | 'approved' | 'rejected';
   twitchLogin?: string;
   twitchAvatar?: string;
+  discordId?: string | null;
+  discordUsername?: string | null;
   mcType?: 'offline' | 'microsoft';
   mcUuid?: string | null;
   mcVerifiedAt?: number;

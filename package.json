@@ -20,7 +20,7 @@
     "electron-updater": "^6.3.9",
     "framer-motion": "^11.15.0",
     "lucide-react": "^1.52.0",
-    "markdown-it": "14.3.2",
+    "markdown-it": "14.3.3",
     "minecraft-launcher-core": "^3.18.1",
     "msmc": "^5.0.5",
     "prismarine-nbt": "^2.8.0",
@@ -37,7 +37,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "concurrently": "^9.1.2",
-    "electron": "44.7.0",
+    "electron": "44.9.3",
     "electron-builder": "26.15.3",
     "postcss": "^8.4.49",
     "resedit": "1.7.2",
@@ -46,6 +46,14 @@
     "vite": "^6.0.7"
   },
   "overrides": {
+    "fast-uri": "3.1.9",
+    "postcss-selector-parser": "7.1.6",
+    "@electron/get": {
+      "undici": "7.30.1"
+    },
+    "node-gyp": {
+      "undici": "6.29.1"
+    },
     "minecraft-launcher-core": {
       "adm-zip": "$adm-zip",
       "request": "npm:@cypress/request@4.0.1",

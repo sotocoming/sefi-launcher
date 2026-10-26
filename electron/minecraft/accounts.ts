@@ -175,7 +175,7 @@ export async function loginCommunity(fresh = false): Promise<Account> {
       type: 'offline', active: true, communityToken: data.token,
       whitelistStatus: user.whitelist_status || 'pending',
       twitchLogin: user.twitch_login, twitchAvatar: user.twitch_avatar,
-      discordId: user.discord_id || null, discordUsername: user.discord_username || null,
+      discordConnected: !!user.discord_username, discordUsername: user.discord_username || null,
       mcType: user.mc_verified_at && user.mc_uuid && user.mc_type === 'microsoft' ? 'microsoft' : 'offline',
       mcUuid: user.mc_verified_at ? user.mc_uuid : undefined,
       mcVerifiedAt: user.mc_verified_at || 0,
@@ -215,7 +215,7 @@ export async function refreshCommunityProfile(token: string): Promise<Account | 
       accounts[msIdx].whitelistStatus = user.whitelist_status;
       accounts[msIdx].twitchLogin = user.twitch_login;
       accounts[msIdx].twitchAvatar = user.twitch_avatar;
-      accounts[msIdx].discordId = user.discord_id || null;
+      accounts[msIdx].discordConnected = !!user.discord_username;
       accounts[msIdx].discordUsername = user.discord_username || null;
       accounts[msIdx].communityToken = token;
       if (user.mc_nickname) accounts[msIdx].username = user.mc_nickname;
@@ -227,7 +227,7 @@ export async function refreshCommunityProfile(token: string): Promise<Account | 
 
     for (const account of accounts) {
       if (account.type === 'microsoft' && account.communityToken === token) {
-        account.discordId = user.discord_id || null;
+        account.discordConnected = !!user.discord_username;
         account.discordUsername = user.discord_username || null;
         account.mcType = user.mc_verified_at && user.mc_uuid && user.mc_type === 'microsoft' ? 'microsoft' : 'offline';
         account.mcUuid = user.mc_verified_at ? user.mc_uuid : undefined;
@@ -247,7 +247,7 @@ export async function refreshCommunityProfile(token: string): Promise<Account | 
       accounts[idx].whitelistStatus = user.whitelist_status;
       accounts[idx].twitchLogin = user.twitch_login;
       accounts[idx].twitchAvatar = user.twitch_avatar;
-      accounts[idx].discordId = user.discord_id || null;
+      accounts[idx].discordConnected = !!user.discord_username;
       accounts[idx].discordUsername = user.discord_username || null;
       accounts[idx].mcVerifiedAt = user.mc_verified_at || 0;
       accounts[idx].mcType = user.mc_verified_at && user.mc_uuid && user.mc_type === 'microsoft' ? 'microsoft' : 'offline';

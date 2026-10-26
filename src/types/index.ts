@@ -14,17 +14,19 @@ export interface Settings {
 
 export interface CommunityProfile {
   id: number;
-  twitch_id: string;
   twitch_login: string;
   twitch_display_name: string;
   twitch_avatar: string;
-  discord_id: string | null;
   discord_username: string | null;
-  discord_avatar: string | null;
   mc_nickname: string | null;
   mc_type: 'offline' | 'microsoft';
   whitelist_status: 'pending' | 'approved' | 'rejected';
-  session_token: string;
+  mc_uuid?: string | null;
+  mc_verified_at?: number;
+  mc_activated_at?: number;
+  access_sync_status?: string;
+  launcher_linked?: number;
+  news_editor?: number;
 }
 
 export interface Account {
@@ -44,7 +46,7 @@ export interface Account {
   whitelistStatus?: 'pending' | 'approved' | 'rejected';
   twitchLogin?: string;
   twitchAvatar?: string;
-  discordId?: string | null;
+  discordConnected?: boolean;
   discordUsername?: string | null;
   mcType?: 'offline' | 'microsoft';
   mcUuid?: string | null;

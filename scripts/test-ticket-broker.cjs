@@ -21,6 +21,7 @@ function challenge(changes={}) {
  return {challenge:raw.toString('base64url'),signature:crypto.sign(null,raw,serverKey.privateKey).toString('base64url')};
 }
 (async()=>{
+ for(const message of ['Bearer secret-value','communityToken="secret-value"','--accessToken secret-value','-Dsefi.reportKey=secret-value','eyJabc.def.ghi'])assert(!moduleObject.exports.redactLaunchLog(message).includes(message.includes('eyJ')?'eyJabc.def.ghi':'secret-value'));
  const broker=await moduleObject.exports.startTicketBroker(account);
  const post=async body=>fetch(`http://127.0.0.1:${broker.port}/sefi/game-ticket`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
  try {

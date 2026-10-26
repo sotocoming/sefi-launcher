@@ -18,7 +18,7 @@ function loader(mocks) {
       if(Object.hasOwn(mocks,name))return mocks[name];
       if(name.startsWith('.'))return load(path.resolve(path.dirname(file),name)+'.ts');
       return dependency(name);
-    },Buffer,process,structuredClone,window:mocks.__window,console:{warn(){},log(){},error(){}},AbortController,AbortSignal,URL,URLSearchParams,setTimeout,clearTimeout});
+    },Buffer,process,performance,structuredClone,window:mocks.__window,console:{warn(){},log(){},error(){}},AbortController,AbortSignal,URL,URLSearchParams,setTimeout,clearTimeout});
     return module.exports;
   }
   return name=>load(path.join(root,'electron/minecraft',name+'.ts'));

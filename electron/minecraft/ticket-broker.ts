@@ -13,8 +13,9 @@ async function api(path: string, token?: string, body?: object): Promise<any> {
 }
 
 export function redactLaunchLog(message: string): string {
-  if (message.includes('Launching with arguments')) return '[MCLC]: Запуск Minecraft (аргументы скрыты)';
-  return message.replace(/(-Dsefi\.reportKey=|-Dsefi\.ticket=|--accessToken[=\s]+|--clientToken[=\s]+)\S+/gi, '$1[hidden]');
+  if (/Launching with arguments/i.test(message)) return '[MCLC]: Запуск Minecraft (аргументы скрыты)';
+  return message.replace(/(-Dsefi\.reportKey=|-Dsefi\.ticket=|--accessToken[=\s]+|--clientToken[=\s]+|Bearer\s+|(?:accessToken|refreshToken|communityToken|password|authorization)["']?\s*[:=]\s*["']?)\S+/gi, '$1[hidden]')
+    .replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g,'[hidden]');
 }
 
 export async function startTicketBroker(account: Account): Promise<{ port: number; close: () => void }> {

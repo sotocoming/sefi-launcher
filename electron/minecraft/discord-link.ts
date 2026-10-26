@@ -97,7 +97,7 @@ export async function linkDiscordAccount(accountId: unknown, parent?: BrowserWin
       void window.loadURL(target.href).catch(() => finish(new Error('Не удалось открыть Discord. Повторите привязку.')));
     });
     const updated = await refreshCommunityProfile(account.communityToken);
-    if (!updated?.discordId) throw new Error('Подтверждение получено, но профиль не обновился. Обновите его или проверьте привязку в личном кабинете.');
+    if (!updated?.discordConnected) throw new Error('Подтверждение получено, но профиль не обновился. Обновите его или проверьте привязку в личном кабинете.');
     return updated;
   } finally {
     if (timer) clearTimeout(timer);

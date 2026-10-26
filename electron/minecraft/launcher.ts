@@ -163,7 +163,9 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
 
   let broker: Awaited<ReturnType<typeof startTicketBroker>> | undefined;
   let presence: Awaited<ReturnType<typeof watchGamePresence>> | undefined;
+  let processEnded = false;
   launcher.on('close', (code: any) => {
+    processEnded = true;
     gameRunning = false;
     broker?.close();
     presence?.close();
@@ -269,6 +271,15 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       if (launcher.preparationError) throw launcher.preparationError;
       throw new Error('Процесс Minecraft не смог стартовать. Java: ' + javaPath + '\n' + startupLog.join('\n').slice(-4000));
     }
+    // A short-lived child can exit before launcher.launch() resolves.
+    if(processEnded || typeof child.exitCode === 'number' || child.signalCode){
+      reportBroker.close();
+      if(!processEnded){
+        broker?.close();presence?.close();
+        onStateChange({status:'error',message:'Minecraft завершился во время запуска. Повторите запуск или отправьте отчёт.'});
+      }
+      return;
+    }
     gameRunning = true;
     onStateChange({ status: 'running', pid: child.pid });
     onStarted?.(settings.closeOnLaunch === true);
@@ -276,7 +287,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     reportBroker.close();
     broker?.close();
     presence?.close();
-    console.error('Launch failed:', err);
+    console.error('Launch failed:', redactLaunchLog(err instanceof Error ? err.message : String(err)));
     onStateChange({ status: 'error', message: err.message || String(err) });
   }
 }

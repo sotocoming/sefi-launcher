@@ -8,9 +8,10 @@ const requireLauncher = createRequire(path.resolve(__dirname, '..', 'package.jso
 const ts = requireLauncher('typescript');
 const nbt = requireLauncher('prismarine-nbt');
 const Module = require('module');
+require.extensions['.ts']=(module,file)=>module._compile(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,esModuleInterop:true,target:ts.ScriptTarget.ES2022}}).outputText,file);
 const filename = path.resolve(__dirname, '..', 'electron/minecraft/servers-dat.ts');
 const compiled = ts.transpileModule(fs.readFileSync(filename,'utf8'), {compilerOptions:{module:ts.ModuleKind.CommonJS,esModuleInterop:true,target:ts.ScriptTarget.ES2022}}).outputText;
-const mod = new Module(filename);mod.paths=Module._nodeModulePaths(path.dirname(filename));mod._compile(compiled,filename);
+const mod = new Module(filename);mod.filename=filename;mod.paths=Module._nodeModulePaths(path.dirname(filename));mod._compile(compiled,filename);
 (async()=>{
  const dir=await fsp.mkdtemp(path.join(os.tmpdir(),'sefi-euro-'));
  const file=path.join(dir,'servers.dat');

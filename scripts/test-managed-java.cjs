@@ -64,11 +64,11 @@ require.extensions['.ts'] = (m, f) => m._compile(ts.transpileModule(fs.readFileS
     assert.equal(await java.resolveJava('', 4096), a); assert.equal(requests, cachedRequests, 'offline launch reuses managed Java');
     assert(probes.some(p => p.args.includes('-Xmx4096M') && p.options.windowsHide && p.options.timeout === 15000));
     ramFailure = true; await assert.rejects(java.resolveJava('', 16384), /уменьшите выделенную память/); ramFailure = false;
-    const custom = path.join(root, 'custom java.exe'); await fsp.writeFile(custom, 'wrong-version');
+    const custom = path.join(root, 'custom path', 'bin', 'java.exe'); await fsp.mkdir(path.dirname(custom),{recursive:true}); await fsp.writeFile(custom, 'wrong-version');
     await assert.rejects(java.resolveJava(custom, 4096), /нужна Java 21/);
     assert.equal((await java.getJavaStatus(custom)).status, 'error');
     await fsp.writeFile(custom, '32bit'); await assert.rejects(java.inspectJava(custom), /64-битная/);
-    await assert.rejects(java.inspectJava('java'), /полный путь/);
+    await assert.rejects(java.inspectJava('java.exe'), /полный путь/);
     // An invalid installation is replaced only after the new archive and executable pass checks.
     offline = false; await fsp.writeFile(a, 'wrong-version');
     assert.equal((await java.getJavaStatus()).status, 'missing');

@@ -24,7 +24,7 @@ const mockSession={fromPartition(name){assert(name.startsWith('sefi-discord-'));
 };}};
 const original=mockSession.fromPartition;mockSession.fromPartition=name=>{const s=original(name);s.webRequest.owner=s;return s;};
 const mod={exports:{}};const source=ts.transpileModule(fs.readFileSync(path.join(__dirname,'../electron/minecraft/discord-link.ts'),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
-vm.runInNewContext(source,{exports:mod.exports,module:mod,URL,AbortController,AbortSignal,console,setTimeout:(f,ms)=>{if(ms===300000){win.timer=f;return setTimeout(()=>{},300000);}return setTimeout(f,ms);},clearTimeout,require:id=>id==='electron'?{BrowserWindow:Window,session:mockSession}:id==='./accounts'?{getAccounts:async()=>account?[account]:[],refreshCommunityProfile:async()=>{refreshes++;return confirmed?{id:'c',discordId:'222222222222222222'}:null;}}:require(id)});
+vm.runInNewContext(source,{exports:mod.exports,module:mod,URL,AbortController,AbortSignal,console,setTimeout:(f,ms)=>{if(ms===300000){win.timer=f;return setTimeout(()=>{},300000);}return setTimeout(f,ms);},clearTimeout,require:id=>id==='electron'?{BrowserWindow:Window,session:mockSession}:id==='./accounts'?{getAccounts:async()=>account?[account]:[],refreshCommunityProfile:async()=>{refreshes++;return confirmed?{id:'c',discordConnected:true}:null;}}:require(id)});
 const api=mod.exports;
 (async()=>{
  await api.linkDiscordAccount('c');assert.equal(refreshes,1);assert(win.dead);assert.equal(clears,1);assert.equal(win.open().action,'deny');

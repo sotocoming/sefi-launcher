@@ -1,6 +1,6 @@
 # SEFI Launcher privacy policy
 
-Last updated: October 25, 2026.
+Last updated: October 26, 2026.
 
 [Русская версия](PRIVACY.ru.md).
 
@@ -26,12 +26,12 @@ information to GitHub and its download infrastructure.
 | News, configuration, server status and map | SEFI services at mc.sotocoming.ru receive network request information such as IP address, time, requested resource and client headers. The map is loaded from that site. Remote news images can also contact their image hosts. | Configuration and status are requested at startup and refreshed while the launcher runs. The map is loaded when opened. |
 | SEFI Community sign-in | The community service receives the browser sign-in exchange and issues a launcher session token. The launcher stores the community profile, including Minecraft name/UUID, Twitch login/avatar and access status. Saved community sessions are refreshed automatically. Twitch authentication takes place through the community website. | When signing in, when a saved session is refreshed, and when checking access before game launch. |
 | Microsoft / Xbox / Minecraft sign-in | Microsoft services receive authorization requests and issue tokens and the Minecraft name/UUID. When a community account is present, the launcher can send a Minecraft access token to the SEFI backend to verify and link that Minecraft profile; explicit linking also uses this verification. The Microsoft refresh token is not sent to the SEFI backend by this flow. | When signing in, linking accounts or refreshing the Microsoft session needed to launch the game. |
-| Discord account linking | A user-initiated, isolated authorization window loads Discord with the identify scope. SEFI receives the confirmed Discord identity; the launcher stores its ID and username with the community profile. The SEFI session token stays in the native process. Temporary authorization-window storage is cleared after completion, cancellation or failure. | Only when you choose to link Discord. Profile refreshes also update its saved linking status. |
+| Discord account linking | A user-initiated, isolated authorization window loads Discord with the identify scope. SEFI receives the confirmed Discord identity; the launcher caches its username and linking status with the community profile. The SEFI session token stays in the native process. Temporary authorization-window storage is cleared after completion, cancellation or failure. | Only when you choose to link Discord. Profile refreshes also update its saved linking status. |
 | Skins and avatars | SEFI receives a selected skin PNG and model when you save it. Skin lookups use player names/UUIDs, including other players rendered by the SEFI skin mod. Official Minecraft skin previews send the profile UUID to sessionserver.mojang.com and fetch public skin/cape textures from textures.minecraft.net over HTTPS, without account tokens or cookies. Avatar requests to mc-heads.net include a player name or UUID. Twitch avatar URLs may contact Twitch image hosts. Those hosts also see network request information. | When displaying an avatar, loading a saved skin, saving/resetting a skin, or rendering community players in Minecraft. |
 | Game and Java downloads | Minecraft/Microsoft, Fabric, CurseForge, Modrinth, Eclipse Adoptium, GitHub, their download/CDN hosts and the SEFI download mirror receive download requests and connection information. Authenticated SEFI mirror requests include the community token; it is not forwarded to external download hosts. | When installing, repairing or launching a game that needs files, or preparing the managed Java runtime. |
 | Launcher updates | GitHub and its download infrastructure receive requests for release metadata and update files, with connection information and updater headers. | Installed releases check automatically and download available updates in the background. |
 | Discord activity | The launcher sends game/launcher state, play start time, game dimension, player count and the configured server-region label to the local Discord application. Discord can publish that activity according to the user's Discord settings. The launcher also requests the Discord application's icon metadata and uses a Discord CDN image URL. | Enabled by default; can be disabled in launcher settings. |
-| Interface fonts | Google Fonts receives font/style requests and connection information from the interface. | When the interface loads and the font is fetched. |
+| Interface fonts | Font files are included in the launcher; loading them does not contact an external font service. | When the interface loads. |
 
 These connections support the features above. Fully quitting the launcher stops its
 background work, but does not close a game or browser already opened from it. While
@@ -89,9 +89,10 @@ account linking determine whether a ticket can be created.
 The launcher stores settings, cached configuration, account identifiers and
 session credentials under its Electron user-data directory (normally the
 sefi-launcher folder inside %APPDATA% on Windows). It maintains accounts.json
-and a recovery copy, accounts.json.bak. The Microsoft refresh token is encrypted
-with Electron safeStorage (Windows DPAPI). This does not mean all stored account
-fields or all other tokens are encrypted; protect access to the Windows profile.
+and a recovery copy, accounts.json.bak. SEFI session tokens, Minecraft access tokens
+and Microsoft refresh tokens are encrypted with Electron safeStorage (Windows DPAPI),
+including the recovery copy. Legacy plaintext tokens migrate when the profile is read.
+Names, UUIDs and other profile fields remain unencrypted; protect access to the Windows profile.
 
 Removing an account updates the active account file. It does not revoke provider
 permissions, delete the SEFI website account or necessarily remove that account

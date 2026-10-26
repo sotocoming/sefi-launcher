@@ -1,0 +1,21 @@
+const assert=require('node:assert/strict'),fs=require('node:fs/promises'),sync=require('node:fs'),path=require('node:path'),os=require('node:os'),vm=require('node:vm'),ts=require('typescript');
+(async()=>{const dir=await fs.mkdtemp(path.join(os.tmpdir(),'sefi-vault-'));try{
+ let locked=false,available=true;const cache=new Map();
+ const electron={app:{getPath:()=>dir},safeStorage:{isEncryptionAvailable:()=>available,encryptString:s=>Buffer.from('cipher:'+s.split('').reverse().join('')),decryptString:b=>{if(locked)throw Error('key unavailable');return b.toString().slice(7).split('').reverse().join('');}}};
+ function load(file){file=path.resolve(file);if(cache.has(file))return cache.get(file).exports;const m={exports:{}};cache.set(file,m);const code=ts.transpileModule(sync.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;vm.runInNewContext(code,{exports:m.exports,module:m,Buffer,process,console,require:id=>id==='electron'?electron:id.startsWith('.')?load(path.resolve(path.dirname(file),id)+'.ts'):require(id)});return m.exports;}
+ const store=load(path.join(__dirname,'../electron/minecraft/account-store.ts')),file=path.join(dir,'accounts.json');
+ const original={id:'c',username:'Player',uuid:'offline',type:'offline',active:true,communityToken:'community-private-secret',accessToken:'minecraft-private-secret',clientToken:'public-random-client-id',msRefreshToken:'refresh-private-secret'};
+ await fs.writeFile(file,JSON.stringify([original]));
+ const native=await Promise.all([store.readAccounts(),store.readAccounts(),store.readAccounts()]);for(const rows of native){assert.equal(rows[0].communityToken,original.communityToken);assert.equal(rows[0].accessToken,original.accessToken);}
+ for(const suffix of ['', '.bak']){const content=await fs.readFile(file+suffix,'utf8');for(const secret of [original.communityToken,original.accessToken,original.msRefreshToken])assert(!content.includes(secret),'no plaintext in current or backup');}
+ const visible=store.publicAccount(native[0][0]);assert(!visible.protectedTokens);assert(!visible.communityToken);assert(!visible.msRefreshToken);assert.equal(visible.accessToken,'');assert.equal(visible.communityConnected,true);
+ const encrypted=JSON.parse(await fs.readFile(file,'utf8'))[0].protectedTokens;
+ locked=true;const unreadable=(await store.readAccounts())[0];assert.equal(unreadable.communityToken,'');assert.equal(unreadable.accessToken,'');assert.equal(store.publicAccount(unreadable).communityConnected,false);
+ await store.updateAccounts(rows=>{rows[0].username='Renamed';});assert.equal(JSON.stringify(JSON.parse(await fs.readFile(file,'utf8'))[0].protectedTokens),JSON.stringify(encrypted),'locked credentials preserved exactly');
+ locked=false;assert.equal((await store.readAccounts())[0].communityToken,original.communityToken);
+ const before=await fs.readFile(file,'utf8'),backup=await fs.readFile(file+'.bak','utf8');available=false;await assert.rejects(store.updateAccounts(rows=>{rows[0].active=false;}),/безопасно сохранить/);assert.equal(await fs.readFile(file,'utf8'),before);assert.equal(await fs.readFile(file+'.bak','utf8'),backup);available=true;
+ await fs.writeFile(file,'{corrupt');assert.equal((await store.readAccounts())[0].communityToken,original.communityToken,'valid encrypted backup recovers');
+ await store.updateAccounts(rows=>rows.splice(0,rows.length));assert.equal((await store.readAccounts()).length,0,'explicit account removal remains possible');
+  await fs.writeFile(file,JSON.stringify([]));await fs.writeFile(file+'.bak',JSON.stringify([original]));assert.equal((await store.readAccounts()).length,0,'backup migration must not restore a removed account');assert(!(await fs.readFile(file+'.bak','utf8')).includes(original.communityToken),'legacy plaintext backup is removed when main is empty');
+ console.log('PASS: concurrent legacy migration, encrypted current/backup, native roundtrip, renderer secret exclusion, unreadable key never used as bearer, opaque preservation, unavailable-key no-write, encrypted backup recovery and account removal');
+ }finally{await fs.rm(dir,{recursive:true,force:true});}})().catch(e=>{console.error(e);process.exitCode=1;});

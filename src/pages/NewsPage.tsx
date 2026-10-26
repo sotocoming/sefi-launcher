@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Newspaper, ExternalLink, ThumbsUp, Calendar, ChevronDown } from 'lucide-react';
-import { GlassCard } from '../components/ui/GlassCard';
+import { ExternalLink, ThumbsUp, ChevronDown } from 'lucide-react';
+
 import { NewsMarkdown } from '../components/ui/NewsMarkdown';
 import { useStore } from '../store/store';
 
@@ -10,7 +10,7 @@ interface NewsPageProps {
 }
 
 export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
-  const { news, setNews, activeAccount, launcherConfig } = useStore();
+  const { news, setNews, activeAccount } = useStore();
   const [activeFilter, setActiveFilter] = useState<'all' | 'event' | 'update' | 'news'>('all');
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
 
@@ -96,157 +96,20 @@ export const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
     news: { label: 'Новость', color: 'text-fuchsia-300', border: 'border-fuchsia-400/25 bg-fuchsia-500/10' },
   };
 
-  return (
-    <motion.div
-      key="news"
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -6 }}
-      className="relative flex h-full flex-col overflow-hidden bg-[#09090d] select-none pt-6 px-8 pb-6"
-    >
-      {/* Header bar */}
-      <div className="flex items-center justify-between pb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-300">
-            <Newspaper size={22} />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">
-              Новости и события сервера
-            </h1>
-            <p className="text-xs text-white/45">
-              Анонсы обновлений, праздников и жизни {launcherConfig?.server?.title || launcherConfig?.server?.name || 'Sweet Home'}
-            </p>
-          </div>
-        </div>
-
-        <button
-          onClick={() => handleOpenExternal()}
-          className="flex items-center gap-1.5 rounded-lg border border-fuchsia-400/30 bg-fuchsia-500/15 px-3 py-1.5 text-xs font-medium text-fuchsia-200 transition hover:bg-fuchsia-500/25 hover:text-white"
-        >
-          <span>Читать на сайте</span>
-          <ExternalLink size={13} />
-        </button>
-      </div>
-
-      {/* Filter Buttons Bar */}
-      <div className="flex items-center gap-2 pb-4">
-        {(['all', 'event', 'update', 'news'] as const).map((filter) => {
-          const names = { all: 'Все', event: 'Ивенты', update: 'Обновления', news: 'Новости' };
-          const active = activeFilter === filter;
-          return (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`rounded-lg px-3 py-1 text-xs font-medium transition ${
-                active
-                  ? 'bg-white/[0.12] text-white border border-white/20'
-                  : 'text-white/45 hover:bg-white/[0.04] hover:text-white/80 border border-transparent'
-              }`}
-            >
-              {names[filter]}
-            </button>
-          );
-        })}
-      </div>
-
-      {!authorized && <button type="button" onClick={() => onNavigate('accounts')} className="mb-4 self-start text-sm text-fuchsia-300 underline underline-offset-4 hover:text-fuchsia-200 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-fuchsia-300">Войдите в SEFI Community, чтобы оценивать новости</button>}
-      {reactionError && <p role="status" className="mb-4 text-sm text-amber-300">{reactionError}</p>}
-      {/* News List */}
-      <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-        {filteredItems.length === 0 ? (
-          <div className="flex h-48 items-center justify-center text-xs text-white/40">
-            В этой категории пока нет новостей.
-          </div>
-        ) : (
-          filteredItems.map((item) => {
-            const tagInfo = tagLabels[item.tag] || tagLabels.news;
-            const currentVote = userVotes[item.id];
-
-            const isExpanded = !!expandedIds[item.id];
-            const isLong = (item.body || '').length > 200 || (item.body || '').split('\n').length > 4;
-
-            return (
-              <GlassCard
-                key={item.id}
-                className="overflow-hidden p-0 border border-white/[0.08] hover:border-white/[0.15] transition"
-              >
-                <div className="flex flex-col md:flex-row">
-                  {item.image && (
-                    <div className="h-48 md:w-64 md:h-48 shrink-0 overflow-hidden bg-black/40">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="size-full object-cover transition duration-300 hover:scale-105"
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex flex-1 flex-col justify-between p-5">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${tagInfo.border} ${tagInfo.color}`}>
-                          {tagInfo.label}
-                        </span>
-                        <div className="flex items-center gap-1 text-[11px] text-white/40">
-                          <Calendar size={11} />
-                          <span>{item.date} {item.time && `· ${item.time}`}</span>
-                        </div>
-                      </div>
-
-                      <h2
-                        onClick={() => handleOpenExternal(item.id)}
-                        className="text-base font-bold text-white hover:text-fuchsia-300 transition cursor-pointer mb-2"
-                      >
-                        {item.title}
-                      </h2>
-
-                      <NewsMarkdown source={item.body} collapsed={!isExpanded && isLong} />
-
-                      {isLong && (
-                        <button
-                          type="button"
-                          onClick={() => toggleExpand(item.id)}
-                          className="mt-2.5 inline-flex items-center gap-1 text-xs font-medium text-fuchsia-300/90 hover:text-fuchsia-200 transition cursor-pointer"
-                        >
-                          <span>{isExpanded ? 'Свернуть' : 'Читать полностью'}</span>
-                          <ChevronDown size={13} className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          disabled={!authorized || busy}
-                          onClick={() => handleReact(item.id, 'like')}
-                          title={currentVote === 'like' ? 'Снять лайк' : 'Поставить лайк'}
-                          className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition cursor-pointer ${
-                            currentVote === 'like'
-                              ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-400/40 shadow-[0_0_12px_rgba(52,211,153,0.25)]'
-                              : 'bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white border border-white/[0.06]'
-                          }`}
-                        >
-                          <ThumbsUp size={12} className={currentVote === 'like' ? 'fill-current' : ''} />
-                          <span>{item.likes}</span>
-                        </button>
-                      </div>
-
-                      <button
-                        onClick={() => handleOpenExternal(item.id)}
-                        className="flex items-center gap-1 text-xs font-medium text-fuchsia-300/80 hover:text-fuchsia-200 transition"
-                      >
-                        <span>Подробнее</span>
-                        <ExternalLink size={11} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </GlassCard>
-            );
-          })
-        )}
-      </div>
-    </motion.div>
-  );
+  const [selectedId,setSelectedId]=useState<string|null>(null);
+  const selected=filteredItems.find(n=>n.id===selectedId)||filteredItems[0];
+  const expanded=!!selected&&!!expandedIds[selected.id];
+  const long=!!selected&&((selected.body||'').length>200||(selected.body||'').split('\n').length>4);
+  return <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="workspace-page news-page">
+   <header className="page-head"><div><h1>Жизнь Sweet Home</h1><p>Обновления, события и истории нашего мира</p></div><button className="s-button" onClick={()=>handleOpenExternal()}>Читать на сайте <ExternalLink size={13}/></button></header>
+   <div className="page-tabs">{(['all','event','update','news'] as const).map(f=><button key={f} aria-pressed={activeFilter===f} onClick={()=>setActiveFilter(f)}>{{all:'Все',event:'Ивенты',update:'Обновления',news:'Новости'}[f]}</button>)}</div>
+   {reactionError&&<p role="status" className="feedback">{reactionError}</p>}
+   {!selected?<div className="empty-panel">В этой категории пока нет новостей.</div>:<div className="news-workspace"><article key={selected.id} className={`news-feature ${expanded ? 'is-expanded' : 'is-preview'} ${selected.image ? 'has-cover' : ''}`}>
+    {selected.image&&<img className="feature-cover" src={selected.image} alt=""/>}
+    <div className="feature-meta"><span>{tagLabels[selected.tag]?.label||'Новость'}</span><time>{selected.date} {selected.time}</time></div>
+    <div className={selected.image?'feature-copy':'feature-copy no-cover'}><h2>{selected.title}</h2><NewsMarkdown source={selected.body} collapsed={!expanded&&long}/>
+    {long&&<button className="text-action" aria-expanded={expanded} onClick={()=>toggleExpand(selected.id)}>{expanded?'Свернуть':'Читать полностью'} <ChevronDown size={13}/></button>}
+    <footer className="article-footer"><button className="s-button news-like" disabled={!authorized||busy} aria-pressed={userVotes[selected.id]==='like'} aria-label={userVotes[selected.id]==='like'?'Снять лайк':'Поставить лайк'} onClick={()=>handleReact(selected.id,'like')}><ThumbsUp size={13}/>{selected.likes}</button>{!authorized?<button className="text-action" onClick={()=>onNavigate('accounts')}>Войти, чтобы оценить</button>:<button className="text-action" onClick={()=>handleOpenExternal(selected.id)}>На сайте <ExternalLink size={12}/></button>}</footer></div>
+   </article><aside className="news-list" aria-label="Все новости">{filteredItems.map(n=><button className="news-row" key={n.id} aria-pressed={selected.id===n.id} onClick={()=>setSelectedId(n.id)}><strong>{n.title}</strong><span>{n.date} · {tagLabels[n.tag]?.label||'Новость'}</span></button>)}</aside></div>}
+  </motion.div>;
 };

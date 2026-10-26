@@ -3,6 +3,15 @@ import type { IElectronAPI } from '../src/types/electron';
 import type { GameState, DownloadProgress, Settings } from '../src/types';
 
 const api: IElectronAPI = {
+  getClockStatus: () => ipcRenderer.invoke('get-clock-status'),
+  openTimeSettings: () => ipcRenderer.invoke('open-time-settings'),
+  prepareLaunchReport: message => ipcRenderer.invoke('prepare-launch-report',message),
+  getReportTickets: id => ipcRenderer.invoke('get-report-tickets',id),
+  previewLaunchReport: (id,options) => ipcRenderer.invoke('preview-launch-report',id,options),
+  sendLaunchReport: (id,token) => ipcRenderer.invoke('send-launch-report',id,token),
+  exportLaunchReport: (id,token) => ipcRenderer.invoke('export-launch-report',id,token),
+  getReleaseNotesVersion: () => ipcRenderer.invoke('get-release-notes-version'),
+  acknowledgeReleaseNotes: version => ipcRenderer.invoke('acknowledge-release-notes', version),
   launchGame: () => ipcRenderer.invoke('launch-game'),
   
   repairResourcePacks: () => ipcRenderer.invoke('repair-resource-packs'),
@@ -16,15 +25,20 @@ const api: IElectronAPI = {
   openDirectory: (dirPath: string) => ipcRenderer.invoke('open-directory', dirPath),
   
   getCommunitySkin: id => ipcRenderer.invoke('get-community-skin', id),
+  getOfficialSkin: (id, refresh) => ipcRenderer.invoke('get-official-skin', id, refresh),
   chooseSkin: () => ipcRenderer.invoke('choose-skin'),
   saveCommunitySkin: (id, png, model) => ipcRenderer.invoke('save-community-skin', id, png, model),
   resetCommunitySkin: id => ipcRenderer.invoke('reset-community-skin', id),
   getAccounts: () => ipcRenderer.invoke('get-accounts'),
   addOfflineAccount: (username: string) => ipcRenderer.invoke('add-offline-account', username),
   loginMicrosoft: () => ipcRenderer.invoke('login-microsoft'),
+  cancelCommunityLogin: () => ipcRenderer.invoke('cancel-community-login'),
   loginCommunity: () => ipcRenderer.invoke('login-community'),
   linkMinecraftAccount: (id: string) => ipcRenderer.invoke('link-minecraft-account', id),
   refreshCommunityProfile: (accountId: string) => ipcRenderer.invoke('refresh-community-profile', accountId),
+  openCommunityProfile: () => ipcRenderer.invoke('open-community-profile'),
+  linkDiscordAccount: (accountId: string) => ipcRenderer.invoke('link-discord-account', accountId),
+  cancelDiscordLink: () => ipcRenderer.invoke('cancel-discord-link'),
   removeAccount: (id: string) => ipcRenderer.invoke('remove-account', id),
   setActiveAccount: (id: string) => ipcRenderer.invoke('set-active-account', id),
   
@@ -38,6 +52,7 @@ const api: IElectronAPI = {
     ipcRenderer.invoke('react-news', id, reaction, prev),
 
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  getUpdateStatus: () => ipcRenderer.invoke('get-update-status'),
   installUpdate: () => ipcRenderer.invoke('install-update'),
   openExternal: (url: string) => ipcRenderer.invoke('open-external', url),
   

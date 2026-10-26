@@ -1,59 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
-  color-scheme: dark;
-  background: #060608;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  overflow: hidden;
-  background: #060608;
-  color: #F7F4FB;
-  user-select: none;
-}
-
-button,
-input {
-  font: inherit;
-}
-
-::selection {
-  background: rgba(197, 91, 255, 0.35);
-}
-
-/* Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 99px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.titlebar-drag {
-  -webkit-app-region: drag;
-}
-
-.titlebar-no-drag {
-  -webkit-app-region: no-drag;
-}
+:root{font-family:Onest,sans-serif;color-scheme:dark;--canvas:#140f1c;--surface:#191121;--surface-raised:#281b33;--line:#594064;--text:#f2eaf6;--secondary:#c0afcd;--accent:#d9b6ed;background:var(--canvas)}
+*{box-sizing:border-box}body{margin:0;overflow:hidden;user-select:none}button,input,select,textarea{font:inherit}button,a,input{touch-action:manipulation}main:focus{outline:none}::selection{background:#64528e;color:white}.titlebar-drag{-webkit-app-region:drag}.titlebar-no-drag{-webkit-app-region:no-drag}.skip-link{position:absolute;left:210px;top:-100px;z-index:100;padding:12px;background:var(--surface);border:1px solid var(--accent);border-radius:8px}.skip-link:focus{top:12px}
+@layer components{.sefi-panel{border:1px solid var(--line);border-radius:12px;background:var(--surface)}.sefi-panel-accent{border-color:#7e6aa9}.page-view{background:var(--canvas);padding:28px 32px 32px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}

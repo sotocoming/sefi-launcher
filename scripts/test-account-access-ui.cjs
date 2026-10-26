@@ -16,19 +16,19 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
     getAccounts:async()=>{if(window.failRefresh)throw Error('Список временно недоступен');return window.accounts;},
     getCommunitySkin:async()=>null,
     getSettings:async()=>({ramMax:4096}),getModpackStatus:async()=>({installed:true}),getServerStatus:async()=>({online:true}),getLauncherConfig:async()=>({server:{ip:'test.invalid',port:25565},news:[]}),
-    launchGame:async()=>{window.launches++;},
+    onGameStateChange:cb=>{window.gameChanged=cb;return()=>{};},launchGame:async()=>{window.launches++;window.gameChanged?.({status:'idle'});},
     linkMinecraftAccount:async()=>{window.linkCalls++;window.failRefresh=true;throw Error('Привязка не завершена');},
     loginCommunity:async()=>{const comm={id:'comm',uuid:'offline',username:'Godot_Plane',type:'offline',active:true,communityConnected:true,twitchLogin:'godot_plane',whitelistStatus:'approved'};ms.active=false;window.accounts=[ms,comm];return comm;},
    },{get:(target,key)=>key in target?target[key]:()=>()=>{}});
   });
   await page.goto('http://sefi.test/');
-  const play=page.getByRole('button',{name:/^ИГРАТЬ/});
+  const play=page.getByRole('button',{name:/^Играть/i});
   await play.click();const dialog=page.getByRole('dialog');await dialog.waitFor();assert.equal(await page.evaluate(()=>window.launches),0);assert.match(await dialog.innerText(),/Вы не вошли в Twitch/);
   await dialog.getByRole('button',{name:'Отмена',exact:true}).click();assert.equal(await page.evaluate(()=>window.launches),0);
   await play.click();await page.keyboard.press('Escape');await dialog.waitFor({state:'hidden'});
   await play.click();await dialog.getByRole('button',{name:'Всё равно запустить',exact:true}).click();await page.waitForFunction(()=>window.launches===1);
-  await play.click();await dialog.getByRole('button',{name:'Аккаунты',exact:true}).click();await page.getByRole('heading',{name:/Профиль игрока/}).waitFor();assert.equal(await page.evaluate(()=>window.launches),1);
-  await page.getByRole('button',{name:'Войти через сайт',exact:true}).click();const link=page.getByRole('button',{name:'Привязать к Twitch',exact:true});await link.click();await link.waitFor();assert.equal(await link.isEnabled(),true);await page.getByText(/Список временно недоступен/).waitFor();assert.equal(await page.evaluate(()=>window.linkCalls),1);
+  await play.click();await dialog.getByRole('button',{name:'Аккаунт',exact:true}).click();await page.getByRole('heading',{name:/Твой профиль/}).waitFor();assert.equal(await page.evaluate(()=>window.launches),1);
+  await page.getByRole('button',{name:'Войти через сайт',exact:true}).click();const link=page.getByRole('button',{name:'Привязать Minecraft к Twitch',exact:true});await link.click();await link.waitFor();assert.equal(await link.isEnabled(),true);await page.getByText(/Список временно недоступен/).waitFor();assert.equal(await page.evaluate(()=>window.linkCalls),1);
   await page.evaluate(()=>window.failRefresh=false);await link.click();await link.waitFor();assert.equal(await link.isEnabled(),true);assert.equal(await page.evaluate(()=>window.linkCalls),2);
   await page.screenshot({path:path.join(__dirname,'../../account-refresh-error.png')});
   await page.evaluate(()=>sessionStorage.setItem('fixtureMode','unlinked'));await page.reload();await play.click();await dialog.waitFor();assert.match(await dialog.innerText(),/ещё не связали/);await page.screenshot({path:path.join(__dirname,'../../unlinked-warning.png')});await dialog.getByRole('button',{name:'Отмена',exact:true}).click();

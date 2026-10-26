@@ -1,5 +1,6 @@
 import { net } from 'electron';
 import { setTimeout as delay } from 'timers/promises';
+import { observeServerClock } from './server-clock';
 
 const ORIGIN='https://mc.sotocoming.ru';
 export class CommunitySessionError extends Error {
@@ -10,6 +11,7 @@ export async function communityRequest(route: string, token?: string, body?: obj
   const readOnly=body===undefined;
   for(let attempt=0;attempt<2;attempt++){
     let response: Response;
+    const startedWall=Date.now(), startedMono=performance.now();
     try{
       response=await net.fetch(ORIGIN+route,{method:body===undefined?'GET':'POST',redirect:'error',signal:AbortSignal.timeout(timeout),
         headers:{Accept:'application/json',...(body!==undefined?{'Content-Type':'application/json'}:{}),...(token?{'X-Community-Token':token}:{})},
@@ -18,6 +20,7 @@ export async function communityRequest(route: string, token?: string, body?: obj
       if(attempt===0 && (readOnly||retry)){await delay(500);continue;}
       throw new CommunitySessionError('Сервис SEFI временно недоступен. Аккаунт сохранён; повторите запуск позже.');
     }
+    observeServerClock(response.headers.get('Date'),startedWall,startedMono,response.headers.get('Age'));
     if(!response.ok){
       const status=response.status;
       if(attempt===0 && (readOnly||retry) && (status>=500||status===429)){await response.body?.cancel();await delay(700);continue;}

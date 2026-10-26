@@ -66,7 +66,7 @@ export const NewsPanel: React.FC = () => {
       {/* Header bar: Compact and informative */}
       <div className="flex items-center justify-between border-b border-white/[0.06] px-3.5 py-2.5 shrink-0 bg-black/20">
         <div className="flex items-center gap-2">
-          <span className="size-1.5 rounded-full bg-fuchsia-400 shadow-[0_0_8px_#d18aff]" />
+          <span className="size-1.5 rounded-full bg-fuchsia-400" />
           <span className="text-xs font-semibold text-white/90">Новости сервера</span>
         </div>
 

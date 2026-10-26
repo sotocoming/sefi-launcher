@@ -1,7 +1,8 @@
+import { AccountImage } from '../components/accounts/AccountImage';
 import { SkinEditor } from '../components/accounts/SkinEditor';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Trash2, Check, Box, AlertCircle } from 'lucide-react';
+import { Trash2, Box, Link2, ExternalLink } from 'lucide-react';
 import { useStore } from '../store/store';
 
 export const AccountsPage: React.FC = () => {
@@ -11,6 +12,8 @@ export const AccountsPage: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [linkingId, setLinkingId] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState('');
+  const [discordBusy, setDiscordBusy] = useState(false);
+  const [profileBusy, setProfileBusy] = useState(false);
 
   const handleMicrosoftLogin = async () => {
     setIsLoggingInMs(true);
@@ -96,6 +99,32 @@ export const AccountsPage: React.FC = () => {
   const commAccount = accounts.find((a) => a.communityConnected || a.twitchLogin);
   // 2. Microsoft / Mojang side
   const msAccount = accounts.find((a) => a.type === 'microsoft');
+  const communityId = commAccount?.id;
+  useEffect(()=>{
+    if(!communityId)return;
+    let alive=true,working=false,last=-Infinity;
+    const refresh=async()=>{
+      if(working||Date.now()-last<10000)return;working=true;last=Date.now();
+      try{
+        const account=await window.electronAPI.refreshCommunityProfile(communityId);
+        if(!alive||!account||typeof account.id!=='string')return;
+        const fresh=await window.electronAPI.getAccounts();
+        if(alive){setAccounts(fresh);setActiveAccount(fresh.find(a=>a.active)||null);}
+      }catch{/* Cached profile remains usable when SEFI is offline. */}
+      finally{working=false;}
+    };
+    void refresh();window.addEventListener('focus',refresh);
+    return()=>{alive=false;window.removeEventListener('focus',refresh);};
+  },[communityId,setAccounts,setActiveAccount]);
+  const openProfile=async()=>{setProfileBusy(true);setErrorMsg('');try{await window.electronAPI.openCommunityProfile();}catch{setErrorMsg('Не удалось открыть личный кабинет. Проверьте браузер по умолчанию и повторите попытку.');}finally{setProfileBusy(false);}};
+  const linkDiscord=async()=>{
+    if(!commAccount||discordBusy)return;setDiscordBusy(true);setErrorMsg('');setSuccessMsg('');
+    try{
+      await window.electronAPI.linkDiscordAccount(commAccount.id);
+      const fresh=await window.electronAPI.getAccounts();setAccounts(fresh);setActiveAccount(fresh.find(a=>a.active)||null);
+    }catch(err:any){setErrorMsg((err.message||'Не удалось привязать Discord. Повторите попытку.').replace(/^Error invoking remote method '[^']+': (?:Error: )?/,''));}
+    finally{setDiscordBusy(false);}
+  };
   // Check if they are unified / linked together
   const isLicenseBoundOnBackend = Boolean(commAccount?.mcVerifiedAt && commAccount.mcType === 'microsoft' && commAccount.mcUuid);
   const isLinked = Boolean(
@@ -103,345 +132,16 @@ export const AccountsPage: React.FC = () => {
       && msAccount.uuid.replace(/-/g, '').toLowerCase() === commAccount!.mcUuid!.replace(/-/g, '').toLowerCase()
   );
 
-  return (
-    <motion.div
-      key="accounts"
-      initial={{ opacity: 0, x: 8 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -8 }}
-      className="h-full overflow-y-auto px-8 pb-10 pt-6 select-none"
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-            <span>Профиль игрока</span>
-            <span className="text-xs px-2.5 py-0.5 rounded-full border border-fuchsia-500/25 bg-fuchsia-500/10 text-fuchsia-300 font-medium">
-              Minecraft 1.20.1
-            </span>
-          </h1>
-          <p className="mt-1 text-sm text-white/45">
-            Связь аккаунта сообщества Twitch и игрового клиента Minecraft
-          </p>
-        </div>
-      </div>
-
-      {linkingId && (
-        <p role="status" className="mt-4 text-sm text-fuchsia-200">
-          Подтвердите привязку в открывшемся окне. Если открылся браузер, завершите вход Twitch и вернитесь в лаунчер.
-        </p>
-      )}
-      {successMsg && (
-        <div role="status" className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-3.5 text-xs text-emerald-200">
-          {successMsg}
-        </div>
-      )}
-      {errorMsg && (
-        <div className="mt-4 rounded-xl border border-red-500/25 bg-red-500/10 p-3.5 text-xs text-red-200 flex items-center gap-2 shadow-lg backdrop-blur-sm">
-          <span className="size-2 rounded-full bg-red-400 animate-ping" />
-          <span>{errorMsg}</span>
-        </div>
-      )}
-
-      {/* Main Two-Card Tandem with Chain in the Middle */}
-      <div className="mt-8 relative grid grid-cols-[1fr,auto,1fr] items-center gap-4">
-        {/* Left Card: Twitch / SEFI Community */}
-        <div className={`relative rounded-2xl border p-6 backdrop-blur-md transition-all duration-300 flex flex-col justify-between min-h-[260px] ${
-          commAccount
-            ? 'border-purple-500/40 bg-[#160c24]/90 shadow-[0_4px_30px_rgba(168,85,247,0.12)]'
-            : 'border-white/[0.08] bg-[#0e111a]/70 hover:border-purple-500/30'
-        }`}>
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-purple-500/15 border border-purple-400/25 text-purple-300">
-                <svg className="size-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>
-                </svg>
-              </div>
-              <span className="rounded-full border border-purple-400/30 bg-purple-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-purple-300">
-                Twitch Community
-              </span>
-            </div>
-
-            {commAccount ? (
-              <div className="mt-5">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={commAccount.twitchAvatar || `https://mc-heads.net/avatar/${commAccount.username}/48`}
-                    alt={commAccount.twitchLogin || 'Twitch'}
-                    className="size-12 rounded-xl object-cover border border-purple-400/40 bg-purple-950/40 shadow-md"
-                  />
-                  <div>
-                    <div className="text-base font-bold text-white tracking-tight">
-                      @{commAccount.twitchLogin || commAccount.username}
-                    </div>
-                    <div className="mt-0.5 font-mono text-[11px] text-white/40">
-                      ID: #{commAccount.id.replace('comm_', '').slice(0, 10)}…
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${
-                    commAccount.whitelistStatus === 'approved'
-                      ? 'border-emerald-500/30 bg-emerald-500/15 text-emerald-300'
-                      : commAccount.whitelistStatus === 'rejected'
-                      ? 'border-rose-500/30 bg-rose-500/15 text-rose-300'
-                      : 'border-amber-500/30 bg-amber-500/15 text-amber-300'
-                  }`}>
-                    <span className={`size-1.5 rounded-full ${
-                      commAccount.whitelistStatus === 'approved'
-                        ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]'
-                        : commAccount.whitelistStatus === 'rejected'
-                        ? 'bg-rose-400 shadow-[0_0_6px_#f43f5e]'
-                        : 'bg-amber-400 shadow-[0_0_6px_#fbbf24]'
-                    }`} />
-                    <span>
-                      {commAccount.whitelistStatus === 'approved'
-                        ? 'Доступ открыт'
-                        : commAccount.whitelistStatus === 'rejected'
-                        ? 'Доступ отклонён'
-                        : 'Ожидает одобрения'}
-                    </span>
-                  </span>
-
-                  {isLicenseBoundOnBackend && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-400/30 bg-blue-500/15 px-2.5 py-0.5 text-[11px] font-medium text-blue-300">
-                      <Box size={12} />
-                      Лицензия привязана
-                    </span>
-                  )}
-                </div>
-
-              </div>
-            ) : (
-              <div className="mt-5">
-                <h3 className="text-base font-semibold text-white tracking-tight">Вход не выполнен</h3>
-                <p className="mt-1.5 text-xs leading-5 text-white/45">
-                  Войдите под своей учетной записью Twitch, чтобы получить игровой ник и доступ на сервер.
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="mt-6">
-            {commAccount ? (
-              <button
-                onClick={(e) => handleRemove(commAccount.id, e)}
-                className="flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] text-xs font-medium text-white/50 hover:bg-red-500/15 hover:text-red-300 hover:border-red-500/30 transition cursor-pointer"
-              >
-                <Trash2 size={13} />
-                <span>Сменить Twitch-аккаунт</span>
-              </button>
-            ) : (
-              <button
-                disabled={isLoggingInCommunity || linkingId !== null}
-                onClick={async () => {
-                  setIsLoggingInCommunity(true);
-                  setErrorMsg('');
-                  try {
-                    if (window.electronAPI?.loginCommunity) {
-                      const newAcc = await window.electronAPI.loginCommunity();
-                      const updated = await window.electronAPI.getAccounts();
-                      setAccounts(updated);
-                      setActiveAccount(newAcc);
-        if (newAcc.communityLinkError) setErrorMsg(newAcc.communityLinkError);
-                    }
-                  } catch (err: any) {
-                    setErrorMsg(err.message || 'Ошибка входа SEFI Community');
-                  } finally { setIsLoggingInCommunity(false); }
-                }}
-                className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-purple-600 px-4 text-xs font-semibold text-white transition hover:bg-purple-500 active:scale-[0.98] cursor-pointer shadow-lg shadow-purple-600/25"
-              >
-                <span>{isLoggingInCommunity ? 'Подтвердите в браузере…' : 'Войти через сайт'}</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Center: Interactive Chain / Connector */}
-        <div className="flex flex-col items-center justify-center z-10 px-1">
-          {isLinked ? (
-            <div className="group relative flex flex-col items-center">
-              <div className="flex size-12 items-center justify-center rounded-2xl border border-emerald-400/40 bg-emerald-500/20 text-emerald-300 shadow-[0_0_25px_rgba(52,211,153,0.3)] backdrop-blur-md">
-                <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg>
-              </div>
-              <span className="mt-2 text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-400/20">
-                Связано
-              </span>
-            </div>
-          ) : commAccount && msAccount ? (
-            <button
-              onClick={() => handleLinkMinecraft(msAccount.id)}
-              disabled={linkingId !== null}
-              className="group relative flex flex-col items-center cursor-pointer active:scale-95 transition"
-              title="Нажмите, чтобы связать аккаунты"
-            >
-              <div className="flex size-12 items-center justify-center rounded-2xl border border-fuchsia-400/40 bg-fuchsia-500/20 text-fuchsia-300 shadow-[0_0_20px_rgba(217,70,239,0.3)] animate-pulse hover:bg-fuchsia-500/30">
-                <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg>
-              </div>
-              <span className="mt-2 text-[10px] font-bold uppercase tracking-wider text-fuchsia-300 bg-fuchsia-500/15 px-2 py-0.5 rounded-full border border-fuchsia-400/25">
-                {linkingId ? 'Связка…' : 'Привязать к Twitch'}
-              </span>
-            </button>
-          ) : (
-            <div className="flex flex-col items-center opacity-30">
-              <div className="flex size-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white/50">
-                <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                </svg>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Right Card: Minecraft Java Game Profile */}
-        <div className={`relative rounded-2xl border p-6 backdrop-blur-md transition-all duration-300 flex flex-col justify-between min-h-[260px] ${
-          msAccount
-            ? 'border-blue-500/40 bg-[#0c1424]/90 shadow-[0_4px_30px_rgba(59,130,246,0.12)]'
-            : isLicenseBoundOnBackend
-            ? 'border-amber-500/40 bg-[#1f170c]/90 shadow-[0_4px_30px_rgba(245,158,11,0.12)]'
-            : commAccount
-            ? 'border-white/[0.1] bg-[#12141c]/80'
-            : 'border-white/[0.08] bg-[#0e111a]/70 hover:border-blue-400/30'
-        }`}>
-          <div>
-            <div className="flex items-center justify-between">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-blue-500/15 border border-blue-400/25 text-blue-300">
-                <Box size={22} />
-              </div>
-              <span className={`rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
-                msAccount
-                  ? 'border-blue-400/30 bg-blue-500/15 text-blue-300'
-                  : isLicenseBoundOnBackend
-                  ? 'border-amber-400/30 bg-amber-500/15 text-amber-300'
-                  : 'border-white/10 bg-white/[0.05] text-white/50'
-              }`}>
-                {msAccount ? 'Minecraft Java Лицензия' : isLicenseBoundOnBackend ? 'Требуется вход Microsoft' : 'Игровой профиль'}
-              </span>
-            </div>
-
-
-            {msAccount ? (
-              <div className="mt-5">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={`https://mc-heads.net/avatar/${encodeURIComponent(msAccount.username)}/48`}
-                    alt={msAccount.username}
-                    className="size-12 rounded-xl object-cover border border-blue-400/40 bg-black/40 shadow-md"
-                  />
-                  <div>
-                    <div className="text-base font-bold text-white tracking-tight">
-                      {msAccount.username}
-                    </div>
-                    <div className="mt-0.5 font-mono text-[11px] text-white/40">
-                      UUID: {msAccount.uuid.slice(0, 12)}…
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-blue-400/30 bg-blue-500/15 px-2.5 py-0.5 text-[11px] font-medium text-blue-300">
-                    <Check size={11} strokeWidth={3} />
-                    {isLinked ? 'Привязка подтверждена сервером' : 'Вход Microsoft выполнен'}
-                  </span>
-                </div>
-                {!isLinked && (
-                  <p className="mt-3 text-xs leading-5 text-amber-200">
-                    {commAccount ? 'Привязка к сообществу не подтверждена. Нажмите «Привязать к Twitch» между карточками и подтвердите пару аккаунтов.' : 'Войдите в SEFI Community через сайт, затем нажмите «Привязать к Twitch» между карточками.'}
-                  </p>
-                )}
-              </div>
-            ) : isLicenseBoundOnBackend && commAccount ? (
-              <div className="mt-5">
-                <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-200 space-y-1">
-                  <div className="font-semibold flex items-center gap-1.5 text-amber-300">
-                    <AlertCircle size={14} />
-                    <span>Привязана лицензия Mojang</span>
-                  </div>
-                  <p className="text-[11px] text-amber-200/80 leading-4">
-                    Ваш аккаунт зарегистрирован под лицензией <strong className="text-white">{commAccount.username}</strong>. Войдите через Microsoft для игры.
-                  </p>
-                </div>
-              </div>
-            ) : commAccount ? (
-              <div className="mt-5">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={`https://mc-heads.net/avatar/${encodeURIComponent(commAccount.username)}/48`}
-                    alt={commAccount.username}
-                    className="size-12 rounded-xl object-cover border border-white/15 bg-black/40 shadow-md"
-                  />
-                  <div>
-                    <div className="text-base font-bold text-white tracking-tight">
-                      {commAccount.username}
-                    </div>
-                    <div className="mt-0.5 text-xs text-white/50">
-                      Стандартный доступ (серверный ник)
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex items-center gap-2">
-                  <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-0.5 text-[11px] font-medium text-white/60">
-                    Готов к игре
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="mt-5">
-                <h3 className="text-base font-semibold text-white tracking-tight">Minecraft не подключён</h3>
-                <p className="mt-1.5 text-xs leading-5 text-white/45">
-                  Войдите через Microsoft для игры с официальной лицензией Java.
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="mt-6">
-            {msAccount ? (
-              <button
-                onClick={(e) => handleRemove(msAccount.id, e)}
-                className="flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] text-xs font-medium text-white/50 hover:bg-red-500/15 hover:text-red-300 hover:border-red-500/30 transition cursor-pointer"
-              >
-                <Trash2 size={13} />
-                <span>Выйти из Microsoft</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleMicrosoftLogin}
-                disabled={isLoggingInMs}
-                className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-white text-xs font-semibold text-zinc-950 transition hover:bg-zinc-200 active:scale-[0.98] disabled:opacity-50 cursor-pointer shadow-lg"
-              >
-                {isLoggingInMs ? (
-                  <>
-                    <span className="size-3.5 rounded-full border-2 border-zinc-950 border-t-transparent animate-spin" />
-                    <span>Ожидание браузера...</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="size-4" viewBox="0 0 21 21">
-                      <path fill="#f25022" d="M1 1h9v9H1z"/>
-                      <path fill="#00a4ef" d="M1 11h9v9H1z"/>
-                      <path fill="#7fba00" d="M1 1h9v9h-9z"/>
-                      <path fill="#ffb900" d="M1 11h9v9h-9z"/>
-                    </svg>
-                    <span>{isLicenseBoundOnBackend ? 'Войти в Microsoft для игры' : 'Войти через Microsoft'}</span>
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-      <SkinEditor key={activeAccount?.id || 'none'} account={activeAccount} />
-    </motion.div>
-  );
+  const selectAccount=async(id:string)=>{try{await window.electronAPI.setActiveAccount(id);const fresh=await window.electronAPI.getAccounts();setAccounts(fresh);setActiveAccount(fresh.find(a=>a.active)||null);}catch(err:any){setErrorMsg(err.message||'Не удалось выбрать профиль.');}};
+  const handleCommunityLogin=async()=>{setIsLoggingInCommunity(true);setErrorMsg('');try{const account=await window.electronAPI.loginCommunity();setAccounts(await window.electronAPI.getAccounts());setActiveAccount(account);if(account.communityLinkError)setErrorMsg(account.communityLinkError);}catch(err:any){setErrorMsg((err.message||'Ошибка входа SEFI Community').replace(/^Error invoking remote method '[^']+': (?:Error: )?/,''));}finally{setIsLoggingInCommunity(false);}};
+  return <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="workspace-page accounts-page">
+   <header className="page-head"><div><h1>Твой профиль</h1><p>Аккаунт сообщества, Minecraft и свой стиль в игре</p></div><button className="s-button account-cabinet" disabled={profileBusy} onClick={()=>void openProfile()}><ExternalLink size={14}/>{profileBusy?'Открываем…':'Личный кабинет'}</button></header>
+   {linkingId&&<p role="status" className="feedback">Подтвердите привязку в открывшемся окне и вернитесь в лаунчер.</p>}{successMsg&&<p role="status" className="feedback success">{successMsg}</p>}{errorMsg&&<p role="alert" className="feedback error">{errorMsg}</p>}
+   <div className="account-workspace"><section className="identity-panel"><div className="community-identity"><span className="eyebrow">SEFI COMMUNITY</span>
+    {commAccount?<><div className="identity-name"><AccountImage src={commAccount.twitchAvatar||''} alt={commAccount.twitchLogin||commAccount.username}/><div><h2>{commAccount.username}</h2><p>@{commAccount.twitchLogin||commAccount.username}</p></div></div><span className={"access-label"+(!commAccount.communityConnected?" needs-login":"")}>{!commAccount.communityConnected?'Требуется вход':commAccount.whitelistStatus==='approved'?'Доступ открыт':commAccount.whitelistStatus==='rejected'?'Доступ отклонён':'Ожидает одобрения'}</span></>:<><h2>Твой мир начинается здесь</h2><p>Войди через Twitch, чтобы получить игровой профиль и доступ к сообществу Sweet Home.</p></>}
+    <div className="identity-actions">{commAccount?<><button className="s-button" onClick={()=>void(commAccount.communityConnected?selectAccount(commAccount.id):handleCommunityLogin())} disabled={isLoggingInCommunity||(commAccount.communityConnected&&activeAccount?.id===commAccount.id)}>{isLoggingInCommunity?'Подтвердите в браузере…':!commAccount.communityConnected?'Войти снова':activeAccount?.id===commAccount.id?'Профиль выбран':'Выбрать профиль'}</button>{isLoggingInCommunity?<button className="text-action" onClick={()=>void window.electronAPI.cancelCommunityLogin().catch(()=>setErrorMsg('Не удалось отменить вход. Закройте окно браузера и повторите позже.'))}>Отменить вход</button>:<button className="text-action" onClick={e=>handleRemove(commAccount.id,e)}>Сменить Twitch-аккаунт</button>}</>:<><button className="s-button primary" disabled={isLoggingInCommunity||linkingId!==null} onClick={handleCommunityLogin}>{isLoggingInCommunity?'Подтвердите в браузере…':'Войти через сайт'}</button>{isLoggingInCommunity&&<button className="text-action" onClick={()=>void window.electronAPI.cancelCommunityLogin().catch(()=>setErrorMsg('Не удалось отменить вход. Повторите попытку.'))}>Отменить вход</button>}</>}</div>
+   </div>{commAccount&&<div className="account-discord"><div><h3>Discord</h3><p className={commAccount.discordConnected?'connected':''} role="status">{discordBusy?'Подтвердите привязку в окне Discord':commAccount.discordConnected?(commAccount.discordUsername||'Аккаунт привязан'):'Не привязан · по желанию'}</p></div>{discordBusy?<button className="text-action" onClick={()=>void window.electronAPI.cancelDiscordLink().catch(()=>setErrorMsg('Закройте окно Discord, чтобы отменить привязку.'))}>Отменить</button>:commAccount.discordConnected?<span className="discord-connected">Привязан</span>:<button className="s-button" aria-label="Привязать Discord" disabled={isLoggingInMs||isLoggingInCommunity||linkingId!==null} onClick={()=>void linkDiscord()}>Привязать</button>}</div>}<div className="minecraft-identity"><div className="identity-title"><Box size={20}/><div><h3>Minecraft Java</h3><p>{msAccount?'Лицензия Minecraft':isLicenseBoundOnBackend?'Нужен вход Microsoft':'Лицензия — по желанию'}</p></div></div>
+    {msAccount?<><div className="identity-name compact"><AccountImage src={'https://mc-heads.net/avatar/'+encodeURIComponent(msAccount.username)+'/48'} alt={msAccount.username}/><div><strong>{msAccount.username}</strong><p>{isLinked?'Связан с Twitch':'Профиль Microsoft'}</p></div></div><div className="identity-actions"><button className="s-button" onClick={()=>void selectAccount(msAccount.id)} disabled={activeAccount?.id===msAccount.id}>{activeAccount?.id===msAccount.id?'Профиль выбран':'Выбрать профиль'}</button><button className="text-action" onClick={e=>handleRemove(msAccount.id,e)}><Trash2 size={13}/> Выйти</button></div></>:<><p>Войди в Microsoft, если играешь с лицензией. Для профиля сообщества используй вход через сайт.</p><button className="s-button" disabled={isLoggingInMs||linkingId!==null} onClick={handleMicrosoftLogin}>{isLoggingInMs?'Вход в Microsoft…':'Войти через Microsoft'}</button></>}
+   </div><footer className="identity-footer">{isLinked?<span className="success">Minecraft и Twitch связаны</span>:commAccount&&msAccount?<button className="s-button" disabled={linkingId!==null} onClick={()=>handleLinkMinecraft(msAccount.id)}><Link2 size={14}/>{linkingId?'Привязываем…':'Привязать Minecraft к Twitch'}</button>:<span>Профиль сообщества и лицензия хранятся в одном месте</span>}</footer></section><SkinEditor key={activeAccount?.id||'empty'} account={activeAccount}/></div>
+  </motion.div>;
 };

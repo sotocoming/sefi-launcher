@@ -175,6 +175,7 @@ export async function loginCommunity(fresh = false): Promise<Account> {
       type: 'offline', active: true, communityToken: data.token,
       whitelistStatus: user.whitelist_status || 'pending',
       twitchLogin: user.twitch_login, twitchAvatar: user.twitch_avatar,
+      discordConnected: !!user.discord_username, discordUsername: user.discord_username || null,
       mcType: user.mc_verified_at && user.mc_uuid && user.mc_type === 'microsoft' ? 'microsoft' : 'offline',
       mcUuid: user.mc_verified_at ? user.mc_uuid : undefined,
       mcVerifiedAt: user.mc_verified_at || 0,
@@ -214,6 +215,8 @@ export async function refreshCommunityProfile(token: string): Promise<Account | 
       accounts[msIdx].whitelistStatus = user.whitelist_status;
       accounts[msIdx].twitchLogin = user.twitch_login;
       accounts[msIdx].twitchAvatar = user.twitch_avatar;
+      accounts[msIdx].discordConnected = !!user.discord_username;
+      accounts[msIdx].discordUsername = user.discord_username || null;
       accounts[msIdx].communityToken = token;
       if (user.mc_nickname) accounts[msIdx].username = user.mc_nickname;
       const cleaned = accounts.filter(a => a.id === accounts[msIdx].id || !(a.type === 'offline' && (a.id === `comm_${user.id}` || a.twitchLogin === user.twitch_login)));
@@ -224,6 +227,8 @@ export async function refreshCommunityProfile(token: string): Promise<Account | 
 
     for (const account of accounts) {
       if (account.type === 'microsoft' && account.communityToken === token) {
+        account.discordConnected = !!user.discord_username;
+        account.discordUsername = user.discord_username || null;
         account.mcType = user.mc_verified_at && user.mc_uuid && user.mc_type === 'microsoft' ? 'microsoft' : 'offline';
         account.mcUuid = user.mc_verified_at ? user.mc_uuid : undefined;
         account.mcVerifiedAt = user.mc_verified_at || 0;
@@ -242,13 +247,15 @@ export async function refreshCommunityProfile(token: string): Promise<Account | 
       accounts[idx].whitelistStatus = user.whitelist_status;
       accounts[idx].twitchLogin = user.twitch_login;
       accounts[idx].twitchAvatar = user.twitch_avatar;
+      accounts[idx].discordConnected = !!user.discord_username;
+      accounts[idx].discordUsername = user.discord_username || null;
       accounts[idx].mcVerifiedAt = user.mc_verified_at || 0;
       accounts[idx].mcType = user.mc_verified_at && user.mc_uuid && user.mc_type === 'microsoft' ? 'microsoft' : 'offline';
       accounts[idx].mcUuid = user.mc_uuid;
 
       return accounts[idx];
     }
-    return null;
+    return accounts.find(account => account.communityToken === token) || null;
     });
   } catch (err) {
     console.warn('[Community] profile refresh unavailable; accounts preserved');

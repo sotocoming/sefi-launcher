@@ -1,3 +1,6 @@
+import {prepareLaunchReport,previewLaunchReport,sendLaunchReport,exportLaunchReport,getReportTickets} from './launch-reports';
+import { getReleaseNotesVersion, acknowledgeReleaseNotes } from './release-notes';
+import { cancelCommunityBrowser } from './minecraft/community-browser';
 import { trustedIpc, trustedDocument, embeddingHeaders } from './ipc-security';
 import { canonicalPack } from './minecraft/pack-sources';
 import packCatalog from './minecraft/modpack-catalog.json';
@@ -12,6 +15,11 @@ import { getServerStatus } from './server-status';
 import { getAccounts, addOfflineAccount, loginMicrosoft, loginCommunity, linkMinecraftAccount, refreshCommunityProfile, removeAccount, setActiveAccount } from './minecraft/accounts';
 import { getModpackStatus } from './minecraft/modpack';
 import { chooseSkin, getCommunitySkin, saveCommunitySkin, resetCommunitySkin } from './minecraft/skins';
+import { getOfficialSkin } from './minecraft/official-skin';
+import { GameWindow } from './game-window';
+import {linkDiscordAccount, cancelDiscordLink} from './minecraft/discord-link';
+import { serverClockStatus } from './minecraft/server-clock';
+import { communityRequest } from './minecraft/community-request';
 import { getJavaStatus, getJavaPath, inspectJava } from './minecraft/java';
 import { prepareGameDirectory } from './minecraft/game-directory';
 import { publicAccount } from './minecraft/account-store';
@@ -32,6 +40,8 @@ if (process.platform === 'win32') {
 }
 
 let mainWindow: BrowserWindow | null = null;
+const gameWindow = new GameWindow(() => mainWindow);
+app.on('before-quit', () => gameWindow.dispose());
 let hiddenForGame = false;
 let gameBusy = false;
 let controlsRepairBusy = false;
@@ -41,6 +51,17 @@ const discordPresence = new DiscordPresence();
 app.once('before-quit', () => discordPresence.close());
 const indexFile = path.join(app.getAppPath(), 'dist/index.html');
 const secureIpc = trustedIpc(ipcMain, () => mainWindow, indexFile, isDev);
+secureIpc.handle('get-report-tickets', (_event,id:unknown)=>getReportTickets(id));
+let clockProbe: Promise<unknown> | null = null;
+let clockProbeAt = -Infinity;
+secureIpc.handle('get-clock-status', async () => {
+  if (!serverClockStatus().checked && !clockProbe && performance.now()-clockProbeAt>60000) {
+    clockProbeAt=performance.now();clockProbe=communityRequest('/api/public/community/launcher/ticket/config').catch(()=>{}).finally(()=>{clockProbe=null;});
+  }
+  if(clockProbe)await clockProbe;
+  return serverClockStatus();
+});
+secureIpc.handle('open-time-settings', async () => {if(process.platform==='win32')await shell.openExternal('ms-settings:dateandtime');});
 function sendToMain(channel: string, value: unknown) {
   if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.webContents.isDestroyed()) mainWindow.webContents.send(channel, value);
 }
@@ -92,6 +113,7 @@ function createWindow() {
   });
 
   const created = mainWindow;
+  created.on('close', event => gameWindow.close(event));
   created.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   created.webContents.on('will-navigate', (event, url) => {
     if (!trustedDocument(url, indexFile, isDev)) event.preventDefault();
@@ -137,6 +159,15 @@ function setupIpc() {
   });
   secureIpc.on('window-close', () => mainWindow?.close());
 
+  secureIpc.handle('prepare-launch-report', (_,message) => prepareLaunchReport(message));
+  secureIpc.handle('preview-launch-report', (_,id,options) => previewLaunchReport(id,options));
+  secureIpc.handle('send-launch-report', (_,id,token) => sendLaunchReport(id,token));
+  secureIpc.handle('export-launch-report', (_,id,token) => {
+    if(!mainWindow||mainWindow.isDestroyed())throw new Error('Окно лаунчера закрыто.');
+    return exportLaunchReport(mainWindow,id,token);
+  });
+  secureIpc.handle('get-release-notes-version', getReleaseNotesVersion);
+  secureIpc.handle('acknowledge-release-notes', (_, version) => acknowledgeReleaseNotes(version));
   secureIpc.handle('get-settings', getSettings);
   secureIpc.handle('save-settings', async (_, settings) => {
     await saveSettings(settings);
@@ -151,6 +182,7 @@ function setupIpc() {
   }
   secureIpc.handle('choose-skin', event => chooseSkin(skinWindow(event)));
   secureIpc.handle('get-community-skin', (event, id: string) => { skinWindow(event); return getCommunitySkin(id); });
+  secureIpc.handle('get-official-skin', (event, id: string, refresh?: boolean) => { skinWindow(event); return getOfficialSkin(id, refresh); });
   secureIpc.handle('save-community-skin', (event, id: string, png: string, model: 'classic' | 'slim') => {
     skinWindow(event); return saveCommunitySkin(id, png, model);
   });
@@ -175,6 +207,7 @@ function setupIpc() {
     bringToFront();
     return publicAccount(acc);
   });
+  secureIpc.handle('cancel-community-login', () => cancelCommunityBrowser());
   secureIpc.handle('login-community', async () => {
     const acc = await loginCommunity();
     bringToFront();
@@ -193,11 +226,22 @@ function setupIpc() {
     const account = (await getAccounts()).find(a => a.id === accountId);
     return account?.communityToken ? publicAccount(await refreshCommunityProfile(account.communityToken)) : null;
   });
+  secureIpc.handle('open-community-profile', async () => {await shell.openExternal('https://mc.sotocoming.ru/profile');});
+  secureIpc.handle('link-discord-account', async (_, accountId: string) => {
+    try {return publicAccount(await linkDiscordAccount(accountId, mainWindow));}
+    finally {bringToFront();}
+  });
+  secureIpc.handle('cancel-discord-link', async () => cancelDiscordLink());
   secureIpc.handle('remove-account', async (_, id) => await removeAccount(id));
   secureIpc.handle('set-active-account', async (_, id) => await setActiveAccount(id));
 
   secureIpc.handle('get-launcher-config', getLauncherConfig);
-  secureIpc.handle('get-server-status', getServerStatus);
+  secureIpc.handle('get-server-status', async () => {
+    const config = await getLauncherConfig();
+    const settings = await getSettings();
+    const endpoint = config.server.endpoints?.find(item => item.id === settings.selectedServerId) || config.server.endpoints?.[0];
+    return getServerStatus(endpoint?.host || config.server.ip, endpoint?.port || config.server.port);
+  });
 
   async function newsRequest(event: Electron.IpcMainInvokeEvent, body?: object) {
     if (!mainWindow || event.sender !== mainWindow.webContents || event.senderFrame !== mainWindow.webContents.mainFrame) {
@@ -241,9 +285,10 @@ function setupIpc() {
   secureIpc.handle('launch-game', async () => {
     if (controlsRepairBusy) throw new Error('Дождитесь завершения исправления управления.');
     await launchGame((state) => {
+      gameWindow.state(state.status);
       discordPresence.gameState(state);
       gameBusy = !['idle', 'error'].includes(state.status);
-      autoUpdater.autoInstallOnAppQuit = !gameBusy;
+      autoUpdater.autoInstallOnAppQuit = !app.commandLine.hasSwitch('ui-preview') && !gameBusy;
       if (!gameBusy) void updateChecks?.run();
       sendToMain('game-state-change', state);
       if (state.status === 'downloading') {
@@ -256,7 +301,7 @@ function setupIpc() {
     }, (hideWindow) => {
       if (hideWindow && mainWindow && !mainWindow.isDestroyed()) {
         hiddenForGame = true;
-        mainWindow.hide();
+        gameWindow.hide();
       }
     }, location => discordPresence.gameLocation(location));
   });
@@ -350,12 +395,24 @@ function setupIpc() {
 }
 
 function setupAutoUpdater() {
+  if (app.commandLine.hasSwitch('ui-preview')) {
+    autoUpdater.autoInstallOnAppQuit = false;
+    secureIpc.handle('check-for-updates', async () => ({status:'error',error:'Локальная тестовая сборка. Автообновления отключены.'}));
+    secureIpc.handle('get-update-status', () => ({status:'idle'}));
+    secureIpc.handle('install-update', () => { throw new Error('В тестовой сборке установка обновлений отключена.'); });
+    return;
+  }
   let updateState: UpdateInfo = { status: 'idle' };
+  let downloadReady = false;
+  const fail = (err: unknown) => {
+    const phase = updateState.status === 'installing' ? 'install' : ['available','downloading'].includes(updateState.status) ? 'download' : updateState.phase || 'check';
+    publish({status:'error',phase,canInstall:downloadReady,version:updateState.version,error:err instanceof Error ? err.message : 'Update error'});
+  };
   const publish = (state: UpdateInfo) => { updateState = state; sendToMain('update-status-change', state); };
   updateChecks = new UpdateChecks({
     state: () => updateState,
     blocked: () => gameBusy || !net.isOnline(),
-    check: async () => { await autoUpdater.checkForUpdates(); },
+    check: async () => { try { await autoUpdater.checkForUpdates(); } catch (err) { if(updateState.status !== 'error') fail(err); throw err; } },
   });
   autoUpdater.logger = console;
   // Automatically download updates in the background when available
@@ -379,7 +436,7 @@ function setupAutoUpdater() {
 
   autoUpdater.on('update-not-available', () => {
     publish({
-      status: 'idle'
+      status: 'idle', checkedAt: Date.now()
     });
   });
 
@@ -394,8 +451,9 @@ function setupAutoUpdater() {
   });
 
   autoUpdater.on('update-downloaded', (info) => {
+    downloadReady = true;
     publish({
-      status: 'ready',
+      status: 'ready', canInstall:true,
       version: info.version,
       releaseNotes: typeof info.releaseNotes === 'string' ? info.releaseNotes : undefined
     });
@@ -403,12 +461,10 @@ function setupAutoUpdater() {
 
   autoUpdater.on('error', (err) => {
     console.error('AutoUpdater error:', err);
-    publish({
-      status: 'error',
-      error: err?.message || 'Update check error'
-    });
+    fail(err);
   });
 
+  secureIpc.handle('get-update-status', () => updateState);
   secureIpc.handle('check-for-updates', async () => {
     if (isDev) return { status: 'error', error: 'Обновления доступны в установленном лаунчере.' };
     return await updateChecks!.run(true);
@@ -416,7 +472,11 @@ function setupAutoUpdater() {
 
   secureIpc.handle('install-update', () => {
     // isSilent: true installs silently, isForceRunAfter: true launches new version immediately
-    if (!gameBusy) autoUpdater.quitAndInstall(false, true);
+    if (gameBusy) throw new Error('Сначала завершите Minecraft.');
+    if (isDev || !downloadReady) throw new Error('Обновление ещё не загружено.');
+    if (updateState.status === 'installing') return;
+    publish({...updateState,status:'installing',phase:'install',canInstall:true});
+    try { autoUpdater.quitAndInstall(false, true); } catch(err) { fail(err); throw err; }
   });
 
   // Check for updates shortly after launcher launch in production

@@ -21,8 +21,9 @@ assert.equal(await page.locator('aside').getByRole('button',{name:'Unsafe',exact
  assert.deepEqual(await page.evaluate(()=>window.opened),['https://mc.sotocoming.ru/','https://discord.gg/AZKGFPzpsa','https://dalink.to/sefirota','https://example.org/angle']);
  await page.evaluate(()=>window.opened=[]);
  await body.getByRole('link',{name:'Правила сервера'}).click();assert.deepEqual(await page.evaluate(()=>window.opened),['https://example.org/rules']);assert.equal(page.url(),'http://sefi.test/');assert.equal(await page.evaluate(()=>window.pwned),undefined);
- assert(await page.getByText('Обычный текст без нового поля',{exact:true}).isVisible());assert.deepEqual(errors,[]);
+ assert.deepEqual(errors,[]);
  await page.screenshot({path:path.join(__dirname,'../design/news-markdown.png'),fullPage:true});
  await page.getByRole('button',{name:'Свернуть',exact:true}).first().click();assert(await body.evaluate(el=>el.classList.contains('is-collapsed')));
+ await page.getByRole('button',{name:/Старая запись/}).click();assert(await page.getByText('Обычный текст без нового поля',{exact:true}).isVisible());
  console.log('Launcher built UI: Markdown source, legacy fallback, expand/collapse, lists/quotes/code, explicit and plain URL links, parentheses, code exclusion, no HTML execution PASS');
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

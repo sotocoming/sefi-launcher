@@ -1,4 +1,6 @@
+import { beginLaunchDiagnostics, setDiagnosticCredentials, recordDiagnosticState, setDiagnosticEnvironment, recordDiagnosticLines, type LaunchDiagnostics } from './launch-diagnostics';
 import { ensureClaimsColorFix } from './claims-fix';
+import { ensureRussianLocalization } from './localization';
 import { startReportBroker } from './report-broker';
 import { ensureReportMod } from './report-mod';
 import { protectMinecraftHandler } from './game-integrity';
@@ -29,17 +31,21 @@ let gameRunning = false;
 export async function launchGame(onStateChange: (state: GameState) => void, onStarted?: (hideWindow: boolean) => void, onLocation?: (location: GameLocation | null) => void) {
   if (launchBusy || gameRunning) return;
   launchBusy = true;
-  try { await performLaunch(onStateChange, onStarted, onLocation); }
+  const attempt=beginLaunchDiagnostics();
+  const publish=(state:GameState)=>{recordDiagnosticState(attempt,state);onStateChange(state);};
+  try { await performLaunch(publish, onStarted, onLocation, attempt); }
   catch (error) {
-    onStateChange({ status: 'error', message: error instanceof Error ? error.message : 'Не удалось подготовить игру.' });
+    publish({ status: 'error', message: error instanceof Error ? error.message : 'Не удалось подготовить игру.' });
   } finally { launchBusy = false; }
 }
 
-async function performLaunch(onStateChange: (state: GameState) => void, onStarted?: (hideWindow: boolean) => void, onLocation?: (location: GameLocation | null) => void) {
+async function performLaunch(onStateChange: (state: GameState) => void, onStarted: ((hideWindow: boolean) => void)|undefined, onLocation: ((location: GameLocation | null) => void)|undefined, attempt:LaunchDiagnostics) {
   onStateChange({ status: 'checking' });
 
   const settings = await getSettings();
+  setDiagnosticEnvironment(attempt,settings);
   const accounts = await getAccounts();
+  setDiagnosticCredentials(attempt,accounts);
   let activeAccount = accounts.find((a) => a.active);
 
   if (!activeAccount) {
@@ -68,6 +74,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   }
 
   if(activeAccount.type==='microsoft')activeAccount=await ensureMicrosoftAccount(activeAccount.id);
+  setDiagnosticCredentials(attempt,[activeAccount]);
   settings.gameDirectory = await prepareGameDirectory(settings.gameDirectory);
   const javaPath = await resolveJava(settings.javaPath || '', settings.ramMax, (progress) => {
     onStateChange({ status: 'downloading', progress });
@@ -79,6 +86,9 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       onStateChange({ status: 'downloading', progress });
     });
   }
+
+  onStateChange({status: 'downloading', progress: {stage: 'modpack', task: 'Проверка русского перевода сборки', total: 1, downloaded: 0, percentage: 0}});
+  await ensureRussianLocalization(settings.gameDirectory, await getLauncherConfig());
 
   onStateChange({
     status: 'downloading',
@@ -141,17 +151,21 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   };
   launcher.on('debug', (msg: string) => {
     rememberStartup(msg);
+    recordDiagnosticLines(attempt,'launch',msg);
     console.log('[Minecraft Debug]:', redactLaunchLog(msg));
   });
 
   launcher.on('data', (data: string) => {
     rememberStartup(data);
+    recordDiagnosticLines(attempt,'game',data);
     console.log('[Minecraft Log]:', redactLaunchLog(data));
   });
 
   let broker: Awaited<ReturnType<typeof startTicketBroker>> | undefined;
   let presence: Awaited<ReturnType<typeof watchGamePresence>> | undefined;
+  let processEnded = false;
   launcher.on('close', (code: any) => {
+    processEnded = true;
     gameRunning = false;
     broker?.close();
     presence?.close();
@@ -193,6 +207,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
 
   // Long modpack downloads may outlive the game token: renew again immediately before spawn.
   if(activeAccount.type==='microsoft')activeAccount=await ensureMicrosoftAccount(activeAccount.id,true);
+  setDiagnosticCredentials(attempt,[activeAccount]);
   let reportBroker: Awaited<ReturnType<typeof startReportBroker>>;
   try {
     await ensureReportMod(settings.gameDirectory);
@@ -256,6 +271,15 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
       if (launcher.preparationError) throw launcher.preparationError;
       throw new Error('Процесс Minecraft не смог стартовать. Java: ' + javaPath + '\n' + startupLog.join('\n').slice(-4000));
     }
+    // A short-lived child can exit before launcher.launch() resolves.
+    if(processEnded || typeof child.exitCode === 'number' || child.signalCode){
+      reportBroker.close();
+      if(!processEnded){
+        broker?.close();presence?.close();
+        onStateChange({status:'error',message:'Minecraft завершился во время запуска. Повторите запуск или отправьте отчёт.'});
+      }
+      return;
+    }
     gameRunning = true;
     onStateChange({ status: 'running', pid: child.pid });
     onStarted?.(settings.closeOnLaunch === true);
@@ -263,7 +287,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     reportBroker.close();
     broker?.close();
     presence?.close();
-    console.error('Launch failed:', err);
+    console.error('Launch failed:', redactLaunchLog(err instanceof Error ? err.message : String(err)));
     onStateChange({ status: 'error', message: err.message || String(err) });
   }
 }

@@ -10,6 +10,15 @@ import type {
 } from './index';
 
 export interface IElectronAPI {
+  getClockStatus():Promise<{checked:boolean;warning:boolean;driftSeconds:number}>;
+  openTimeSettings():Promise<void>;
+  prepareLaunchReport(message?:string):Promise<import('./index').LaunchReportDraft>;
+  previewLaunchReport(id:string,options:{attachments:import('./index').ReportAttachmentId[];comment:string;discord:boolean;ticketId?:number}):Promise<import('./index').LaunchReportPreview>;
+  getReportTickets(id:string):Promise<import('./index').ReportTicket[]>;
+  sendLaunchReport(id:string,token:string):Promise<import('./index').LaunchReportResult>;
+  exportLaunchReport(id:string,token:string):Promise<{cancelled:boolean}>;
+  getReleaseNotesVersion(): Promise<string>;
+  acknowledgeReleaseNotes(version: string): Promise<void>;
   // Game
   launchGame(): Promise<void>;
 
@@ -29,13 +38,18 @@ export interface IElectronAPI {
   getAccounts(): Promise<Account[]>;
   addOfflineAccount(username: string): Promise<Account>;
   loginMicrosoft(): Promise<Account>;
+  cancelCommunityLogin(): Promise<void>;
   loginCommunity(): Promise<Account>;
   linkMinecraftAccount(id: string): Promise<Account | null>;
   refreshCommunityProfile(accountId: string): Promise<Account | null>;
+  openCommunityProfile(): Promise<void>;
+  linkDiscordAccount(accountId: string): Promise<Account | null>;
+  cancelDiscordLink(): Promise<void>;
   removeAccount(id: string): Promise<void>;
   setActiveAccount(id: string): Promise<void>;
 
   getCommunitySkin(id: string): Promise<import('./index').CommunitySkin | null>;
+  getOfficialSkin(id: string, refresh?: boolean): Promise<import('./index').OfficialSkin | null>;
   chooseSkin(): Promise<import('./index').SkinDraft | null>;
   saveCommunitySkin(id: string, png: string, model: 'classic' | 'slim'): Promise<import('./index').CommunitySkin | null>;
   resetCommunitySkin(id: string): Promise<null>;
@@ -52,6 +66,7 @@ export interface IElectronAPI {
 
   // Updates & Links
   checkForUpdates(): Promise<UpdateInfo>;
+  getUpdateStatus?(): Promise<UpdateInfo>;
   installUpdate(): Promise<void>;
   openExternal(url: string): Promise<void>;
 

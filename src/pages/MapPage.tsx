@@ -1,97 +1,42 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ExternalLink, RotateCw, Compass } from 'lucide-react';
-import { GlassCard } from '../components/ui/GlassCard';
-import { useStore } from '../store/store';
+import {useEffect,useRef,useState} from 'react';
+import {motion} from 'framer-motion';
+import {ExternalLink,RotateCw,LoaderCircle} from 'lucide-react';
+import {useStore} from '../store/store';
 
-export const MapPage: React.FC = () => {
-  const { launcherConfig } = useStore();
-  const serverName = launcherConfig?.server?.title || launcherConfig?.server?.name || 'Sweet Home';
-  const [iframeKey, setIframeKey] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const handleOpenExternal = () => {
-    const url = 'https://mc.sotocoming.ru/maps';
-    if (window.electronAPI?.openExternal) {
-      window.electronAPI.openExternal(url);
-    } else {
-      window.open(url, '_blank');
-    }
+const mapBase=import.meta.env.MODE==='map-preview'?'http://127.0.0.1:43880/maps':'https://mc.sotocoming.ru/maps';
+export function MapPage(){
+ const name=useStore(s=>s.launcherConfig?.server?.name||'Sweet Home');
+ const [key,setKey]=useState(0),[loading,setLoading]=useState(true),[slow,setSlow]=useState(false),[refreshing,setRefreshing]=useState(false);
+ const frame=useRef<HTMLIFrameElement>(null),ack=useRef(false),fallback=useRef<ReturnType<typeof setTimeout>>();
+ const origin=new URL(mapBase).origin;
+ useEffect(()=>{
+  if(!loading)return;
+  const timer=setTimeout(()=>{setSlow(true);setLoading(false);setRefreshing(false);},15000);return()=>clearTimeout(timer);
+ },[key,loading]);
+ useEffect(()=>{
+  const receive=(event:MessageEvent)=>{
+   if(event.source!==frame.current?.contentWindow||event.origin!==origin||event.data?.type!=='sefi-map-state'||!['loading','ready','error'].includes(event.data.status))return;
+   ack.current=true;if(fallback.current)clearTimeout(fallback.current);
+   if(event.data.status!=='loading'){setLoading(false);setRefreshing(false);setSlow(false);}
   };
-
-  const handleReload = () => {
-    setIsLoading(true);
-    setIframeKey((prev) => prev + 1);
-  };
-
-  return (
-    <motion.div
-      key="map"
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -6 }}
-      className="relative flex h-full flex-col overflow-hidden bg-[#09090d] select-none pt-6 px-8 pb-6"
-    >
-      {/* Top Header Bar */}
-      <div className="flex items-center justify-between pb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-xl border border-fuchsia-400/20 bg-fuchsia-500/10 text-fuchsia-300">
-            <Compass size={22} />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold tracking-tight text-white">
-                Карта сервера {serverName}
-              </h1>
-              <span className="rounded-full bg-emerald-500/15 border border-emerald-400/25 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
-                Онлайн мир
-              </span>
-            </div>
-            <p className="text-xs text-white/45">
-              Спутниковый обзор верхнего мира, ландшафта и построек поселенцев
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleReload}
-            title="Перезагрузить карту"
-            className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-white/70 transition hover:bg-white/[0.08] hover:text-white"
-          >
-            <RotateCw size={13} className={isLoading ? 'animate-spin' : ''} />
-            <span>Обновить</span>
-          </button>
-
-          <button
-            onClick={handleOpenExternal}
-            className="flex items-center gap-1.5 rounded-lg border border-fuchsia-400/30 bg-fuchsia-500/15 px-3 py-1.5 text-xs font-medium text-fuchsia-200 transition hover:bg-fuchsia-500/25 hover:text-white"
-          >
-            <span>В браузере</span>
-            <ExternalLink size={13} />
-          </button>
-        </div>
-      </div>
-
-      {/* Main Map Viewer */}
-      <GlassCard className="relative flex-1 overflow-hidden rounded-2xl border border-white/[0.08] bg-[#101711] p-0 shadow-2xl">
-        {isLoading && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#0d120e] gap-3">
-            <div className="size-8 animate-spin rounded-full border-2 border-emerald-400/20 border-t-emerald-400" />
-            <span className="text-xs font-mono text-emerald-300/80 tracking-wide">
-              Загрузка карты мира {serverName}…
-            </span>
-          </div>
-        )}
-
-        <iframe
-          key={iframeKey}
-          src="https://mc.sotocoming.ru/maps"
-          title={`Карта сервера ${serverName}`}
-          className="size-full border-0 bg-[#101711]"
-          onLoad={() => setIsLoading(false)}
-        />
-      </GlassCard>
-    </motion.div>
-  );
-};
+  window.addEventListener('message',receive);
+  return()=>{window.removeEventListener('message',receive);if(fallback.current)clearTimeout(fallback.current);};
+ },[origin]);
+ const reload=()=>{
+  if(refreshing)return;setRefreshing(true);setSlow(false);ack.current=false;
+  frame.current?.contentWindow?.postMessage({type:'sefi-map-refresh'},origin);
+  if(fallback.current)clearTimeout(fallback.current);
+  fallback.current=setTimeout(()=>{if(!ack.current){setLoading(true);setKey(k=>k+1);}},1200);
+ };
+ const loaded=()=>{setLoading(false);setSlow(false);setRefreshing(false);};
+ return <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="workspace-page map-page">
+  <header className="page-head"><div><h1>Карта {name}</h1><p>Знакомые постройки и новые маршруты</p></div><div className="map-tools">
+   <button className="s-button" onClick={reload} disabled={refreshing}><RotateCw size={13} className={refreshing?'animate-spin':''}/>{refreshing?'Обновляем…':'Обновить'}</button>
+   <button className="s-button" onClick={()=>void window.electronAPI.openExternal(mapBase)}>В браузере <ExternalLink size={13}/></button>
+  </div></header>
+  <div className="map-frame"><iframe ref={frame} key={key} src={mapBase+'?embed=launcher'} title={'Карта сервера '+name} allow="fullscreen" onLoad={loaded} onError={()=>{setLoading(false);setRefreshing(false);setSlow(true);}}/>
+   {loading&&<div className="map-loading" role="status"><LoaderCircle size={20} className="animate-spin"/>Загружаем карту мира…</div>}
+  </div>
+  {slow&&<p className="map-note" role="status">Карта загружается дольше обычного. Можно обновить её или открыть в браузере.</p>}
+ </motion.div>;
+}

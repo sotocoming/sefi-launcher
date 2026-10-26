@@ -16,6 +16,7 @@ public final class ReportScreen extends Screen {
   busy=draft.sending;
   formWidth=Math.min(440,width-24);left=(width-formWidth)/2;top=Math.max(6,(height-300)/2);
   int y=top+32;
+  addDrawableChild(ButtonWidget.builder(Text.literal(draft.ticketId>0?"Дополнить #"+draft.ticketId+"…":"Новая заявка…"),b->{if(!busy)client.setScreen(new DestinationScreen(this));}).dimensions(left+formWidth/2,top,formWidth/2,20).build());
   subject=addDrawableChild(new TextFieldWidget(textRenderer,left,y,formWidth,18,Text.literal("Коротко о проблеме")));subject.setMaxLength(80);subject.setText(draft.title);subject.setChangedListener(s->{draft.title=s;draft.changed();});
   y+=36;int areaHeight=Math.max(38,Math.min(85,height-188));
   description=addDrawableChild(new EditBoxWidget(textRenderer,left,y,formWidth,areaHeight,Text.literal("Что случилось?"),Text.literal("Описание")));description.setMaxLength(2500);description.setText(draft.description);description.setChangeListener(s->{draft.description=s;draft.changed();});
@@ -67,19 +68,38 @@ public final class ReportScreen extends Screen {
   super.render(ctx,mx,my,delta);
   ctx.drawTextWrapped(textRenderer,Text.literal(draft.message.isEmpty()?"Приложится: "+(draft.build?"сборка; ":"")+(draft.settings?"настройки; ":"")+(draft.errors?"ошибки; ":"")+(draft.input && InputTrace.hasRecording()?"кнопки; ":"")+"без чата и паролей.":draft.message),left,statusY,formWidth,0xBBBBBB);
  }
+ private static final class DestinationScreen extends Screen {
+  private final ReportScreen parent;private java.util.List<ReportData.Ticket> tickets=java.util.List.of();private int page,x,y,w,perPage;private boolean loading,loaded;private String error="";
+  DestinationScreen(ReportScreen parent){super(Text.literal("Куда отправить отчёт"));this.parent=parent;}
+  @Override protected void init(){
+   w=Math.min(460,width-24);x=(width-w)/2;y=10;perPage=Math.max(1,Math.min(8,(height-145)/24));
+   addDrawableChild(ButtonWidget.builder(Text.literal("Создать новую заявку"),b->select(0)).dimensions(x,y+25,w,20).build());
+   if(!loaded&&!loading)load();
+   for(int i=0;i<perPage;i++){int index=page*perPage+i;if(index>=tickets.size())break;var ticket=tickets.get(index);addDrawableChild(ButtonWidget.builder(Text.literal("#"+ticket.id()+" · "+ticket.title()+" · "+ticket.status()),b->select(ticket.id())).dimensions(x,y+78+i*24,w,20).build());}
+   int half=(w-6)/2;
+   if(tickets.size()>perPage){var prev=addDrawableChild(ButtonWidget.builder(Text.literal("Назад"),b->{page--;clearAndInit();}).dimensions(x,height-55,half,20).build());prev.active=page>0;var next=addDrawableChild(ButtonWidget.builder(Text.literal("Далее"),b->{page++;clearAndInit();}).dimensions(x+half+6,height-55,half,20).build());next.active=(page+1)*perPage<tickets.size();}
+   addDrawableChild(ButtonWidget.builder(Text.literal("К отчёту"),b->close()).dimensions(x,height-30,half,20).build());var refresh=addDrawableChild(ButtonWidget.builder(Text.literal("Обновить заявки"),b->{b.active=false;load();}).dimensions(x+half+6,height-30,half,20).build());refresh.active=!loading;
+  }
+  private void load(){if(loading)return;loading=true;error="";ReportData.openTickets().whenComplete((value,failure)->client.execute(()->{if(client.currentScreen!=this)return;loading=false;loaded=true;page=0;if(failure!=null){error="Не удалось загрузить заявки. Проверьте вход SEFI или повторите позже.";tickets=java.util.List.of();}else tickets=value;clearAndInit();}));}
+  private void select(long id){parent.draft.ticketId=id;if(id>0)parent.draft.discord=true;parent.draft.changed();client.setScreen(parent);}
+  @Override public void close(){client.setScreen(parent);}
+  @Override public boolean shouldPause(){return false;}
+  @Override public void render(DrawContext ctx,int mx,int my,float delta){renderBackground(ctx);ctx.drawTextWithShadow(textRenderer,title,x,y,0xFFFFFF);super.render(ctx,mx,my,delta);ctx.drawTextWrapped(textRenderer,Text.literal(loading?"Загружаем ваши открытые заявки…":!error.isEmpty()?error:tickets.isEmpty()?"Открытых заявок нет. Можно создать новую.":"Выберите свою открытую заявку для дополнения."),x,y+50,w,0xBBBBBB);}
+ }
  private static final class OptionsScreen extends Screen {
   private final ReportScreen parent;private int x,y,w;
   private ButtonWidget recording;
   OptionsScreen(ReportScreen parent){super(Text.literal("Что приложить"));this.parent=parent;}
   @Override protected void init(){
    w=Math.min(420,width-24);x=(width-w)/2;y=Math.max(8,(height-230)/2);int row=y+25;
-   toggle("Версии модов и ресурс-паки",0,row);toggle("Настройки модов и управления",1,row+24);toggle("Ошибки игры (без чата)",2,row+48);toggle("Создать тикет в Discord",4,row+72);
+   toggle("Версии модов и ресурс-паки",0,row);toggle("Настройки модов и управления",1,row+24);toggle("Ошибки игры (без чата)",2,row+48);toggle(parent.draft.ticketId>0?"Дополнить выбранную заявку":"Создать тикет в Discord",4,row+72);
    recording=addDrawableChild(ButtonWidget.builder(Text.empty(),b->client.setScreen(new RecordingScreen(this))).dimensions(x,row+96,w,20).build());updateRecording();
    addDrawableChild(ButtonWidget.builder(Text.literal("Готово"),b->close()).dimensions(x,y+205,w,20).build());
   }
   private void updateRecording(){recording.setMessage(Text.literal(!InputTrace.hasRecording()?"Кнопки: записи нет — настроить…":"Кнопки: "+(InputTrace.isRecording()?"идёт запись":"запись готова")+(parent.draft.input?" · приложится":" · не приложится")));}
   @Override public void tick(){updateRecording();}
   private void toggle(String label,int kind,int yy){
+   if(kind==4&&parent.draft.ticketId>0){var fixed=addDrawableChild(ButtonWidget.builder(Text.literal("Дополнить заявку #"+parent.draft.ticketId),b->{}).dimensions(x,yy,w,20).build());fixed.active=false;return;}
    addDrawableChild(ButtonWidget.builder(Text.literal((value(kind)?"☑ ":"☐ ")+label),b->{boolean next=!value(kind);switch(kind){case 0->parent.draft.build=next;case 1->parent.draft.settings=next;case 2->parent.draft.errors=next;case 3->parent.draft.input=next;case 4->parent.draft.discord=next;}parent.draft.changed();b.setMessage(Text.literal((next?"☑ ":"☐ ")+label));}).dimensions(x,yy,w,20).build());
   }
   private boolean value(int kind){return switch(kind){case 0->parent.draft.build;case 1->parent.draft.settings;case 2->parent.draft.errors;case 3->parent.draft.input;default->parent.draft.discord;};}

@@ -4,7 +4,7 @@ import { app } from 'electron';
 import { randomUUID } from 'crypto';
 import { installFile, renameFile } from './atomic-files';
 export async function ensureReportMod(gameDir:string):Promise<void> {
- const name='sefi-input-diagnostics-0.2.0.jar';
+ const name='sefi-input-diagnostics-0.3.0.jar';
  const candidates=[path.join(process.resourcesPath||'','resources/mods',name),path.join(app.getAppPath(),'resources/mods',name)];
  const source=await Promise.all(candidates.map(async p=>await fs.access(p).then(()=>p,()=>null))).then(paths=>paths.find(Boolean));
  if(!source) throw new Error('В установке лаунчера отсутствует мод отчётов SEFI. Переустановите лаунчер.');

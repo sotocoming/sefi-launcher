@@ -47,6 +47,7 @@ interface StoreState {
   refreshServerStatus: () => Promise<void>;
   updateSettings: (settings: Settings) => Promise<void>;
   launch: () => Promise<void>;
+  checkLauncherUpdate: () => Promise<void>;
   installLauncherUpdate: () => Promise<void>;
 }
 
@@ -137,7 +138,13 @@ export const useStore = create<StoreState>((set, get) => ({
     set({ settings });
     const task = settingsSaveQueue.then(() => window.electronAPI.saveSettings(settings));
     settingsSaveQueue = task.catch(() => {});
-    try { await task; }
+    try {
+      await task;
+      if (previous?.selectedServerId !== settings.selectedServerId && get().settings === settings) {
+        set({ serverStatus: null });
+        await get().refreshServerStatus();
+      }
+    }
     catch (e) {
       if (get().settings === settings) set({ settings: previous });
       console.error('Failed to save settings', e);
@@ -150,6 +157,7 @@ export const useStore = create<StoreState>((set, get) => ({
       return;
     }
     
+    set({gameState:{status:'checking'},downloadProgress:null});
     try {
       await settingsSaveQueue;
       await window.electronAPI.launchGame();
@@ -166,13 +174,19 @@ export const useStore = create<StoreState>((set, get) => ({
     }
   },
 
+  checkLauncherUpdate: async () => {
+    const {gameState,updateInfo}=get();
+    if(!['idle','error'].includes(gameState.status)||['checking','available','downloading','ready','installing'].includes(updateInfo?.status||''))return;
+    set({updateInfo:{status:'checking'}});
+    try{set({updateInfo:await window.electronAPI.checkForUpdates()});}
+    catch(error){set({updateInfo:{status:'error',phase:'check',error:error instanceof Error?error.message:String(error)}});}
+  },
   installLauncherUpdate: async () => {
-    try {
-      if (window.electronAPI?.installUpdate) {
-        await window.electronAPI.installUpdate();
-      }
-    } catch (e) {
-      console.error('Failed to install update', e);
-    }
+    const {gameState,updateInfo}=get();
+    if(!['idle','error'].includes(gameState.status)||!updateInfo ||
+      !(updateInfo.status==='ready'||updateInfo.status==='error'&&updateInfo.phase==='install'&&updateInfo.canInstall))return;
+    set({updateInfo:{...updateInfo,status:'installing',phase:'install',error:undefined}});
+    try{await window.electronAPI.installUpdate();}
+    catch(error){set({updateInfo:{...updateInfo,status:'error',phase:'install',canInstall:true,error:error instanceof Error?error.message:String(error)}});}
   }
 }));

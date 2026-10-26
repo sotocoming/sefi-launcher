@@ -1,30 +1,31 @@
 import React from 'react';
-import { Minus, Square, X, DownloadCloud, Sparkles } from 'lucide-react';
-import { useStore } from '../../store/store';
+import { LauncherUpdateIndicator } from '../updates/LauncherUpdate';
 
 interface WindowButtonProps {
-  icon: typeof Minus;
+  icon: 'minimize' | 'maximize' | 'close';
   onClick: () => void;
   danger?: boolean;
+  label: string;
 }
 
-const WindowButton: React.FC<WindowButtonProps> = ({ icon: Icon, onClick, danger }) => {
+const WindowButton: React.FC<WindowButtonProps> = ({ icon, onClick, danger, label }) => {
   return (
     <button
+      aria-label={label}
+      title={label}
       onClick={onClick}
-      className={`titlebar-no-drag flex size-8 items-center justify-center rounded-lg text-white/40 transition ${
-        danger
-          ? 'hover:bg-red-500/80 hover:text-white'
-          : 'hover:bg-white/[0.08] hover:text-white'
-      }`}
+      className={`window-action titlebar-no-drag ${danger ? 'is-close' : ''}`}
     >
-      <Icon size={14} />
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="square" aria-hidden="true" focusable="false">
+        {icon === 'minimize' && <path d="M2.5 6h7" />}
+        {icon === 'maximize' && <rect x="2.5" y="2.5" width="7" height="7" />}
+        {icon === 'close' && <path d="m2.5 2.5 7 7m0-7-7 7" />}
+      </svg>
     </button>
   );
 };
 
-export const TitleBar: React.FC = () => {
-  const { updateInfo, installLauncherUpdate, gameState } = useStore();
+export const TitleBar: React.FC<{onOpenUpdates:()=>void}> = ({onOpenUpdates}) => {
 
   const handleMinimize = () => {
     if (window.electronAPI?.minimize) {
@@ -45,36 +46,18 @@ export const TitleBar: React.FC = () => {
   };
 
   return (
-    <header className="titlebar-drag relative z-50 flex h-11 w-full shrink-0 items-center justify-between border-b border-white/[0.04] bg-[#09090d]/80 backdrop-blur-md px-3 select-none">
-      <div className="flex-1 pointer-events-none" />
+    <header className="window-chrome titlebar-drag relative z-50 flex h-11 w-full shrink-0 items-center justify-between border-b border-white/[0.04] bg-[#09090d]/80 backdrop-blur-md px-3 select-none">
+      <span className="flex-1 pointer-events-none pl-3 text-xs text-sefi-textSecondary">SEFI Launcher</span>
 
       {/* Right controls area: Update status + window action buttons */}
       <div className="flex items-center gap-3 titlebar-no-drag">
-        {/* Update Notification Indicator */}
-        {updateInfo?.status === 'downloading' && (
-          <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400">
-            <DownloadCloud size={13} className="animate-bounce text-emerald-400" />
-            <span>Загрузка {updateInfo.version ? `v${updateInfo.version}` : ''} ({updateInfo.percent || 0}%)</span>
-          </div>
-        )}
-
-        {updateInfo?.status === 'ready' && (
-          <button
-            onClick={installLauncherUpdate}
-            disabled={!['idle','error'].includes(gameState.status)}
-            title={!['idle','error'].includes(gameState.status) ? 'Установите обновление после выхода из игры' : 'Установить обновление'}
-            className="flex items-center gap-2 rounded-full border border-emerald-400/50 bg-emerald-500/20 px-3.5 py-1 text-xs font-semibold text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)] transition hover:bg-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-          >
-            <Sparkles size={13} className="text-emerald-300 animate-pulse" />
-            <span>Обновление готово! <b>Перезапустить</b></span>
-          </button>
-        )}
+        <LauncherUpdateIndicator onOpen={onOpenUpdates}/>
 
         {/* Window Controls */}
-        <div className="flex items-center gap-1">
-          <WindowButton icon={Minus} onClick={handleMinimize} />
-          <WindowButton icon={Square} onClick={handleMaximize} />
-          <WindowButton icon={X} onClick={handleClose} danger />
+        <div className="window-actions">
+          <WindowButton label="Свернуть окно" icon="minimize" onClick={handleMinimize} />
+          <WindowButton label="Развернуть или восстановить" icon="maximize" onClick={handleMaximize} />
+          <WindowButton label="Закрыть окно" icon="close" onClick={handleClose} danger />
         </div>
       </div>
     </header>

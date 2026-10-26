@@ -14,17 +14,19 @@ export interface Settings {
 
 export interface CommunityProfile {
   id: number;
-  twitch_id: string;
   twitch_login: string;
   twitch_display_name: string;
   twitch_avatar: string;
-  discord_id: string | null;
   discord_username: string | null;
-  discord_avatar: string | null;
   mc_nickname: string | null;
   mc_type: 'offline' | 'microsoft';
   whitelist_status: 'pending' | 'approved' | 'rejected';
-  session_token: string;
+  mc_uuid?: string | null;
+  mc_verified_at?: number;
+  mc_activated_at?: number;
+  access_sync_status?: string;
+  launcher_linked?: number;
+  news_editor?: number;
 }
 
 export interface Account {
@@ -44,6 +46,8 @@ export interface Account {
   whitelistStatus?: 'pending' | 'approved' | 'rejected';
   twitchLogin?: string;
   twitchAvatar?: string;
+  discordConnected?: boolean;
+  discordUsername?: string | null;
   mcType?: 'offline' | 'microsoft';
   mcUuid?: string | null;
   mcVerifiedAt?: number;
@@ -125,6 +129,8 @@ export type GameState =
   | { status: 'error'; message: string };
 
 export interface ServerStatus {
+  /** Measured status ping round-trip time. Absent when the server does not answer ping. */
+  pingMs?: number;
   online: boolean;
   players: number;
   maxPlayers: number;
@@ -133,9 +139,12 @@ export interface ServerStatus {
   favicon?: string;
 }
 
-export type UpdateStatus = 'idle' | 'checking' | 'available' | 'downloading' | 'ready' | 'error';
+export type UpdateStatus = 'idle' | 'checking' | 'available' | 'downloading' | 'ready' | 'installing' | 'error';
 
 export interface UpdateInfo {
+  phase?: 'check' | 'download' | 'install';
+  canInstall?: boolean;
+  checkedAt?: number;
   status: UpdateStatus;
   version?: string;
   releaseNotes?: string;
@@ -147,6 +156,7 @@ export interface UpdateInfo {
 
 export interface SkinDraft { png: string; filename: string; }
 export interface CommunitySkin { png: string; model: 'classic' | 'slim'; sha256: string; }
+export interface OfficialSkin { png: string; model: 'classic' | 'slim'; cape?: string; }
 
 export interface JavaStatus {
   status: 'ready' | 'missing' | 'error';
@@ -161,3 +171,12 @@ export interface ControlRepairResult {
   changed: number;
   backupPath?: string;
 }
+
+export type ReportAttachmentId = 'build'|'launch'|'game'|'crash';
+export interface LaunchReportDraft {
+ id:string; title:string; summary:string; author:string|null; hasFailure:boolean;
+ attachments:{id:ReportAttachmentId;label:string;detail:string;available:boolean}[];
+}
+export interface LaunchReportPreview {token:string;text:string;bytes:number;canSend:boolean}
+export interface LaunchReportResult {id:string;ticketId?:number;warning?:string;appended?:boolean}
+export interface ReportTicket {id:number;title:string;status:string;statusLabel:string}

@@ -17,6 +17,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
    },{get:(o,k)=>k in o?o[k]:()=>()=>{}});
   });
   await page.goto('http://sefi.test/');await page.getByRole('button',{name:'Настройки',exact:true}).click();
+  await page.getByRole('button',{name:'Лаунчер',exact:true}).click();
   const toggle=page.getByRole('switch',{name:'Показывать игру в Discord'});await toggle.scrollIntoViewIfNeeded();
   assert.equal(await toggle.getAttribute('aria-checked'),'true');
   await toggle.click();await page.waitForFunction(()=>window.savedSettings.length===1);

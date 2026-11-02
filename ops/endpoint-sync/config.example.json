@@ -1,0 +1,13 @@
+{
+  "source": "https://raw.githubusercontent.com/sotocoming/sefi-launcher/master/fallback-endpoints.json",
+  "targets": [
+    {
+      "container": "homestead",
+      "hosts": [
+        "mc.sotocoming.ru"
+      ],
+      "probe_host": "mc.sotocoming.ru",
+      "probe_path": "/api/public/community/launcher/ticket/config"
+    }
+  ]
+}

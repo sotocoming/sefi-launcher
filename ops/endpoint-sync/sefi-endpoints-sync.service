@@ -1,0 +1,19 @@
+[Unit]
+Description=Synchronize SEFI API endpoints in game containers
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/libexec/sefi-endpoints-sync.py
+StateDirectory=sefi-endpoints-sync
+StateDirectoryMode=0700
+Environment=DOCKER_CONFIG=/var/lib/sefi-endpoints-sync/docker-config
+TimeoutStartSec=45
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/sefi-endpoints-sync
+RestrictSUIDSGID=yes

@@ -20,7 +20,7 @@ import { ensureSefiSkinMod } from './skin-mod';
 import { skinApiOrigin } from './skins';
 import { startTicketBroker, redactLaunchLog } from './ticket-broker';
 import { getModpackStatus, installModpack, ensureSefiAuthMod } from './modpack';
-import { ensureServersInServersDat } from './servers-dat';
+import { ensureServersInServersDat } from './servers-dat';
 import { resolveGameAddress } from '../dns-fallback';
 import { applyFullscreenSetting } from './window-options';
 import { watchGamePresence, type GameLocation } from '../game-presence';
@@ -187,6 +187,9 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     throw new Error('Выбранный адрес сервера больше недоступен. Выберите другой адрес рядом с «Играть» или отключите «Подключаться сразу».');
   }
   const fullAddress = resolveGameAddress(selectedServer?.address || primaryAddress);
+  // The auth mod compares the entered address exactly; retain configured names
+  // and include the same reserve IPs used by Quick Play and servers.dat.
+  const authAddresses = [...new Set(endpoints.flatMap(endpoint => [endpoint.address, resolveGameAddress(endpoint.address)]))];
 
   await ensureClaimsColorFix(settings.gameDirectory);
   await ensureSefiSkinMod(settings.gameDirectory);
@@ -197,7 +200,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
     try {
       await ensureSefiAuthMod(settings.gameDirectory);
       broker = await startTicketBroker(activeAccount);
-      customArgs.push(`-Dsefi.authPort=${broker.port}`, `-Dsefi.serverAddress=${fullAddress}`, `-Dsefi.serverAddresses=${endpoints.map(e => e.address).join(",")}`); // Port only, no credential in process arguments.
+      customArgs.push(`-Dsefi.authPort=${broker.port}`, `-Dsefi.serverAddress=${fullAddress}`, `-Dsefi.serverAddresses=${authAddresses.join(",")}`); // Port only, no credential in process arguments.
     } catch (error) {
       broker?.close();
       presence?.close();

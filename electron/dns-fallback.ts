@@ -1,30 +1,26 @@
 import { app, net } from 'electron';
-import dns from 'dns/promises';
-import fs from 'fs/promises';
+import fs from 'fs';
 import path from 'path';
 
 const GITHUB_RAW_FALLBACK_URL =
   'https://raw.githubusercontent.com/sotocoming/sefi-launcher/master/fallback-endpoints.json';
-
 const DEFAULT_FALLBACK: Record<string, string> = {
   'mc.sotocoming.ru': '77.90.13.212',
   'sotocoming.ru': '77.90.13.212',
   'minecraft.sotocoming.ru': '193.124.66.117',
 };
-
 const IPV4_REGEX = /^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
-
+const MAX_ENDPOINT_BYTES = 16384;
 let activeMapping: Record<string, string> = { ...DEFAULT_FALLBACK };
 let fallbackActive = false;
+let cacheFile = '';
+let refresh: Promise<boolean> | undefined;
 
-export function isDnsFallbackActive(): boolean {
-  return fallbackActive;
-}
+export function isDnsFallbackActive(): boolean { return fallbackActive; }
 
 export function resolveGameHost(hostname: string): string {
   if (!fallbackActive) return hostname;
-  const key = hostname.toLowerCase().trim();
-  return activeMapping[key] || hostname;
+  return activeMapping[hostname.toLowerCase().trim()] || hostname;
 }
 
 export function resolveGameAddress(address: string): string {
@@ -40,67 +36,81 @@ export function resolveGameAddress(address: string): string {
 function validateEndpoints(data: unknown): Record<string, string> | null {
   if (!data || typeof data !== 'object' || Array.isArray(data)) return null;
   const validated: Record<string, string> = {};
-  for (const [key, val] of Object.entries(data as Record<string, unknown>)) {
-    if (typeof key === 'string' && typeof val === 'string' && IPV4_REGEX.test(val.trim())) {
-      validated[key.toLowerCase().trim()] = val.trim();
+  for (const [key, value] of Object.entries(data)) {
+    const host = key.toLowerCase().trim();
+    // Neither downloaded data nor the cache may inject resolver rules for other hosts.
+    if (Object.prototype.hasOwnProperty.call(DEFAULT_FALLBACK, host)
+      && typeof value === 'string' && IPV4_REGEX.test(value.trim())) {
+      validated[host] = value.trim();
     }
   }
-  return Object.keys(validated).length > 0 ? validated : null;
+  return Object.keys(validated).length ? validated : null;
 }
 
-async function fetchRemoteFallback(): Promise<Record<string, string> | null> {
+/** Call synchronously after choosing userData, before yielding to Electron's ready event. */
+export function initializeDnsFallback(): void {
+  if (fallbackActive) return;
+  if (app.isReady()) throw new Error('DNS fallback must be initialized before Electron is ready.');
+  cacheFile = path.join(app.getPath('userData'), 'fallback-endpoints-cache.json');
   try {
-    const res = await net.fetch(GITHUB_RAW_FALLBACK_URL, {
-      signal: AbortSignal.timeout(2500),
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    return validateEndpoints(json);
-  } catch {
-    return null;
-  }
-}
-
-export async function applyDnsFallbackIfNeeded(): Promise<void> {
-  try {
-    // Fast probe: check if system DNS can resolve the primary host within 2 seconds
-    await Promise.race([
-      dns.resolve4('mc.sotocoming.ru'),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('DNS probe timeout')), 2000)),
-    ]);
-    return;
-  } catch (probeError) {
-    console.warn('[DNS Fallback] Primary DNS probe failed or timed out:', (probeError as Error)?.message || probeError);
-  }
-
-  fallbackActive = true;
-  let cacheFile = '';
-  try {
-    const userData = app.getPath('userData');
-    cacheFile = path.join(userData, 'fallback-endpoints-cache.json');
-    const cachedRaw = await fs.readFile(cacheFile, 'utf8').catch(() => null);
-    if (cachedRaw) {
-      const parsed = validateEndpoints(JSON.parse(cachedRaw));
-      if (parsed) activeMapping = { ...activeMapping, ...parsed };
+    if (fs.statSync(cacheFile).size <= MAX_ENDPOINT_BYTES) {
+      const cached = validateEndpoints(JSON.parse(fs.readFileSync(cacheFile, 'utf8')));
+      if (cached) activeMapping = { ...activeMapping, ...cached };
     }
   } catch {
-    // Ignore cache read failures; fall back to defaults
+    // Missing, corrupt or unreadable cache: use the bundled endpoints.
   }
-
-  // Attempt to fetch fresh endpoints from GitHub
-  const remote = await fetchRemoteFallback();
-  if (remote) {
-    activeMapping = { ...activeMapping, ...remote };
-    if (cacheFile) {
-      fs.writeFile(cacheFile, JSON.stringify(activeMapping, null, 2), 'utf8').catch(() => {});
-    }
-  }
-
-  // Apply Chromium host resolver rules so all net.fetch, iframes and images route directly to fallback IPs
-  const rules = Object.entries(activeMapping)
-    .map(([host, ip]) => `MAP ${host} ${ip}`)
-    .join(', ');
-
-  console.info('[DNS Fallback] Active. Applying Chromium host-resolver-rules:', rules);
+  const rules = Object.entries(activeMapping).map(([host, ip]) => 'MAP ' + host + ' ' + ip).join(', ');
   app.commandLine.appendSwitch('host-resolver-rules', rules);
+  // Cover DNS failures after startup too. URLs, Host and TLS SNI retain the original hostname.
+  fallbackActive = true;
+}
+
+async function refreshEndpoints(): Promise<boolean> {
+  await app.whenReady();
+  if (!fallbackActive) throw new Error('DNS fallback was not initialized.');
+  try {
+    const response = await net.fetch(GITHUB_RAW_FALLBACK_URL, {
+      redirect: 'error', credentials: 'omit', signal: AbortSignal.timeout(2500),
+    });
+    if (!response.ok) { await response.body?.cancel(); return false; }
+    if (!response.body) return false;
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        size += value.byteLength;
+        if (size > MAX_ENDPOINT_BYTES) { await reader.cancel(); return false; }
+        chunks.push(value);
+      }
+    } finally { reader.releaseLock(); }
+    const remote = validateEndpoints(JSON.parse(Buffer.concat(chunks).toString('utf8')));
+    if (!remote) return false;
+    const next = { ...activeMapping, ...remote };
+    if (Object.keys(next).every(host => next[host] === activeMapping[host])) return false;
+    // New command-line rules require a new network context. Persist first, then
+    // relaunch before creating windows or issuing authenticated requests.
+    const temporary = cacheFile + '.tmp';
+    try {
+      await fs.promises.writeFile(temporary, JSON.stringify(next, null, 2), { mode: 0o600 });
+      await fs.promises.rename(temporary, cacheFile);
+    } catch (error) {
+      await fs.promises.unlink(temporary).catch(() => {});
+      throw error;
+    }
+    app.relaunch();
+    app.exit(0);
+    return true;
+  } catch (error) {
+    console.warn('[DNS Fallback] Endpoint refresh unavailable; keeping startup routes:', (error as Error).message);
+    return false;
+  }
+}
+
+/** True when a restart was scheduled to apply newly published endpoints. */
+export function refreshDnsFallback(): Promise<boolean> {
+  return refresh ??= refreshEndpoints();
 }

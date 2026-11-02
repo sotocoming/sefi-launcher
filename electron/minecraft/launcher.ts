@@ -20,7 +20,8 @@ import { ensureSefiSkinMod } from './skin-mod';
 import { skinApiOrigin } from './skins';
 import { startTicketBroker, redactLaunchLog } from './ticket-broker';
 import { getModpackStatus, installModpack, ensureSefiAuthMod } from './modpack';
-import { ensureServersInServersDat } from './servers-dat';
+import { ensureServersInServersDat } from './servers-dat';
+import { resolveGameAddress } from '../dns-fallback';
 import { applyFullscreenSetting } from './window-options';
 import { watchGamePresence, type GameLocation } from '../game-presence';
 
@@ -185,7 +186,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   if (settings.autoConnect === true && !selectedServer) {
     throw new Error('Выбранный адрес сервера больше недоступен. Выберите другой адрес рядом с «Играть» или отключите «Подключаться сразу».');
   }
-  const fullAddress = selectedServer?.address || primaryAddress;
+  const fullAddress = resolveGameAddress(selectedServer?.address || primaryAddress);
 
   await ensureClaimsColorFix(settings.gameDirectory);
   await ensureSefiSkinMod(settings.gameDirectory);
@@ -252,7 +253,7 @@ async function performLaunch(onStateChange: (state: GameState) => void, onStarte
   };
 
   try {
-    await ensureServersInServersDat(settings.gameDirectory, endpoints.map(e => ({ id: e.id, name: `${serverName} · ${e.label}`, ip: e.address })));
+    await ensureServersInServersDat(settings.gameDirectory, endpoints.map(e => ({ id: e.id, name: `${serverName} · ${e.label}`, ip: resolveGameAddress(e.address) })));
     await applyFullscreenSetting(settings.gameDirectory, settings.fullscreen);
     if (onLocation) {
       presence = await watchGamePresence(onLocation).catch(() => undefined);

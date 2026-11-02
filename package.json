@@ -1,6 +1,6 @@
 {
   "name": "sefi-launcher",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "SEFI Minecraft Launcher",
   "main": "dist-electron/electron/main.js",
   "author": "SEFI Team",
@@ -13,7 +13,8 @@
     "start": "electron .",
     "test:resilience": "node scripts/test-resilience.cjs",
     "test:security": "node scripts/test-ipc-security.cjs .",
-    "test:minecraft": "node scripts/test-game-integrity.cjs && node scripts/test-game-lifecycle.cjs"
+    "test:minecraft": "node scripts/test-game-integrity.cjs && node scripts/test-game-lifecycle.cjs",
+    "test:dns": "node scripts/test-dns-fallback.cjs"
   },
   "dependencies": {
     "adm-zip": "0.6.1",

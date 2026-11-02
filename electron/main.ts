@@ -8,6 +8,7 @@ import { app, BrowserWindow, ipcMain, session, dialog, shell, net } from 'electr
 import path from 'path';
 import fs from 'fs';
 import { autoUpdater } from 'electron-updater';
+import { applyDnsFallbackIfNeeded, isDnsFallbackActive, resolveGameHost } from './dns-fallback';
 import { UpdateChecks } from './update-checks';
 import type { UpdateInfo } from '../src/types';
 import { getSettings, saveSettings, getLauncherConfig } from './config';
@@ -78,7 +79,7 @@ if (!gotTheLock) {
     }
   });
 
-  app.whenReady().then(() => {
+  applyDnsFallbackIfNeeded().then(() => app.whenReady()).then(() => {
     createWindow();
     
     app.on('activate', () => {
@@ -240,7 +241,7 @@ function setupIpc() {
     const config = await getLauncherConfig();
     const settings = await getSettings();
     const endpoint = config.server.endpoints?.find(item => item.id === settings.selectedServerId) || config.server.endpoints?.[0];
-    return getServerStatus(endpoint?.host || config.server.ip, endpoint?.port || config.server.port);
+    return getServerStatus(resolveGameHost(endpoint?.host || config.server.ip), endpoint?.port || config.server.port);
   });
 
   async function newsRequest(event: Electron.IpcMainInvokeEvent, body?: object) {
@@ -249,7 +250,7 @@ function setupIpc() {
     }
     const account = (await getAccounts()).find(account => account.active);
     if (!account?.communityToken) throw new Error('Войдите в SEFI Community, чтобы оценивать новости.');
-    const response = await fetch('https://mc.sotocoming.ru/api/public/news/' + (body ? 'react' : 'reactions'), {
+    const response = await net.fetch('https://mc.sotocoming.ru/api/public/news/' + (body ? 'react' : 'reactions'), {
       method: body ? 'POST' : 'GET', redirect: 'error', signal: AbortSignal.timeout(15000),
       headers: { 'Content-Type': 'application/json', 'X-Community-Token': account.communityToken },
       ...(body ? {body: JSON.stringify(body)} : {}),

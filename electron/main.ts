@@ -8,7 +8,7 @@ import { app, BrowserWindow, ipcMain, session, dialog, shell, net } from 'electr
 import path from 'path';
 import fs from 'fs';
 import { autoUpdater } from 'electron-updater';
-import { applyDnsFallbackIfNeeded, isDnsFallbackActive, resolveGameHost } from './dns-fallback';
+import { initializeDnsFallback, refreshDnsFallback, resolveGameHost } from './dns-fallback';
 import { UpdateChecks } from './update-checks';
 import type { UpdateInfo } from '../src/types';
 import { getSettings, saveSettings, getLauncherConfig } from './config';
@@ -79,7 +79,9 @@ if (!gotTheLock) {
     }
   });
 
-  applyDnsFallbackIfNeeded().then(() => app.whenReady()).then(() => {
+  initializeDnsFallback();
+  app.whenReady().then(async () => {
+    if (await refreshDnsFallback()) return;
     createWindow();
     
     app.on('activate', () => {

@@ -1,0 +1,12 @@
+[Unit]
+Description=Refresh SEFI container endpoints every minute
+
+[Timer]
+OnBootSec=15s
+OnUnitActiveSec=60s
+AccuracySec=5s
+RandomizedDelaySec=5s
+Unit=sefi-endpoints-sync.service
+
+[Install]
+WantedBy=timers.target

@@ -4,6 +4,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const ts = require('typescript');
 const root = path.resolve(__dirname, '..');
+const seed = require('../fallback-endpoints.json');
 const source = ts.transpileModule(fs.readFileSync(path.join(root, 'electron/dns-fallback.ts'), 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
 }).outputText;
@@ -63,6 +64,7 @@ function fixture({ cache, remote, fetchError, writeError, renameError, ready = f
       if (name === 'electron') return electron;
       if (name === 'fs') return disk;
       if (name === 'path') return path.posix;
+      if (name === '../fallback-endpoints.json') return require('../fallback-endpoints.json');
       throw Error('Unexpected dependency ' + name);
     },
   });
@@ -79,17 +81,18 @@ function fixture({ cache, remote, fetchError, writeError, renameError, ready = f
   offline.api.initializeDnsFallback();
   assert.equal(offline.events.length, 1, 'initialization is synchronous and idempotent');
   const rules = offline.events[0].value;
-  assert.match(rules, /MAP mc.sotocoming.ru 77.90.13.212/);
-  assert.equal(offline.api.resolveGameAddress('MC.SOTOCOMING.RU:25566'), '77.90.13.212:25566');
+  assert(rules.includes('MAP mc.sotocoming.ru ' + seed['mc.sotocoming.ru']));
+  assert.equal(offline.api.resolveGameAddress('MC.SOTOCOMING.RU:25566'), seed['mc.sotocoming.ru'] + ':25566');
   assert.equal(offline.api.resolveGameAddress('[::1]:25565'), '[::1]:25565');
   assert.equal(offline.api.resolveGameHost('unrelated.example'), 'unrelated.example');
+  assert.equal(offline.api.resolveGameHost('toString'), 'toString');
   const pending = offline.api.refreshDnsFallback();
   assert.equal(pending, offline.api.refreshDnsFallback(), 'refresh is single flight');
   await Promise.resolve();
   assert.equal(offline.events.some(e => e.type === 'fetch'), false);
   offline.ready();
   assert.equal(await pending, false);
-  assert.equal(offline.api.resolveGameHost('mc.sotocoming.ru'), '77.90.13.212',
+  assert.equal(offline.api.resolveGameHost('mc.sotocoming.ru'), seed['mc.sotocoming.ru'],
     'routes remain usable if DNS fails after startup');
   assert.equal(offline.events.some(e => e.type === 'relaunch'), false);
 
@@ -97,7 +100,7 @@ function fixture({ cache, remote, fetchError, writeError, renameError, ready = f
     JSON.stringify({ 'evil.example': '127.0.0.1', 'mc.sotocoming.ru': '256.0.0.1' })]) {
     const f = fixture({ cache });
     f.api.initializeDnsFallback();
-    assert.equal(f.api.resolveGameHost('mc.sotocoming.ru'), '77.90.13.212');
+    assert.equal(f.api.resolveGameHost('mc.sotocoming.ru'), seed['mc.sotocoming.ru']);
     assert.equal(f.api.resolveGameHost('evil.example'), 'evil.example');
     assert.doesNotMatch(f.events[0].value, /evil/);
   }
@@ -106,7 +109,7 @@ function fixture({ cache, remote, fetchError, writeError, renameError, ready = f
   changed.api.initializeDnsFallback(); changed.ready();
   assert.equal(await changed.api.refreshDnsFallback(), true);
   assert.deepEqual(changed.events.map(e => e.type), ['rules', 'ready', 'fetch', 'write', 'rename', 'relaunch', 'exit']);
-  assert.equal(changed.api.resolveGameHost('mc.sotocoming.ru'), '77.90.13.212',
+  assert.equal(changed.api.resolveGameHost('mc.sotocoming.ru'), seed['mc.sotocoming.ru'],
     'Java and Chromium keep the same mapping until restart');
   const saved = changed.files.get('/profile/fallback-endpoints-cache.json');
   assert.equal(JSON.parse(saved)['mc.sotocoming.ru'], '203.0.113.20');
@@ -125,7 +128,7 @@ function fixture({ cache, remote, fetchError, writeError, renameError, ready = f
     assert.equal(await f.api.refreshDnsFallback(), false);
     assert.equal(f.events.some(e => e.type === 'relaunch'), false);
     assert.equal(f.files.has('/profile/fallback-endpoints-cache.json.tmp'), false);
-    assert.equal(f.api.resolveGameHost('mc.sotocoming.ru'), '77.90.13.212');
+    assert.equal(f.api.resolveGameHost('mc.sotocoming.ru'), seed['mc.sotocoming.ru']);
   }
 
   for (const remote of ['{broken', 'x'.repeat(16385), { 'mc.sotocoming.ru': '1.2.3.999' }, { 'other.example': '1.2.3.4' }]) {

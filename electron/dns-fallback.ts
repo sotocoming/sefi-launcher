@@ -1,14 +1,12 @@
 import { app, net } from 'electron';
 import fs from 'fs';
 import path from 'path';
+import bundledEndpoints from '../fallback-endpoints.json';
 
 const GITHUB_RAW_FALLBACK_URL =
   'https://raw.githubusercontent.com/sotocoming/sefi-launcher/master/fallback-endpoints.json';
-const DEFAULT_FALLBACK: Record<string, string> = {
-  'mc.sotocoming.ru': '77.90.13.212',
-  'sotocoming.ru': '77.90.13.212',
-  'minecraft.sotocoming.ru': '193.124.66.117',
-};
+// The published registry is also the bundled seed: changing addresses has one source.
+const DEFAULT_FALLBACK: Record<string, string> = bundledEndpoints;
 const IPV4_REGEX = /^(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(?:\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
 const MAX_ENDPOINT_BYTES = 16384;
 let activeMapping: Record<string, string> = { ...DEFAULT_FALLBACK };
@@ -20,7 +18,8 @@ export function isDnsFallbackActive(): boolean { return fallbackActive; }
 
 export function resolveGameHost(hostname: string): string {
   if (!fallbackActive) return hostname;
-  return activeMapping[hostname.toLowerCase().trim()] || hostname;
+  const host = hostname.toLowerCase().trim();
+  return Object.hasOwn(activeMapping, host) ? activeMapping[host] : hostname;
 }
 
 export function resolveGameAddress(address: string): string {
@@ -29,7 +28,8 @@ export function resolveGameAddress(address: string): string {
   const colon = trimmed.lastIndexOf(':');
   const host = colon > 0 ? trimmed.slice(0, colon) : trimmed;
   const suffix = colon > 0 ? trimmed.slice(colon) : '';
-  const mapped = activeMapping[host.toLowerCase()];
+  const key = host.toLowerCase();
+  const mapped = Object.hasOwn(activeMapping, key) ? activeMapping[key] : undefined;
   return mapped ? mapped + suffix : address;
 }
 
